@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Formulario Flora</title>
+  <style>
+    body {
+      font-family: 'Georgia', serif;
+      background-color: #fdfaf7; /* Beige/crema */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    form {
+      background: #ffffff;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0px 4px 12px rgba(0,0,0,0.1);
+      width: 320px;
+      border: 2px solid #e6a5b6; /* Rosa pastel */
+    }
+    h3 {
+      text-align: center;
+      color: #5c5c5c; /* Gris neutro */
+      margin-bottom: 20px;
+    }
+    input, textarea, button {
+      width: 100%;
+      margin-bottom: 15px;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+    }
+    input:focus, textarea:focus {
+      border-color: #e6a5b6; /* Rosa */
+      outline: none;
+    }
+    button {
+      background: #e6a5b6; /* Rosa pastel */
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      border: none;
+      transition: 0.3s;
+    }
+    button:hover {
+      background: #c97b94; /* Rosa más fuerte */
+    }
+    #status {
+      margin-top: 10px;
+      font-size: 14px;
+      text-align: center;
+    }
+    .success { color: #4CAF50; }  /* Verde éxito */
+    .error { color: #c0392b; }    /* Rojo error */
+  </style>
+</head>
+<body>
+  <form id="contactForm">
+    <h3>Contáctanos</h3>
+    <input type="text" id="nombre" name="nombre" placeholder="Nombre" required>
+    <input type="email" id="correo" name="correo" placeholder="Correo" required>
+    <input type="tel" id="telefono" name="telefono" placeholder="Teléfono" required>
+    <textarea id="mensaje" name="mensaje" placeholder="Mensaje" required></textarea>
+    <button type="submit">Enviar</button>
+    <div id="status"></div>
+  </form>
+
+  <script>
+    const form = document.getElementById("contactForm");
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      
+      const data = {
+        nombre: document.getElementById("nombre").value,
+        correo: document.getElementById("correo").value,
+        telefono: document.getElementById("telefono").value,
+        mensaje: document.getElementById("mensaje").value
+      };
+
+      try {
+        const response = await fetch("YOUR_WEB_APP_URL", {
+          method: "POST",
+          mode: "cors",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+        const status = document.getElementById("status");
+
+        if (result.status === "success") {
+          status.innerHTML = "✅ ¡Gracias por contactarnos!";
+          status.className = "success";
+          form.reset();
+        } else {
+          status.innerHTML = "❌ Error: " + result.message;
+          status.className = "error";
+        }
+      } catch (error) {
+        document.getElementById("status").innerHTML = "❌ Error al conectar con el servidor.";
+        document.getElementById("status").className = "error";
+      }
+    });
+  </script>
+</body>
+</html>
