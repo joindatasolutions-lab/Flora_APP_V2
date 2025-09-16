@@ -76,36 +76,62 @@
     z-index: 1000;
     left: 0; top: 0;
     width: 100%; height: 100%;
-    background-color: rgba(0,0,0,0.5);
+    background-color: rgba(0,0,0,0.45); /* fondo oscuro */
     justify-content: center; align-items: center;
   }
+
+  .modal-content {
+    background: #fff;
+    padding: 25px;
+    border-radius: 16px;
+    text-align: center;
+    width: 340px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+    border: 2px solid var(--rosa);
+  }
+
+  .modal-content h2 {
+    color: var(--rosa-osc);
+    margin-bottom: 12px;
+  }
+
+  .modal-content p {
+    margin-bottom: 18px;
+    color: var(--gris);
+    font-weight: 600;
+  }
+
   .modal-content button {
-  margin: 6px;
-  padding: 10px 18px;
-  border: none;
-  border-radius: 10px;
-  cursor: pointer;
-  font-weight: 700;
-  font-size: 14px;
-  transition: background 0.3s ease;
-  color: #000; /* texto negro */
-}
+    margin: 6px;
+    padding: 10px 18px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 700;
+    transition: background 0.3s ease;
+  }
 
-/* Botón hacer otro pedido (verde) */
-.btn-pedido {
-  background: #28a745;   /* verde */
-}
-.btn-pedido:hover {
-  background: #1e7e34;   /* verde más oscuro */
-}
+  /* Botón hacer otro pedido */
+  .btn-pedido {
+    background: var(--rosa);
+    color: #000;
+    box-shadow: 0 4px 10px rgba(230,165,182,.4);
+  }
+  .btn-pedido:hover {
+    background: var(--rosa-osc);
+    color: #000;  
+  }
 
-/* Botón salir (rosa) */
-.btn-salir {
-  background: var(--rosa);   /* rosa de tu paleta */
-}
-.btn-salir:hover {
-  background: var(--rosa-osc); /* rosa oscuro */
-}
+  /* Botón salir */
+  .btn-salir {
+    background: #5c5c5c;  /* gris oscuro */
+    color: #fff;
+    box-shadow: 0 4px 10px rgba(0,0,0,.25);
+  }
+  .btn-salir:hover {
+    background: #333;
+  }
+
 </style>
 </head>
 <body>
