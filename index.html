@@ -56,6 +56,19 @@
   #status{ text-align:center; margin-top:10px; font-weight:700 }
   .err{ color:#b00020 } .good{ color:green }
   .hidden{ display:none !important }
+
+  .card img {
+  width: 100%;
+  height: 170px;
+  object-fit: cover;
+  border-bottom: 1px solid var(--borde);
+  filter: saturate(1.02);
+  transition: transform 0.3s ease; /* animación suave */
+  }
+
+  .card:hover img {
+  transform: scale(1.1); /* zoom al hover */
+  }
 </style>
 </head>
 <body>
