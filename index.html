@@ -310,7 +310,6 @@
     e.preventDefault();
     const status = document.getElementById('status');
 
-    // Validaciones mínimas extra
     if (!state.selected) { show('viewCatalog'); return; }
     if (!document.getElementById('barrio').value) {
       status.textContent = "Selecciona el barrio para calcular el total.";
@@ -321,24 +320,19 @@
       status.className = "err"; return;
     }
 
-    const payload = Object.fromEntries(new FormData(e.target).entries());
     try {
-      const resp = await fetch(SCRIPT_URL, {
-        method: "POST",
-        headers: {"Content-Type":"application/json"},
-        body: JSON.stringify(payload)
-      });
-      const out = await resp.json();
+      const fd = new FormData(e.target);               // evita preflight
+      const resp = await fetch(SCRIPT_URL, { method: "POST", body: fd });
+      const out  = await resp.json();
       if (out.status === "success") {
         status.textContent = "✅ ¡Pedido registrado con éxito!";
         status.className = "good";
-        e.target.reset();
-        setClienteBadge(null);
+        e.target.reset(); setClienteBadge(null);
       } else {
         status.textContent = "❌ Error: " + (out.message || "No se pudo registrar.");
         status.className = "err";
       }
-    } catch (_) {
+    } catch (err) {
       status.textContent = "❌ Error de conexión.";
       status.className = "err";
     }
