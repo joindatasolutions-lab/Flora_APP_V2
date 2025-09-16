@@ -79,19 +79,33 @@
     background-color: rgba(0,0,0,0.5);
     justify-content: center; align-items: center;
   }
-  .modal-content {
-    background: #fff;
-    padding: 25px;
-    border-radius: 12px;
-    text-align: center;
-    width: 340px;
-    box-shadow: 0 6px 18px rgba(0,0,0,0.25);
-  }
-  .modal-content h2 { color: #28a745; margin-bottom: 12px; }
-  .modal-content p { margin-bottom: 18px; }
-  .btn-salir { background:#dc3545; }
-  .btn-salir:hover { background:#a71d2a; }
+  .modal-content button {
+  margin: 6px;
+  padding: 10px 18px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 14px;
+  transition: background 0.3s ease;
+  color: #000; /* texto negro */
+}
 
+/* Botón hacer otro pedido (verde) */
+.btn-pedido {
+  background: #28a745;   /* verde */
+}
+.btn-pedido:hover {
+  background: #1e7e34;   /* verde más oscuro */
+}
+
+/* Botón salir (rosa) */
+.btn-salir {
+  background: var(--rosa);   /* rosa de tu paleta */
+}
+.btn-salir:hover {
+  background: var(--rosa-osc); /* rosa oscuro */
+}
 </style>
 </head>
 <body>
