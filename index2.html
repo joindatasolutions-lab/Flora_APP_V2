@@ -20,16 +20,11 @@
   .catalogo{ 
     display:grid; 
     gap:12px; 
-    grid-template-columns:repeat(2,1fr); /* 2 por fila en móviles */
-    max-width:1100px; 
-    margin:0 auto 
+    grid-template-columns:repeat(2,1fr);
+    max-width:1100px; margin:0 auto 
   }
-  @media(min-width:768px){
-    .catalogo{ grid-template-columns:repeat(3,1fr); }
-  }
-  @media(min-width:1024px){
-    .catalogo{ grid-template-columns:repeat(4,1fr); }
-  }
+  @media(min-width:768px){ .catalogo{ grid-template-columns:repeat(3,1fr); } }
+  @media(min-width:1024px){ .catalogo{ grid-template-columns:repeat(4,1fr); } }
   .card{
     background:#fff; border:1px solid var(--borde); border-radius:18px;
     box-shadow:0 6px 18px rgba(0,0,0,.06);
@@ -47,6 +42,30 @@
     background:var(--rosa); color:#fff; font-weight:600; transition:background .2s ease;
   }
   .btn-add:hover{ background:var(--rosa-osc); }
+
+  /* Formulario */
+  form{ background:#fff; border:1px solid var(--borde); border-radius:16px; max-width:780px; margin:0 auto; padding:18px; box-shadow:0 6px 18px rgba(0,0,0,.06) }
+  form h3{ margin:0 0 14px; color:var(--gris) }
+  .grid{ display:grid; gap:12px; grid-template-columns:repeat(2,1fr) }
+  .grid-1{ grid-template-columns:1fr }
+  label{ font-size:.92rem; color:#444 }
+  input, select, textarea{ width:100%; padding:10px 12px; border:1px solid #d9d9d9; border-radius:10px; font-size:14px; background:#fff }
+  input:focus, select:focus, textarea:focus{ outline:2px solid var(--rosa); border-color:var(--rosa) }
+  textarea{ min-height:80px; resize:vertical }
+  .pill{ display:inline-block; padding:8px 12px; border-radius:999px; background:#fff3f6; border:1px solid var(--rosa); margin:0 0 10px; color:#b35a74; font-weight:700 }
+  .badge{ display:inline-block; padding:6px 10px; border-radius:999px; font-size:.85rem; margin-left:8px }
+  .ok{ background:#e7f8ec; color:#1a7f37; border:1px solid #bfe7c8 }
+  .warn{ background:#fff7e6; color:#a15d00; border:1px solid #ffd59e }
+  #status{ text-align:center; margin-top:10px; font-weight:700 }
+  .err{ color:#b00020 } .good{ color:green }
+
+  /* Modal */
+  .modal { display:none; position:fixed; z-index:1000; left:0; top:0; width:100%; height:100%; background-color:rgba(0,0,0,0.45); justify-content:center; align-items:center; }
+  .modal-content { background:#fff; padding:25px; border-radius:16px; text-align:center; width:340px; box-shadow:0 6px 20px rgba(0,0,0,0.25); border:2px solid var(--rosa); }
+  .modal-content h2 { color:var(--rosa-osc); margin-bottom:12px; }
+  .modal-content p { margin-bottom:18px; color:var(--gris); font-weight:600; }
+  .modal-content button { margin:6px; padding:10px 18px; border:none; border-radius:10px; cursor:pointer; font-weight:700; }
+  .btn-salir { background:#5c5c5c; color:#fff; }
 </style>
 </head>
 <body>
@@ -55,82 +74,167 @@
   <h2>Catálogo de Arreglos Florales</h2>
 </header>
 
-<!-- VISTA 1: Catálogo -->
+<!-- VISTA 1 -->
 <section id="viewCatalog" class="view active">
   <div id="catalogo" class="catalogo"></div>
-  <div class="actions">
-    <button id="btnContinuar" class="btn" disabled>Continuar</button>
-  </div>
 </section>
 
-<!-- VISTA 2: Formulario -->
+<!-- VISTA 2 -->
 <section id="viewForm" class="view">
-  <!-- ... resto del formulario sin cambios ... -->
+  <form id="pedidoForm" novalidate>
+    <span class="pill" id="resumenProducto">Producto: —</span>
+    <span id="badgeCliente" class="badge warn hidden">Nuevo cliente</span>
+    <h3>Datos del Pedido</h3>
+
+    <input type="hidden" name="producto" id="producto">
+    <input type="hidden" name="precio"   id="precio">
+    <input type="hidden" name="domicilio" id="domicilio">
+    <input type="hidden" name="total"    id="total">
+    <input type="hidden" name="cantidad" value="1">
+
+    <div class="grid">
+      <div><label>Identificación</label><input name="identificacion" id="identificacion" required /></div>
+      <div><label>Teléfono</label><input name="telefono" id="telefono" type="tel" required /></div>
+      <div><label>Primer Nombre</label><input name="primerNombre" id="primerNombre" required /></div>
+      <div><label>Segundo Nombre</label><input name="segundoNombre" id="segundoNombre" /></div>
+      <div><label>Primer Apellido</label><input name="primerApellido" id="primerApellido" required /></div>
+      <div><label>Segundo Apellido</label><input name="segundoApellido" id="segundoApellido" /></div>
+      <div><label>Forma de Pago</label>
+        <select name="formaPago" required>
+          <option value="">Selecciona…</option><option>Efectivo</option><option>Transferencia</option>
+          <option>Tarjeta</option><option>Link</option><option>Contraentrega</option>
+        </select>
+      </div>
+      <div><label>Fecha de Entrega</label><input name="fechaEntrega" id="fechaEntrega" type="date" required /></div>
+      <div><label>Destinatario</label><input name="destinatario" id="destinatario" required /></div>
+      <div><label>Teléfono destino</label><input name="telefonoDestino" id="telefonoDestino" type="tel" required /></div>
+      <div><label>Barrio</label><select name="barrio" id="barrio" required><option value="">Selecciona…</option></select></div>
+      <div class="grid-1"><label>Dirección</label><input name="direccion" id="direccion" required /></div>
+      <div class="grid-1"><label>Total a pagar (incluye domicilio)</label><div id="labelTotal" class="pill">—</div></div>
+      <div class="grid-1"><label>Mensaje <span class="muted">(opcional)</span></label><textarea name="mensaje" id="mensaje"></textarea></div>
+    </div>
+
+    <div class="actions" style="margin-top:14px">
+      <button type="button" class="btn" id="btnVolver">← Catálogo</button>
+      <button type="submit" class="btn">Confirmar pedido</button>
+    </div>
+    <div id="status"></div>
+  </form>
 </section>
+
+<!-- Modal -->
+<div id="modalExito" class="modal">
+  <div class="modal-content">
+    <h2>✅ Pedido registrado con éxito</h2>
+    <p>¿Desea hacer otro pedido o salir?</p>
+    <button onclick="nuevoPedido()">🛒 Hacer otro pedido</button>
+    <button class="btn-salir" onclick="salir()">🚪 Salir</button>
+  </div>
+</div>
 
 <script>
-  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwW2TpbWuBO0kpE1wYnz9Eizyeus3KcMwVeO0fgp6EdBFZvo9JYsH0J9IZL_zRGlBQ/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwW2TpbWuBO0kpE1wYnz9Eizyeus3KcMwVeO0fgp6EdBFZvo9JYsH0J9IZL_zRGlBQ/exec";
+const state = { selected: null, barrios: {} };
+const fmtCOP = v => Number(v || 0).toLocaleString('es-CO');
 
-  const state = { selected: null, barrios: {} };
-  const fmtCOP = v => Number(v || 0).toLocaleString('es-CO');
+async function init() {
+  try {
+    const res = await fetch(SCRIPT_URL);
+    const { catalogo, barrios } = await res.json();
+    state.barrios = barrios || {};
+    renderCatalog(catalogo || []);
+    fillBarrios(barrios || {});
+    const hoy = new Date().toISOString().slice(0,10);
+    document.getElementById('fechaEntrega').setAttribute('min', hoy);
+  } catch (e) {
+    document.getElementById('catalogo').innerHTML = "<p>Error cargando datos. Revisa la URL del WebApp.</p>";
+  }
+}
 
-  async function init() {
-    try {
-      const res = await fetch(SCRIPT_URL);
-      const { catalogo, barrios } = await res.json();
-      state.barrios = barrios || {};
-      renderCatalog(catalogo || []);
-      fillBarrios(barrios || {});
-      const hoy = new Date().toISOString().slice(0,10);
-      document.getElementById('fechaEntrega').setAttribute('min', hoy);
-    } catch (e) {
-      document.getElementById('catalogo').innerHTML = "<p>Error cargando datos. Revisa la URL del WebApp.</p>";
+function renderCatalog(items) {
+  const wrap = document.getElementById('catalogo');
+  wrap.innerHTML = "";
+  items.forEach(prod => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `
+      <img src="${prod.img}" alt="${prod.name}">
+      <div class="body">
+        <div class="name">${prod.name}</div>
+        <p class="price">$${fmtCOP(prod.price)}</p>
+        <button class="btn-add">Añadir</button>
+      </div>`;
+    card.querySelector('.btn-add').addEventListener('click', ev => {
+      ev.stopPropagation(); selectProduct(card, prod);
+      document.getElementById('btnContinuar').click();
+    });
+    card.addEventListener('click', () => selectProduct(card, prod));
+    wrap.appendChild(card);
+  });
+}
+
+function selectProduct(card, prod) {
+  document.querySelectorAll('.card').forEach(c => c.classList.remove('selected'));
+  card.classList.add('selected'); state.selected = prod;
+  document.getElementById('producto').value = prod.name;
+  document.getElementById('precio').value = Number(prod.price || 0);
+  document.getElementById('resumenProducto').textContent =
+    `Producto: ${prod.name} — $${fmtCOP(prod.price)}`;
+  show('viewForm');
+}
+
+function fillBarrios(dict) {
+  const sel = document.getElementById('barrio');
+  sel.innerHTML = '<option value="">Selecciona…</option>';
+  Object.keys(dict).forEach(nombre => {
+    const opt = document.createElement('option');
+    opt.value = nombre; opt.textContent = nombre;
+    sel.appendChild(opt);
+  });
+}
+
+function show(id) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo({ top:0, behavior:'smooth' });
+}
+document.getElementById('btnVolver').addEventListener('click', () => show('viewCatalog'));
+
+document.getElementById('barrio').addEventListener('change', calcularTotal);
+function calcularTotal() {
+  const precio = Number(document.getElementById('precio').value || 0);
+  const barrio = document.getElementById('barrio').value;
+  const dom = Number(state.barrios[barrio] || 0);
+  const total = precio + dom;
+  document.getElementById('domicilio').value = dom;
+  document.getElementById('total').value = total;
+  document.getElementById('labelTotal').textContent =
+    barrio ? `Total: $${fmtCOP(total)} (incluye domicilio)` : "—";
+}
+
+document.getElementById('pedidoForm').addEventListener('submit', async e => {
+  e.preventDefault(); const status = document.getElementById('status');
+  if (!state.selected) { show('viewCatalog'); return; }
+  if (!document.getElementById('barrio').value) {
+    status.textContent = "Selecciona barrio."; status.className = "err"; return;
+  }
+  try {
+    const fd = new FormData(e.target);
+    const resp = await fetch(SCRIPT_URL, { method: "POST", body: fd });
+    const out = await resp.json();
+    if (out.status === "success") {
+      document.getElementById("modalExito").style.display = "flex";
+      e.target.reset();
+    } else {
+      status.textContent = "❌ Error: " + (out.message || "No se pudo registrar."); status.className = "err";
     }
-  }
+  } catch (err) { status.textContent = "❌ Error de conexión."; status.className = "err"; }
+});
 
-  function renderCatalog(items) {
-    const wrap = document.getElementById('catalogo');
-    wrap.innerHTML = "";
-    items.forEach(prod => {
-      const card = document.createElement('div');
-      card.className = 'card';
-      card.innerHTML = `
-        <img src="${prod.img}" alt="${prod.name}">
-        <div class="body">
-          <div class="name">${prod.name}</div>
-          <p class="price">$${fmtCOP(prod.price)}</p>
-          <button class="btn-add">Añadir</button>
-        </div>
-      `;
-      card.querySelector('.btn-add').addEventListener('click', (ev) => {
-        ev.stopPropagation();
-        selectProduct(card, prod);
-        document.getElementById('btnContinuar').click();
-      });
-      card.addEventListener('click', () => selectProduct(card, prod));
-      wrap.appendChild(card);
-    });
-  }
+function nuevoPedido(){ document.getElementById("modalExito").style.display="none"; show('viewCatalog'); }
+function salir(){ window.location.href="https://joindatasolutions-lab.github.io/Flora_APP_V2/"; }
 
-  function selectProduct(card, prod) {
-    document.querySelectorAll('.card').forEach(c => c.classList.remove('selected'));
-    card.classList.add('selected');
-    state.selected = prod;
-    document.getElementById('btnContinuar').disabled = false;
-  }
-
-  function fillBarrios(dict) {
-    const sel = document.getElementById('barrio');
-    sel.innerHTML = '<option value="">Selecciona…</option>';
-    Object.keys(dict).forEach(nombre => {
-      const opt = document.createElement('option');
-      opt.value = nombre;
-      opt.textContent = nombre;
-      sel.appendChild(opt);
-    });
-  }
-
-  init();
+init();
 </script>
 </body>
 </html>
