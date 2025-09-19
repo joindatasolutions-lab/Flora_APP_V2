@@ -238,66 +238,71 @@ document.getElementById('pedidoForm').addEventListener('submit', async e => {
   } catch (err) { status.textContent = "❌ Error de conexión."; status.className = "err"; }
 });
 
-// --------- Autorrelleno de cliente por identificación (con debounce) ----------
-  let lookupTimer = null;
-  document.getElementById('identificacion').addEventListener('input', (e) => {
-    clearTimeout(lookupTimer);
-    const val = e.target.value.trim();
-    if (!val) {
-      setClienteBadge(null); // resetea
-      return;
+// ---------- Búsqueda y autorrelleno de cliente por Identificación (con debounce) ----------
+let lookupTimer = null;
+
+document.getElementById('identificacion').addEventListener('input', (e) => {
+  clearTimeout(lookupTimer);
+  const val = e.target.value.trim();
+  if (!val) { setClienteBadge(null); return; }
+  lookupTimer = setTimeout(() => buscarCliente(val), 400); // espera 400 ms
+});
+
+async function buscarCliente(ident) {
+  try {
+    // El WebApp debe responder a ?cliente=IDENT con { cliente: { ... } } si existe
+    const res  = await fetch(`${SCRIPT_URL}?cliente=${encodeURIComponent(ident)}`);
+    const data = await res.json();
+
+    if (data && data.cliente) {
+      setClienteBadge(true);
+      autofillCliente(data.cliente);
+    } else {
+      setClienteBadge(false);
+      limpiarCliente(false);
     }
-    lookupTimer = setTimeout(() => buscarCliente(val), 400);
-  });
-
-  async function buscarCliente(ident) {
-    try {
-      const res = await fetch(`${SCRIPT_URL}?cliente=${encodeURIComponent(ident)}`);
-      const data = await res.json();
-      if (data && data.cliente) {
-        setClienteBadge(true);
-        autofillCliente(data.cliente);
-      } else {
-        setClienteBadge(false);
-        limpiarCliente(false);
-      }
-    } catch (e) {
-      setClienteBadge(null);
-    }
+  } catch (err) {
+    setClienteBadge(null);
+    console.error('Lookup cliente error:', err);
   }
+}
 
-  function setClienteBadge(encontrado) {
-    const b = document.getElementById('badgeCliente');
-    b.classList.remove('hidden', 'ok', 'warn');
-    if (encontrado === true) { b.textContent = "Cliente encontrado"; b.classList.add('ok'); }
-    else if (encontrado === false) { b.textContent = "Nuevo cliente"; b.classList.add('warn'); }
-    else { b.classList.add('hidden'); }
+function setClienteBadge(encontrado) {
+  const b = document.getElementById('badgeCliente');
+  b.classList.remove('hidden', 'ok', 'warn');
+  if (encontrado === true) {
+    b.textContent = "Cliente encontrado";
+    b.classList.add('ok');
+  } else if (encontrado === false) {
+    b.textContent = "Nuevo cliente";
+    b.classList.add('warn');
+  } else {
+    b.classList.add('hidden');
   }
+}
 
-  function autofillCliente(c) {
-    // c tiene solo: Identificacion, PrimerNombre, SegundoNombre, PrimerApellido, SegundoApellido, Telefono
-    document.getElementById('primerNombre').value    = c.PrimerNombre || "";
-    document.getElementById('segundoNombre').value   = c.SegundoNombre || "";
-    document.getElementById('primerApellido').value  = c.PrimerApellido || "";
-    document.getElementById('segundoApellido').value = c.SegundoApellido || "";
-    document.getElementById('telefono').value        = c.Telefono || "";
-    // Barrio y Dirección NO vienen de Clientes -> los deja vacíos para que el cliente los ingrese
-  }
+// NOTE: index.html separa nombres y apellidos en 4 campos.
+// En index2.html tienes un solo campo para nombre y otro para apellidos,
+// así que combinamos segundo nombre/apellido si existen.
+function autofillCliente(c) {
+  const nombre =
+    [c.PrimerNombre, c.SegundoNombre].filter(Boolean).join(' ').trim();
+  const apellidos =
+    [c.PrimerApellido, c.SegundoApellido].filter(Boolean).join(' ').trim();
 
-  function limpiarCliente(clearId) {
-    if (clearId) document.getElementById('identificacion').value = "";
-    document.getElementById('primerNombre').value    = "";
-    document.getElementById('segundoNombre').value   = "";
-    document.getElementById('primerApellido').value  = "";
-    document.getElementById('segundoApellido').value = "";
-    document.getElementById('telefono').value        = "";
-    // El usuario seguirá eligiendo Barrio y escribiendo Dirección manualmente
-    document.getElementById('barrio').value          = "";
-    document.getElementById('direccion').value       = "";
-    document.getElementById('labelTotal').textContent = "—";
-    document.getElementById('domicilio').value = 0;
-    document.getElementById('total').value     = 0;
-  }
+  document.getElementById('primerNombre').value   = nombre || "";
+  document.getElementById('primerApellido').value = apellidos || "";
+  document.getElementById('telefono').value       = c.Telefono || "";
+  // Barrio y Dirección quedan para que el usuario los indique según el envío
+}
+
+function limpiarCliente(clearId) {
+  if (clearId) document.getElementById('identificacion').value = "";
+  document.getElementById('primerNombre').value   = "";
+  document.getElementById('primerApellido').value = "";
+  document.getElementById('telefono').value       = "";
+}
+
 
 
 function nuevoPedido(){ document.getElementById("modalExito").style.display="none"; show('viewCatalog'); }
