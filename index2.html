@@ -109,6 +109,7 @@
         </select>
       </div>
       <div><label>Fecha de Entrega</label><input name="fechaEntrega" id="fechaEntrega" type="date" required /></div>
+      <div><label>Hora de Entrega</label><input name="horaEntrega" id="horaEntrega" type="time" required step="900" /></div>
       <div><label>Destinatario</label><input name="destinatario" id="destinatario" required /></div>
       <div><label>Teléfono destino</label><input name="telefonoDestino" id="telefonoDestino" type="tel" required /></div>
       <div><label>Barrio</label><select name="barrio" id="barrio" required><option value="">Selecciona…</option></select></div>
@@ -118,10 +119,13 @@
     </div>
 
     <div class="actions" style="margin-top:14px">
-      <button type="button" class="btn" id="btnVolver">← Catálogo</button>
+      <button type="button" class="btn btn-outline" id="btnVolver">Volver a Catálogo</button>
       <button type="submit" class="btn">Confirmar pedido</button>
     </div>
+
+
     <div id="status"></div>
+    
   </form>
 </section>
 
