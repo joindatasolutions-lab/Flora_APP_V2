@@ -414,6 +414,19 @@
       status.className = "err"; return;
     }
 
+    // 🔹 Concatenar fecha + hora antes de enviar
+    const fecha = document.getElementById('fechaEntrega').value;
+    const hora  = document.getElementById('horaEntrega').value;
+    if (fecha && hora) {
+      const fechaHora = `${fecha} ${hora}:00`; 
+      // ejemplo: 2025-09-18 15:30:00
+      const hiddenInput = document.createElement('input');
+      hiddenInput.type = "hidden";
+      hiddenInput.name = "fechaEntrega";
+      hiddenInput.value = fechaHora;
+      e.target.appendChild(hiddenInput);
+    }
+
     try {
       const fd = new FormData(e.target);               // evita preflight
       const resp = await fetch(SCRIPT_URL, { method: "POST", body: fd });
