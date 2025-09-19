@@ -227,6 +227,13 @@ document.getElementById('pedidoForm').addEventListener('submit', async e => {
   }
   try {
     const fd = new FormData(e.target);
+    // --- NUEVO: concatenar fecha + hora ---
+    const fecha = document.getElementById('fechaEntrega').value;
+    const hora  = document.getElementById('horaEntrega').value;
+    if (fecha && hora) {
+      fd.set('fechaEntrega', `${fecha} ${hora}`);
+      // ó ISO: fd.set('fechaEntrega', `${fecha}T${hora}:00`);
+    }
     const resp = await fetch(SCRIPT_URL, { method: "POST", body: fd });
     const out = await resp.json();
     if (out.status === "success") {
