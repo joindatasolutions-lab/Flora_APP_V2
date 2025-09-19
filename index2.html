@@ -238,6 +238,68 @@ document.getElementById('pedidoForm').addEventListener('submit', async e => {
   } catch (err) { status.textContent = "❌ Error de conexión."; status.className = "err"; }
 });
 
+// --------- Autorrelleno de cliente por identificación (con debounce) ----------
+  let lookupTimer = null;
+  document.getElementById('identificacion').addEventListener('input', (e) => {
+    clearTimeout(lookupTimer);
+    const val = e.target.value.trim();
+    if (!val) {
+      setClienteBadge(null); // resetea
+      return;
+    }
+    lookupTimer = setTimeout(() => buscarCliente(val), 400);
+  });
+
+  async function buscarCliente(ident) {
+    try {
+      const res = await fetch(`${SCRIPT_URL}?cliente=${encodeURIComponent(ident)}`);
+      const data = await res.json();
+      if (data && data.cliente) {
+        setClienteBadge(true);
+        autofillCliente(data.cliente);
+      } else {
+        setClienteBadge(false);
+        limpiarCliente(false);
+      }
+    } catch (e) {
+      setClienteBadge(null);
+    }
+  }
+
+  function setClienteBadge(encontrado) {
+    const b = document.getElementById('badgeCliente');
+    b.classList.remove('hidden', 'ok', 'warn');
+    if (encontrado === true) { b.textContent = "Cliente encontrado"; b.classList.add('ok'); }
+    else if (encontrado === false) { b.textContent = "Nuevo cliente"; b.classList.add('warn'); }
+    else { b.classList.add('hidden'); }
+  }
+
+  function autofillCliente(c) {
+    // c tiene solo: Identificacion, PrimerNombre, SegundoNombre, PrimerApellido, SegundoApellido, Telefono
+    document.getElementById('primerNombre').value    = c.PrimerNombre || "";
+    document.getElementById('segundoNombre').value   = c.SegundoNombre || "";
+    document.getElementById('primerApellido').value  = c.PrimerApellido || "";
+    document.getElementById('segundoApellido').value = c.SegundoApellido || "";
+    document.getElementById('telefono').value        = c.Telefono || "";
+    // Barrio y Dirección NO vienen de Clientes -> los deja vacíos para que el cliente los ingrese
+  }
+
+  function limpiarCliente(clearId) {
+    if (clearId) document.getElementById('identificacion').value = "";
+    document.getElementById('primerNombre').value    = "";
+    document.getElementById('segundoNombre').value   = "";
+    document.getElementById('primerApellido').value  = "";
+    document.getElementById('segundoApellido').value = "";
+    document.getElementById('telefono').value        = "";
+    // El usuario seguirá eligiendo Barrio y escribiendo Dirección manualmente
+    document.getElementById('barrio').value          = "";
+    document.getElementById('direccion').value       = "";
+    document.getElementById('labelTotal').textContent = "—";
+    document.getElementById('domicilio').value = 0;
+    document.getElementById('total').value     = 0;
+  }
+
+
 function nuevoPedido(){ document.getElementById("modalExito").style.display="none"; show('viewCatalog'); }
 function salir(){ window.location.href="https://joindatasolutions-lab.github.io/Flora_APP_V2/"; }
 
