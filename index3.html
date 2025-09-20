@@ -516,19 +516,19 @@
     }
 
     // --------------- SUBMIT ---------------
-    async function onSubmit(e){
+    async function onSubmit(e) {
       e.preventDefault();
       const status = document.getElementById('status');
       const btnSubmit = e.target.querySelector('button[type="submit"]');
 
-      if (state.cart.length === 0){
-        status.textContent = "Tu carrito está vacío."; 
+      if (state.cart.length === 0) {
+        status.textContent = "Tu carrito está vacío.";
         status.className = "status err";
-        show('viewCatalog'); 
+        show('viewCatalog');
         return;
       }
 
-      // Bloquear botón y mostrar mensaje
+      // Bloquear botón
       btnSubmit.disabled = true;
       btnSubmit.textContent = "Procesando... ⏳";
       status.textContent = "Enviando pedido...";
@@ -554,7 +554,7 @@
       const hora           = document.getElementById('horaEntrega').value;
       const observaciones  = document.getElementById('observaciones').value.trim();
 
-      if (!identificacion || !primerNombre || !primerApellido || !telefono || !barrio || !direccion || !fecha || !hora){
+      if (!identificacion || !primerNombre || !primerApellido || !telefono || !barrio || !direccion || !fecha || !hora) {
         status.textContent = "Por favor completa los campos requeridos.";
         status.className = "status err";
         btnSubmit.disabled = false;
@@ -572,43 +572,39 @@
         precio: subtotal,
         cantidad: count,
         identificacion,
-        primerNombre, 
-        segundoNombre, 
-        primerApellido, 
-        segundoApellido, 
-        telefono,
-        destinatario, 
-        telefonoDestino,
-        barrio, 
-        direccion,
-        fechaEntrega: fechaHora,   // 👈 corregido
-        domicilio, 
-        total,
-        mensaje: observaciones     // 👈 corregido
+        primerNombre, segundoNombre, primerApellido, segundoApellido, telefono,
+        destinatario, telefonoDestino,
+        barrio, direccion,
+        fechaEntrega: fechaHora,   // 👈 debe llamarse así
+        domicilio, total,
+        mensaje: observaciones     // 👈 debe llamarse así
       };
 
+      try {
+        // Enviar como FormData
+        const formData = new URLSearchParams();
+        Object.entries(payload).forEach(([k, v]) => formData.append(k, v));
 
-      try{
         const res = await fetch(SCRIPT_URL, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload)
+          body: formData
         });
-        const out = await res.json().catch(()=>({ok:false}));
 
-        if (res.ok && (out.ok !== false)){
+        const out = await res.json().catch(() => ({ ok: false }));
+
+        if (res.ok && (out.status === "success" || out.ok !== false)) {
           status.textContent = "✅ Pedido registrado con éxito.";
           status.className = "status ok";
           clearCart();
           updateCartBadge();
-          setTimeout(()=>{ show('viewCatalog'); }, 1000);
-        }else{
+          setTimeout(() => { show('viewCatalog'); }, 1200);
+        } else {
           status.textContent = "❌ No se pudo registrar el pedido.";
           status.className = "status err";
         }
-      }catch(err){
+      } catch (err) {
         console.error(err);
-        status.textContent = "❌ Error de red al registrar el pedido.:" + err;
+        status.textContent = `❌ Error de red al registrar el pedido: ${err}`;
         status.className = "status err";
       } finally {
         // Reactivar botón
@@ -616,6 +612,7 @@
         btnSubmit.textContent = "Confirmar pedido";
       }
     }
+
 
 
     // --------------- EVENTOS UI ---------------
