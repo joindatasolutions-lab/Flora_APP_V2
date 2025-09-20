@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Flora | Catálogo</title>
+  <style>
+    :root{
+      --rosa:#e91e63;
+      --borde:#e9e9ef;
+      --texto:#222;
+      --muted:#666;
+      --bg:#fff;
+      --chip:#f7f7fb;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,'Helvetica Neue',Arial;
+      color:var(--texto); background:#fafafa;
+    }
+    header{
+      position:sticky; top:0; z-index:50; background:var(--bg);
+      border-bottom:1px solid var(--borde); padding:10px 16px;
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+    }
+    header .brand{font-weight:800; letter-spacing:.3px}
+    header .brand b{color:var(--rosa)}
+    main{padding:16px; max-width:1100px; margin:0 auto}
+
+    /* Vistas */
+    .view{display:none}
+    .view.active{display:block}
+
+    /* Catálogo */
+    .grid{
+      display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:14px;
+    }
+    @media (max-width:1100px){ .grid{grid-template-columns:repeat(3,1fr)} }
+    @media (max-width:800px){ .grid{grid-template-columns:repeat(2,1fr)} }
+    @media (max-width:520px){ .grid{grid-template-columns:repeat(2,1fr); gap:10px} }
+
+    .card{
+      background:#fff; border:1px solid var(--borde); border-radius:16px; overflow:hidden;
+      display:flex; flex-direction:column; position:relative;
+      transition:transform .08s ease;
+    }
+    .card:hover{transform:translateY(-2px)}
+    .card-img{
+      width:100%; height:150px; background:#f5f5f5; overflow:hidden;
+      display:block;
+    }
+    .card-img img{width:100%; height:100%; object-fit:cover; display:block}
+    .card-body{padding:10px 12px 56px}
+    .card h3{
+      font-size:15px; margin:0 0 6px; line-height:1.25; font-weight:800;
+    }
+    .card p{
+      margin:0 0 8px; color:var(--muted); font-size:13px; min-height:32px;
+    }
+    .price{font-weight:800}
+
+    /* Botón Añadir como franja */
+    .btn-add{
+      position:absolute; left:0; right:0; bottom:0;
+      border:0; background:var(--rosa); color:#fff; width:100%;
+      padding:10px 12px; font-weight:800; cursor:pointer;
+    }
+
+    /* FAB carrito */
+    .cart-fab{
+      position:fixed; right:16px; bottom:16px;
+      background:var(--rosa); color:#fff; border:none; border-radius:9999px;
+      padding:10px 14px; font-weight:700; cursor:pointer;
+      display:flex; align-items:center; gap:8px;
+      box-shadow:0 10px 24px rgba(0,0,0,.15); z-index:900;
+    }
+    .cart-fab #cartCount{
+      background:#fff; color:var(--rosa); border-radius:999px; padding:2px 8px; font-weight:800;
+      min-width:24px; text-align:center;
+    }
+
+    /* Drawer carrito */
+    .drawer{
+      position:fixed; top:0; right:0; height:100vh; width:380px; max-width:92vw;
+      background:#fff; border-left:2px solid var(--borde);
+      box-shadow:-10px 0 30px rgba(0,0,0,.15);
+      transform:translateX(100%); transition:transform .25s ease; z-index:1000;
+      display:flex; flex-direction:column;
+    }
+    .drawer.open{ transform:translateX(0) }
+    .drawer-header{
+      display:flex; justify-content:space-between; align-items:center;
+      padding:14px 16px; border-bottom:1px solid var(--borde);
+    }
+    .icon-btn{ background:#f3f3f3; border:1px solid #ddd; border-radius:10px; padding:6px 10px; cursor:pointer; }
+    .drawer-body{ padding:10px 12px; display:flex; flex-direction:column; height:100%; }
+    .cart-list{ list-style:none; margin:0; padding:0; gap:8px; display:flex; flex-direction:column; overflow:auto; }
+    .cart-item{
+      display:grid; grid-template-columns:1fr auto; gap:8px; align-items:center;
+      border:1px solid var(--borde); border-radius:12px; padding:10px;
+    }
+    .cart-item .name{ font-weight:700; }
+    .qty{
+      display:flex; align-items:center; gap:6px; border:1px solid #ddd; border-radius:10px; padding:4px 6px;
+    }
+    .qty button{ border:none; background:#f3f3f3; padding:4px 8px; border-radius:8px; cursor:pointer; font-weight:800; }
+    .drawer-footer{ margin-top:auto; border-top:1px solid var(--borde); padding-top:10px; }
+    .subtotal{ font-weight:800; margin-bottom:10px }
+    .drawer-actions{ display:flex; gap:8px; }
+    .btn-outline{ background:#fff; border:1px solid var(--rosa); color:var(--rosa); border-radius:10px; padding:10px 12px; font-weight:700; cursor:pointer; }
+    .btn-primary{ background:var(--rosa); color:#fff; border:none; border-radius:10px; padding:10px 12px; font-weight:800; cursor:pointer; }
+
+    /* Formulario */
+    .form{
+      background:#fff; border:1px solid var(--borde); border-radius:16px; padding:16px; max-width:780px; margin:0 auto;
+    }
+    .row{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    @media (max-width:720px){ .row{grid-template-columns:1fr} }
+    label{font-size:13px; color:#444; font-weight:700}
+    input, select, textarea{
+      width:100%; padding:10px 12px; border:1px solid #ddd; border-radius:10px; font:inherit;
+      background:#fff;
+    }
+    textarea{min-height:90px}
+    .pill{
+      background:var(--chip); border:1px dashed var(--borde); padding:10px 12px; border-radius:12px; color:#333; font-size:14px;
+    }
+    .actions{
+      display:flex; gap:10px; justify-content:center; margin-top:14px;
+    }
+    .btn{
+      background:var(--rosa); color:#fff; border:none; border-radius:12px; padding:12px 16px; font-weight:800; cursor:pointer; min-width:160px;
+    }
+    .btn-alt{
+      background:#fff; color:var(--rosa); border:2px solid var(--rosa); border-radius:12px; padding:12px 16px; font-weight:800; cursor:pointer; min-width:160px;
+    }
+    .status{margin-top:10px; font-weight:700}
+    .ok{color:#0a8a39}
+    .err{color:#c62828}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand"><b>Flora</b> • Catálogo</div>
+    <div></div>
+  </header>
+
+  <main>
+    <!-- Vista de Catálogo -->
+    <section id="viewCatalog" class="view active">
+      <div id="catalogGrid" class="grid"></div>
+    </section>
+
+    <!-- Vista de Formulario / Checkout -->
+    <section id="viewForm" class="view">
+      <form id="pedidoForm" class="form">
+        <h2 style="margin:0 0 10px">Finalizar pedido</h2>
+
+        <div class="pill" id="resumenProducto">Tu carrito está vacío.</div>
+
+        <div class="row" style="margin-top:10px">
+          <div>
+            <label for="identificacion">Identificación</label>
+            <input id="identificacion" name="identificacion" type="text" required placeholder="Cédula o NIT" />
+          </div>
+          <div>
+            <label for="telefono">Teléfono</label>
+            <input id="telefono" name="telefono" type="tel" required placeholder="Ej: 3001234567" />
+          </div>
+          <div>
+            <label for="primerNombre">Primer nombre</label>
+            <input id="primerNombre" name="primerNombre" type="text" required />
+          </div>
+          <div>
+            <label for="segundoNombre">Segundo nombre</label>
+            <input id="segundoNombre" name="segundoNombre" type="text" />
+          </div>
+          <div>
+            <label for="primerApellido">Primer apellido</label>
+            <input id="primerApellido" name="primerApellido" type="text" required />
+          </div>
+          <div>
+            <label for="segundoApellido">Segundo apellido</label>
+            <input id="segundoApellido" name="segundoApellido" type="text" />
+          </div>
+        </div>
+
+        <h3 style="margin:16px 0 6px">Datos de entrega</h3>
+        <div class="row">
+          <div>
+            <label for="destinatario">Destinatario</label>
+            <input id="destinatario" name="destinatario" type="text" placeholder="Quién recibe" />
+          </div>
+          <div>
+            <label for="telefonoDestino">Teléfono del destinatario</label>
+            <input id="telefonoDestino" name="telefonoDestino" type="tel" />
+          </div>
+          <div>
+            <label for="barrio">Barrio</label>
+            <select id="barrio" name="barrio" required></select>
+          </div>
+          <div>
+            <label for="direccion">Dirección</label>
+            <input id="direccion" name="direccion" type="text" required placeholder="Calle, carrera, #, apto" />
+          </div>
+          <div>
+            <label for="fechaEntrega">Fecha de entrega</label>
+            <input id="fechaEntrega" name="fechaEntrega" type="date" required />
+          </div>
+          <div>
+            <label for="horaEntrega">Hora de entrega</label>
+            <input id="horaEntrega" name="horaEntrega" type="time" required />
+          </div>
+        </div>
+
+        <div class="row" style="margin-top:10px">
+          <div>
+            <label for="observaciones">Observaciones</label>
+            <textarea id="observaciones" name="observaciones" placeholder="Tarjeta/dedicatoria, indicaciones…"></textarea>
+          </div>
+          <div>
+            <div style="display:grid; grid-template-columns:1fr auto; gap:6px; align-items:center">
+              <span>Subtotal</span> <strong>$<span id="subResumen">0</span></strong>
+              <span>Domicilio</span> <strong>$<span id="domResumen">0</span></strong>
+              <span>Total</span> <strong>$<span id="totResumen">0</span></strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- Campos para payload (rellenos por JS) -->
+        <input type="hidden" id="producto" name="producto" />
+        <input type="hidden" id="precio" name="precio" />
+        <input type="hidden" id="cantidad" name="cantidad" />
+
+        <div class="actions">
+          <button type="button" class="btn-alt" id="btnVolver">Regresar al catálogo</button>
+          <button type="submit" class="btn">Confirmar pedido</button>
+        </div>
+        <div id="status" class="status"></div>
+      </form>
+    </section>
+  </main>
+
+  <!-- Botón flotante Carrito -->
+  <button id="cartFab" class="cart-fab" aria-label="Carrito">
+    🛒 <span id="cartCount">0</span>
+  </button>
+
+  <!-- Drawer del Carrito -->
+  <div id="cartDrawer" class="drawer" aria-hidden="true">
+    <div class="drawer-header">
+      <strong>Tu carrito</strong>
+      <button id="cartClose" class="icon-btn" aria-label="Cerrar">✕</button>
+    </div>
+    <div class="drawer-body">
+      <ul id="cartList" class="cart-list"></ul>
+      <div class="drawer-footer">
+        <div class="subtotal">
+          Subtotal: $<span id="cartSubtotal">0</span>
+        </div>
+        <div class="drawer-actions">
+          <button id="cartVaciar" class="btn-outline">Vaciar</button>
+          <button id="cartContinuar" class="btn-primary">Continuar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // --------------- CONFIG ---------------
+    // Tu WebApp de Apps Script:
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwW2TpbWuBO0kpE1wYnz9Eizyeus3KcMwVeO0fgp6EdBFZvo9JYsH0J9IZL_zRGlBQ/exec";
+
+    // --------------- STATE & HELPERS ---------------
+    const state = { selected: null, barrios: {}, clientes: [], cart: [], catalogo: [] };
+    const fmtCOP = v => Number(v || 0).toLocaleString('es-CO');
+
+    function show(id){
+      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      window.scrollTo({top:0, behavior:'smooth'});
+    }
+
+    function formatDateISO(d){
+      const y = d.getFullYear();
+      const m = String(d.getMonth()+1).padStart(2,'0');
+      const day = String(d.getDate()).padStart(2,'0');
+      return `${y}-${m}-${day}`;
+    }
+    function formatDateTimeISO(dateStr, timeStr){
+      if (!dateStr || !timeStr) return "";
+      return `${dateStr} ${timeStr}`;
+    }
+
+    // --------------- INIT (catálogo + barrios + clientes) ---------------
+    async function init(){
+      try{
+        const res = await fetch(SCRIPT_URL);
+        const data = await res.json();
+        const catalogo = data.catalogo || [];
+        const barrios  = data.barrios  || {};
+        const clientes = data.clientes || []; // si tu endpoint ya lo trae
+
+        state.catalogo = catalogo;
+        state.barrios  = barrios;
+        state.clientes = clientes;
+
+        renderCatalog(catalogo);
+        fillBarrios(barrios);
+
+        // fecha mínima = hoy
+        const hoy = formatDateISO(new Date());
+        document.getElementById('fechaEntrega').setAttribute('min', hoy);
+
+      }catch(err){
+        console.error('Error init()', err);
+        // Carga mínima si falla el endpoint
+        renderCatalog([]);
+      }
+    }
+
+    function fillBarrios(mapBarrio){
+      const sel = document.getElementById('barrio');
+      sel.innerHTML = `<option value="" disabled selected>Selecciona un barrio</option>`;
+      Object.entries(mapBarrio).forEach(([nombre, costo])=>{
+        const opt = document.createElement('option');
+        opt.value = nombre;
+        opt.textContent = `${nombre} (${costo ? '$'+fmtCOP(costo) : 'domicilio a confirmar'})`;
+        sel.appendChild(opt);
+      });
+    }
+
+    // --------------- CATÁLOGO ---------------
+    function renderCatalog(items){
+      const grid = document.getElementById('catalogGrid');
+      if (!items || !items.length){
+        grid.innerHTML = `<div class="pill">No hay productos disponibles por ahora.</div>`;
+        return;
+      }
+
+      grid.innerHTML = '';
+      items.forEach(prod=>{
+        const card = document.createElement('div');
+        card.className = 'card';
+
+        const imgUrl = prod.image || prod.img || prod.foto || '';
+        const desc   = prod.description || prod.desc || '';
+        const name   = prod.name || prod.producto || 'Producto';
+        const price  = Number(prod.price || prod.precio || 0);
+
+        card.innerHTML = `
+          <a class="card-img" href="javascript:void(0)" aria-label="${name}">
+            <img src="${imgUrl}" alt="${name}" loading="lazy" />
+          </a>
+          <div class="card-body">
+            <h3 title="${name}">${name}</h3>
+            <p>${desc || ''}</p>
+            <div class="price">$${fmtCOP(price)}</div>
+          </div>
+          <button class="btn-add">Añadir</button>
+        `;
+
+        // Selección visual (si quieres que tocar la tarjeta solo seleccione)
+        card.querySelector('.card-img').addEventListener('click', () => {
+          selectProduct(card, { id: prod.id || name, name, price });
+        });
+
+        // Añadir al carrito (no navega)
+        card.querySelector('.btn-add').addEventListener('click', ev => {
+          ev.stopPropagation();
+          addToCart({ id: prod.id || name, name, price });
+        });
+
+        grid.appendChild(card);
+      });
+    }
+
+    function selectProduct(card, prod){
+      document.querySelectorAll('.card').forEach(c => c.classList.remove('selected'));
+      card.classList.add('selected');
+      state.selected = prod;
+
+      // precarga de un ítem por si hacen checkout directo
+      document.getElementById('producto').value = prod.name;
+      document.getElementById('precio').value = Number(prod.price || 0);
+      document.getElementById('cantidad').value = 1;
+      document.getElementById('resumenProducto').textContent =
+        `Producto: ${prod.name} — $${fmtCOP(prod.price)}`;
+    }
+
+    // --------------- CARRITO ---------------
+    function addToCart(prod){
+      const idx = state.cart.findIndex(i => (i.id === prod.id));
+      if (idx >= 0) state.cart[idx].qty += 1;
+      else state.cart.push({ id: prod.id, name: prod.name, price: Number(prod.price||0), qty: 1 });
+      updateCartBadge();
+      // feedback rápido (opcional)
+    }
+
+    function getCartTotals(){
+      const count = state.cart.reduce((a,i)=>a + i.qty, 0);
+      const subtotal = state.cart.reduce((a,i)=>a + i.qty*Number(i.price||0), 0);
+      return { count, subtotal };
+    }
+
+    function updateCartBadge(){
+      const { count } = getCartTotals();
+      const el = document.getElementById('cartCount');
+      if (el) el.textContent = count;
+    }
+
+    function openCart(){
+      renderCart();
+      document.getElementById('cartDrawer').classList.add('open');
+      document.getElementById('cartDrawer').setAttribute('aria-hidden','false');
+    }
+
+    function closeCart(){
+      document.getElementById('cartDrawer').classList.remove('open');
+      document.getElementById('cartDrawer').setAttribute('aria-hidden','true');
+    }
+
+    function changeQty(idx, delta){
+      state.cart[idx].qty += delta;
+      if (state.cart[idx].qty <= 0) state.cart.splice(idx,1);
+      renderCart();
+      updateCartBadge();
+    }
+
+    function clearCart(){
+      state.cart = [];
+      renderCart();
+      updateCartBadge();
+    }
+
+    function renderCart(){
+      const list = document.getElementById('cartList');
+      const sub = document.getElementById('cartSubtotal');
+      if (!list || !sub) return;
+
+      if (state.cart.length === 0){
+        list.innerHTML = `<li class="cart-item"><span class="name">Tu carrito está vacío.</span></li>`;
+      } else {
+        list.innerHTML = state.cart.map((it, idx) => `
+          <li class="cart-item">
+            <div>
+              <div class="name">${it.name}</div>
+              <div class="price">$${fmtCOP(it.price)} c/u</div>
+            </div>
+            <div class="qty">
+              <button onclick="changeQty(${idx},-1)">−</button>
+              <span>${it.qty}</span>
+              <button onclick="changeQty(${idx},1)">+</button>
+            </div>
+          </li>
+        `).join('');
+      }
+      sub.textContent = fmtCOP(getCartTotals().subtotal);
+    }
+
+    function proceedToCheckout(){
+      if (state.cart.length === 0){ closeCart(); return; }
+
+      const { subtotal, count } = getCartTotals();
+      const resumen = state.cart.map(i => `${i.qty}× ${i.name}`).join(' | ');
+
+      // Cargamos al formulario
+      document.getElementById('producto').value = resumen;   // resumen del carrito
+      document.getElementById('precio').value   = subtotal;  // suma de los ítems
+      document.getElementById('cantidad').value = count;     // número total de ítems
+      document.getElementById('resumenProducto').textContent =
+        `Carrito: ${resumen} — $${fmtCOP(subtotal)}`;
+
+      // Actualiza los totales iniciales
+      document.getElementById('subResumen').textContent = fmtCOP(subtotal);
+      const dom = getDomicilioActual();
+      document.getElementById('domResumen').textContent = fmtCOP(dom);
+      document.getElementById('totResumen').textContent = fmtCOP(subtotal + dom);
+
+      closeCart();
+      show('viewForm');
+    }
+
+    // --------------- CLIENTE (autocompletar por identificación) ---------------
+    function buscarClientePorId(id){
+      if (!id || !state.clientes || !state.clientes.length) return null;
+      const found = state.clientes.find(c =>
+        String(c.identificacion || c.Identificacion || '').trim() === String(id).trim()
+      );
+      return found || null;
+    }
+
+    function rellenarCliente(cli){
+      if (!cli) return;
+      document.getElementById('primerNombre').value   = cli.primerNombre   || cli.PrimerNombre   || '';
+      document.getElementById('segundoNombre').value  = cli.segundoNombre  || cli.SegundoNombre  || '';
+      document.getElementById('primerApellido').value = cli.primerApellido || cli.PrimerApellido || '';
+      document.getElementById('segundoApellido').value= cli.segundoApellido|| cli.SegundoApellido|| '';
+      document.getElementById('telefono').value       = cli.telefono       || cli.Telefono       || '';
+    }
+
+    // --------------- TOTALES / DOMICILIO ---------------
+    function getDomicilioActual(){
+      const barrio = document.getElementById('barrio').value;
+      const costo = Number((state.barrios && state.barrios[barrio]) || 0);
+      return costo;
+    }
+
+    function calcularTotal(){
+      const subtotal = Number(document.getElementById('precio').value || 0);
+      const domicilio = getDomicilioActual();
+      document.getElementById('subResumen').textContent = fmtCOP(subtotal);
+      document.getElementById('domResumen').textContent = fmtCOP(domicilio);
+      document.getElementById('totResumen').textContent = fmtCOP(subtotal + domicilio);
+    }
+
+    // --------------- SUBMIT ---------------
+    async function onSubmit(e){
+      e.preventDefault();
+      const status = document.getElementById('status');
+
+      if (state.cart.length === 0){
+        status.textContent = "Tu carrito está vacío."; status.className = "status err";
+        show('viewCatalog'); return;
+      }
+
+      // Recolectar datos
+      const { subtotal } = getCartTotals();
+      const resumen = state.cart.map(i => `${i.qty}× ${i.name}`).join(' | ');
+      const count = state.cart.reduce((a,i)=>a+i.qty,0);
+
+      const identificacion = document.getElementById('identificacion').value.trim();
+      const telefono       = document.getElementById('telefono').value.trim();
+      const primerNombre   = document.getElementById('primerNombre').value.trim();
+      const segundoNombre  = document.getElementById('segundoNombre').value.trim();
+      const primerApellido = document.getElementById('primerApellido').value.trim();
+      const segundoApellido= document.getElementById('segundoApellido').value.trim();
+
+      const destinatario   = document.getElementById('destinatario').value.trim();
+      const telefonoDestino= document.getElementById('telefonoDestino').value.trim();
+      const barrio         = document.getElementById('barrio').value;
+      const direccion      = document.getElementById('direccion').value.trim();
+      const fecha          = document.getElementById('fechaEntrega').value;
+      const hora           = document.getElementById('horaEntrega').value;
+      const observaciones  = document.getElementById('observaciones').value.trim();
+
+      if (!identificacion || !primerNombre || !primerApellido || !telefono || !barrio || !direccion || !fecha || !hora){
+        status.textContent = "Por favor completa los campos requeridos.";
+        status.className = "status err";
+        return;
+      }
+
+      // Concatenación fecha + hora en el mismo campo
+      const fechaHora = formatDateTimeISO(fecha, hora);
+      const domicilio = getDomicilioActual();
+      const total = subtotal + domicilio;
+
+      const payload = {
+        action: "crearPedido",
+        producto: resumen,
+        precio: subtotal,
+        cantidad: count,
+        identificacion,
+        primerNombre, segundoNombre, primerApellido, segundoApellido, telefono,
+        destinatario, telefonoDestino,
+        barrio, direccion,
+        fecha: fechaHora, // <-- fecha y hora en el mismo campo
+        domicilio, total,
+        observaciones
+      };
+
+      status.textContent = "Enviando...";
+      status.className = "status";
+
+      try{
+        const res = await fetch(SCRIPT_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+        const out = await res.json().catch(()=>({ok:false}));
+
+        if (res.ok && (out.ok !== false)){
+          status.textContent = "✅ Pedido registrado con éxito.";
+          status.className = "status ok";
+          // Limpiar carrito y volver al catálogo
+          clearCart();
+          updateCartBadge();
+          setTimeout(()=>{ show('viewCatalog'); }, 800);
+        }else{
+          status.textContent = "No se pudo registrar el pedido. Intenta de nuevo.";
+          status.className = "status err";
+        }
+      }catch(err){
+        console.error(err);
+        status.textContent = "Error de red al registrar el pedido.";
+        status.className = "status err";
+      }
+    }
+
+    // --------------- EVENTOS UI ---------------
+    // Drawer carrito
+    document.getElementById('cartFab').addEventListener('click', openCart);
+    document.getElementById('cartClose').addEventListener('click', closeCart);
+    document.getElementById('cartVaciar').addEventListener('click', clearCart);
+    document.getElementById('cartContinuar').addEventListener('click', proceedToCheckout);
+
+    // Form
+    document.getElementById('pedidoForm').addEventListener('submit', onSubmit);
+    document.getElementById('btnVolver').addEventListener('click', () => show('viewCatalog'));
+    document.getElementById('barrio').addEventListener('change', calcularTotal);
+
+    // Autocompletar cliente por identificación
+    document.getElementById('identificacion').addEventListener('blur', ()=>{
+      const id = document.getElementById('identificacion').value.trim();
+      const cli = buscarClientePorId(id);
+      if (cli) rellenarCliente(cli);
+    });
+
+    // --------------- ARRANQUE ---------------
+    init();
+  </script>
+</body>
+</html>
