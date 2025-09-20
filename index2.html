@@ -6,7 +6,12 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 <title>Flora - Tienda de Flores</title>
 <style>
-  :root{ --rosa:#e6a5b6; --rosa-osc:#c97b94; --bg:#fdfaf7; --gris:#5c5c5c; --borde:#ecd6dc; }
+  :root{ 
+    --rosa:#e6a5b6;
+    --rosa-osc:#c97b94;
+    --bg:#fdfaf7;
+    --gris:#5c5c5c;
+    --borde:#ecd6dc; }
   *{ box-sizing:border-box }
   body{ margin:0; font-family:'Inter', sans-serif; background:var(--bg); color:#333; display:flex; min-height:100vh; flex-direction:column }
   header{ text-align:center; padding:20px 16px }
@@ -141,6 +146,7 @@
 
 <script>
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwW2TpbWuBO0kpE1wYnz9Eizyeus3KcMwVeO0fgp6EdBFZvo9JYsH0J9IZL_zRGlBQ/exec";
+
 const state = { selected: null, barrios: {} };
 const fmtCOP = v => Number(v || 0).toLocaleString('es-CO');
 
