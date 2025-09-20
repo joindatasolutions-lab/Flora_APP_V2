@@ -572,13 +572,21 @@
         precio: subtotal,
         cantidad: count,
         identificacion,
-        primerNombre, segundoNombre, primerApellido, segundoApellido, telefono,
-        destinatario, telefonoDestino,
-        barrio, direccion,
-        fechaEntrega: fechaHora, // <-- debe llamarse IGUAL que en tu doPost
-        domicilio, total,
-        mensaje: observaciones   // <-- tu doPost espera "mensaje", no "observaciones"
+        primerNombre, 
+        segundoNombre, 
+        primerApellido, 
+        segundoApellido, 
+        telefono,
+        destinatario, 
+        telefonoDestino,
+        barrio, 
+        direccion,
+        fechaEntrega: fechaHora,   // 👈 corregido
+        domicilio, 
+        total,
+        mensaje: observaciones     // 👈 corregido
       };
+
 
       try{
         const res = await fetch(SCRIPT_URL, {
