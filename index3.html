@@ -599,11 +599,20 @@
     document.getElementById('btnVolver').addEventListener('click', () => show('viewCatalog'));
     document.getElementById('barrio').addEventListener('change', calcularTotal);
 
+    
     // Autocompletar cliente por identificación
-    document.getElementById('identificacion').addEventListener('blur', ()=>{
+    document.getElementById('identificacion').addEventListener('blur', async ()=>{
       const id = document.getElementById('identificacion').value.trim();
-      const cli = buscarClientePorId(id);
-      if (cli) rellenarCliente(cli);
+      if (!id) return;
+      try {
+        const res = await fetch(SCRIPT_URL + "?cliente=" + encodeURIComponent(id));
+        const data = await res.json();
+        if (data && data.cliente) {
+          rellenarCliente(data.cliente);
+        }
+      } catch(err) {
+        console.error("Error buscando cliente", err);
+      }
     });
 
     // --------------- ARRANQUE ---------------
