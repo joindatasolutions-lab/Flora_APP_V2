@@ -481,11 +481,17 @@
 
     function rellenarCliente(cli){
       if (!cli) return;
-      document.getElementById('primerNombre').value   = cli.primerNombre   || cli.PrimerNombre   || '';
-      document.getElementById('segundoNombre').value  = cli.segundoNombre  || cli.SegundoNombre  || '';
-      document.getElementById('primerApellido').value = cli.primerApellido || cli.PrimerApellido || '';
-      document.getElementById('segundoApellido').value= cli.segundoApellido|| cli.SegundoApellido|| '';
-      document.getElementById('telefono').value       = cli.telefono       || cli.Telefono       || '';
+
+      // Nombre = PrimerNombre + SegundoNombre
+      const nombre = [cli.PrimerNombre, cli.SegundoNombre].filter(Boolean).join(' ');
+      document.getElementById('nombre').value = nombre;
+
+      // Apellidos = PrimerApellido + SegundoApellido
+      const apellidos = [cli.PrimerApellido, cli.SegundoApellido].filter(Boolean).join(' ');
+      document.getElementById('apellidos').value = apellidos;
+
+      // Teléfono
+      document.getElementById('telefono').value = cli.Telefono || '';
     }
 
 
