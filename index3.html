@@ -370,13 +370,14 @@
         const price  = Number(prod.price || prod.precio || 0);
 
         card.innerHTML = `
-          <img src="${imgUrl}" alt="${name}" loading="lazy" />
+          <div class="card">
+          <img src="${imgUrl}" alt="${name}">
           <div class="body">
-            <div class="name">${name}</div>
+            <div class="${name}">Nombre producto</div>
             <p class="price">$${fmtCOP(price)}</p>
             <button class="btn-add">Añadir</button>
           </div>
-        `;
+          </div>`;
 
         // Acción al presionar botón añadir
         card.querySelector('.btn-add').addEventListener('click', ev => {
