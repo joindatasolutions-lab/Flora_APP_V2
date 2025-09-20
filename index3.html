@@ -608,7 +608,7 @@
         }
       }catch(err){
         console.error(err);
-        status.textContent = "❌ Error de red al registrar el pedido.:" & err;
+        status.textContent = "❌ Error de red al registrar el pedido.:" + err;
         status.className = "status err";
       } finally {
         // Reactivar botón
