@@ -135,9 +135,10 @@
 </head>
 <body>
   <header>
-    <div class="brand"><b>Flora</b> • Catálogo</div>
-    <div></div>
+    <img src="img/logo 2024 marca registrada-04.png" alt="FLORA Logo"/>
+    <h2>Catálogo de Arreglos Florales</h2>
   </header>
+
 
   <main>
     <!-- Vista de Catálogo -->
@@ -162,12 +163,20 @@
             <input id="telefono" name="telefono" type="tel" required placeholder="Ej: 3001234567" />
           </div>
           <div>
-            <label for="primerNombre">Nombre</label>
+            <label for="primerNombre">Primer nombre</label>
             <input id="primerNombre" name="primerNombre" type="text" required />
           </div>
           <div>
-            <label for="primerApellido">Apellido(s)</label>
+            <label for="segundoNombre">Segundo nombre</label>
+            <input id="segundoNombre" name="segundoNombre" type="text" />
+          </div>
+          <div>
+            <label for="primerApellido">Primer apellido</label>
             <input id="primerApellido" name="primerApellido" type="text" required />
+          </div>
+          <div>
+            <label for="segundoApellido">Segundo apellido</label>
+            <input id="segundoApellido" name="segundoApellido" type="text" />
           </div>
         </div>
 
@@ -336,7 +345,7 @@
 
         card.innerHTML = `
           <a class="card-img" href="javascript:void(0)" aria-label="${name}">
-            <img src="img/logo 2024 marca registrada-04.png" alt="FLORA Logo" loading="lazy" />
+            <img src="${imgUrl}" alt="${name}" loading="lazy" />
           </a>
           <div class="card-body">
             <h3 title="${name}">${name}</h3>
