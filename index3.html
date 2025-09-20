@@ -354,7 +354,7 @@
 
     // --------------- CATÁLOGO --------------- 
     function renderCatalog(items) {
-      const wrap = document.getElementById('catalogGrid'); // igual que en index2
+      const wrap = document.getElementById('catalogGrid') || document.getElementById('catalogo');
       wrap.innerHTML = "";
 
       if (!items || !items.length) {
@@ -367,26 +367,26 @@
         card.className = 'card';
 
         const imgUrl = prod.image || prod.img || prod.foto || "";
-        const name = prod.name || prod.producto || "Producto";
-        const price = Number(prod.price || prod.precio || 0);
+        const name   = prod.name || prod.producto || "Producto";
+        const price  = Number(prod.price || prod.precio || 0); // 👈 acepta price o precio
 
         card.innerHTML = `
           <img src="${imgUrl}" alt="${name}">
           <div class="body">
             <div class="name">${name}</div>
-            <p class="price">$${fmtCOP(price)}</p>
+            <p class="price">$${fmtCOP(price)}</p>   <!-- 👈 precio visible -->
             <button class="btn-add">Añadir</button>
           </div>
         `;
 
-        // Botón "Añadir" → agrega al carrito y pasa al formulario
+        // Botón Añadir
         card.querySelector('.btn-add').addEventListener('click', ev => {
           ev.stopPropagation();
           addToCart({ id: prod.id || name, name, price });
           document.getElementById('btnContinuar')?.click();
         });
 
-        // Click en la tarjeta → selección de producto
+        // Clic en la tarjeta
         card.addEventListener('click', () => {
           selectProduct(card, { id: prod.id || name, name, price });
         });
