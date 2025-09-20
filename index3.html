@@ -354,46 +354,49 @@
 
     // --------------- CATÁLOGO --------------- 
     function renderCatalog(items) {
-      const grid = document.getElementById('catalogGrid');
+      const wrap = document.getElementById('catalogo'); // igual que en index2
+      wrap.innerHTML = "";
+
       if (!items || !items.length) {
-        grid.innerHTML = `<div class="pill">No hay productos disponibles por ahora.</div>`;
+        wrap.innerHTML = `<div class="pill">No hay productos disponibles por ahora.</div>`;
         return;
       }
 
-      grid.innerHTML = '';
       items.forEach(prod => {
         const card = document.createElement('div');
         card.className = 'card';
 
-        const imgUrl = prod.image || prod.img || prod.foto || '';
-        const name   = prod.name || prod.producto || 'Producto';
-        const price  = Number(prod.price || prod.precio || 0);
+        const imgUrl = prod.image || prod.img || prod.foto || "";
+        const name = prod.name || prod.producto || "Producto";
+        const price = Number(prod.price || prod.precio || 0);
 
         card.innerHTML = `
-          <div class="card">
           <img src="${imgUrl}" alt="${name}">
           <div class="body">
-            <div class="${name}">Nombre producto</div>
+            <div class="name">${name}</div>
             <p class="price">$${fmtCOP(price)}</p>
             <button class="btn-add">Añadir</button>
           </div>
-          </div>`;
+        `;
 
-        // Acción al presionar botón añadir
+        // Botón "Añadir" → agrega al carrito y pasa al formulario
         card.querySelector('.btn-add').addEventListener('click', ev => {
           ev.stopPropagation();
           addToCart({ id: prod.id || name, name, price });
-          document.getElementById('btnContinuar')?.click(); // igual que index2
+          document.getElementById('btnContinuar')?.click();
         });
 
-        // Acción al hacer clic en toda la tarjeta
+        // Click en la tarjeta → selección de producto
         card.addEventListener('click', () => {
           selectProduct(card, { id: prod.id || name, name, price });
         });
 
-        grid.appendChild(card);
+        wrap.appendChild(card);
       });
     }
+
+        
+    
 
 
     function selectProduct(card, prod){
