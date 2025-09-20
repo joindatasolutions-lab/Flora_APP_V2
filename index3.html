@@ -519,11 +519,20 @@
     async function onSubmit(e){
       e.preventDefault();
       const status = document.getElementById('status');
+      const btnSubmit = e.target.querySelector('button[type="submit"]');
 
       if (state.cart.length === 0){
-        status.textContent = "Tu carrito está vacío."; status.className = "status err";
-        show('viewCatalog'); return;
+        status.textContent = "Tu carrito está vacío."; 
+        status.className = "status err";
+        show('viewCatalog'); 
+        return;
       }
+
+      // Bloquear botón y mostrar mensaje
+      btnSubmit.disabled = true;
+      btnSubmit.textContent = "Procesando... ⏳";
+      status.textContent = "Enviando pedido...";
+      status.className = "status";
 
       // Recolectar datos
       const { subtotal } = getCartTotals();
@@ -533,9 +542,9 @@
       const identificacion = document.getElementById('identificacion').value.trim();
       const telefono       = document.getElementById('telefono').value.trim();
       const primerNombre   = document.getElementById('primerNombre').value.trim();
-      const segundoNombre  = document.getElementById('segundoNombre').value.trim();
+      const segundoNombre  = document.getElementById('segundoNombre') ? document.getElementById('segundoNombre').value.trim() : "";
       const primerApellido = document.getElementById('primerApellido').value.trim();
-      const segundoApellido= document.getElementById('segundoApellido').value.trim();
+      const segundoApellido= document.getElementById('segundoApellido') ? document.getElementById('segundoApellido').value.trim() : "";
 
       const destinatario   = document.getElementById('destinatario').value.trim();
       const telefonoDestino= document.getElementById('telefonoDestino').value.trim();
@@ -548,10 +557,11 @@
       if (!identificacion || !primerNombre || !primerApellido || !telefono || !barrio || !direccion || !fecha || !hora){
         status.textContent = "Por favor completa los campos requeridos.";
         status.className = "status err";
+        btnSubmit.disabled = false;
+        btnSubmit.textContent = "Confirmar pedido";
         return;
       }
 
-      // Concatenación fecha + hora en el mismo campo
       const fechaHora = formatDateTimeISO(fecha, hora);
       const domicilio = getDomicilioActual();
       const total = subtotal + domicilio;
@@ -565,13 +575,10 @@
         primerNombre, segundoNombre, primerApellido, segundoApellido, telefono,
         destinatario, telefonoDestino,
         barrio, direccion,
-        fecha: fechaHora, // <-- fecha y hora en el mismo campo
+        fecha: fechaHora, 
         domicilio, total,
         observaciones
       };
-
-      status.textContent = "Enviando...";
-      status.className = "status";
 
       try{
         const res = await fetch(SCRIPT_URL, {
@@ -584,20 +591,24 @@
         if (res.ok && (out.ok !== false)){
           status.textContent = "✅ Pedido registrado con éxito.";
           status.className = "status ok";
-          // Limpiar carrito y volver al catálogo
           clearCart();
           updateCartBadge();
-          setTimeout(()=>{ show('viewCatalog'); }, 800);
+          setTimeout(()=>{ show('viewCatalog'); }, 1000);
         }else{
-          status.textContent = "No se pudo registrar el pedido. Intenta de nuevo.";
+          status.textContent = "❌ No se pudo registrar el pedido.";
           status.className = "status err";
         }
       }catch(err){
         console.error(err);
-        status.textContent = "Error de red al registrar el pedido.";
+        status.textContent = "❌ Error de red al registrar el pedido.";
         status.className = "status err";
+      } finally {
+        // Reactivar botón
+        btnSubmit.disabled = false;
+        btnSubmit.textContent = "Confirmar pedido";
       }
     }
+
 
     // --------------- EVENTOS UI ---------------
     // Drawer carrito
