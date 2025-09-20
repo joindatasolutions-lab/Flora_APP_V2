@@ -131,6 +131,11 @@
     .status{margin-top:10px; font-weight:700}
     .ok{color:#0a8a39}
     .err{color:#c62828}
+
+    .badge{ display:inline-block; padding:6px 10px; border-radius:999px; font-size:.85rem; margin-left:8px }
+    .ok{ background:#e7f8ec; color:#1a7f37; border:1px solid #bfe7c8 }
+    .warn{ background:#fff7e6; color:#a15d00; border:1px solid #ffd59e }
+    .hidden{ display:none }
   </style>
 </head>
 <body>
@@ -152,7 +157,7 @@
         <h2 style="margin:0 0 10px">Finalizar pedido</h2>
 
         <div class="pill" id="resumenProducto">Tu carrito está vacío.</div>
-
+        <span id="badgeCliente" class="badge warn hidden">Nuevo cliente</span>
         <div class="row" style="margin-top:10px">
           <div>
             <label for="identificacion">Identificación</label>
