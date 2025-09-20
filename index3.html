@@ -575,9 +575,9 @@
         primerNombre, segundoNombre, primerApellido, segundoApellido, telefono,
         destinatario, telefonoDestino,
         barrio, direccion,
-        fecha: fechaHora, 
+        fechaEntrega: fechaHora, // <-- debe llamarse IGUAL que en tu doPost
         domicilio, total,
-        observaciones
+        mensaje: observaciones   // <-- tu doPost espera "mensaje", no "observaciones"
       };
 
       try{
