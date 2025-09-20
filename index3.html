@@ -611,24 +611,68 @@
     document.getElementById('btnVolver').addEventListener('click', () => show('viewCatalog'));
     document.getElementById('barrio').addEventListener('change', calcularTotal);
 
-    document.getElementById('identificacion').addEventListener('blur', async ()=>{
-      const id = document.getElementById('identificacion').value.trim();
-      if (!id) return;
+    // ---------- Búsqueda y autorrelleno de cliente por Identificación ----------
+    let lookupTimer = null;
+
+    document.getElementById('identificacion').addEventListener('input', (e) => {
+      clearTimeout(lookupTimer);
+      const val = e.target.value.trim();
+      if (!val) { setClienteBadge(null); return; }
+      lookupTimer = setTimeout(() => buscarCliente(val), 400); // espera 400 ms
+    });
+
+    async function buscarCliente(ident) {
       try {
-        const res = await fetch(SCRIPT_URL + "?cliente=" + encodeURIComponent(id));
+        const res  = await fetch(`${SCRIPT_URL}?cliente=${encodeURIComponent(ident)}`);
         const data = await res.json();
 
-        // Debug: mostrar en HTML
+        // Debug en pantalla
         document.getElementById('debugCliente').textContent = JSON.stringify(data, null, 2);
 
         if (data && data.cliente) {
-          rellenarCliente(data.cliente);
+          setClienteBadge(true);
+          autofillCliente(data.cliente);
+        } else {
+          setClienteBadge(false);
+          limpiarCliente(false);
         }
-      } catch(err) {
-        console.error("Error buscando cliente", err);
-        document.getElementById('debugCliente').textContent = "Error: " + err;
+      } catch (err) {
+        setClienteBadge(null);
+        console.error('Lookup cliente error:', err);
       }
-    });
+    }
+
+    function setClienteBadge(encontrado) {
+      const b = document.getElementById('badgeCliente');
+      b.classList.remove('hidden', 'ok', 'warn');
+      if (encontrado === true) {
+        b.textContent = "Cliente encontrado";
+        b.classList.add('ok');
+      } else if (encontrado === false) {
+        b.textContent = "Nuevo cliente";
+        b.classList.add('warn');
+      } else {
+        b.classList.add('hidden');
+      }
+    }
+
+    function autofillCliente(c) {
+      const nombre =
+        [c.PrimerNombre, c.SegundoNombre].filter(Boolean).join(' ').trim();
+      const apellidos =
+        [c.PrimerApellido, c.SegundoApellido].filter(Boolean).join(' ').trim();
+
+      document.getElementById('primerNombre').value   = nombre || "";
+      document.getElementById('primerApellido').value = apellidos || "";
+      document.getElementById('telefono').value       = c.Telefono || "";
+    }
+
+    function limpiarCliente(clearId) {
+      if (clearId) document.getElementById('identificacion').value = "";
+      document.getElementById('primerNombre').value   = "";
+      document.getElementById('primerApellido').value = "";
+      document.getElementById('telefono').value       = "";
+    }
 
     /* Autocompletar cliente por identificación
     document.getElementById('identificacion').addEventListener('blur', async ()=>{
