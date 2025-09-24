@@ -53,6 +53,50 @@
   .btn-add:hover{ filter:brightness(.95); }
   .btn-add:active{ transform:translateY(1px); }
 
+  /* FAB carrito */
+    .cart-fab{
+      position:fixed; right:16px; bottom:16px;
+      background:var(--rosa); color:#fff; border:none; border-radius:9999px;
+      padding:10px 14px; font-weight:700; cursor:pointer;
+      display:flex; align-items:center; gap:8px;
+      box-shadow:0 10px 24px rgba(0,0,0,.15); z-index:900;
+    }
+    .cart-fab #cartCount{
+      background:#fff; color:var(--rosa); border-radius:999px; padding:2px 8px; font-weight:800;
+      min-width:24px; text-align:center;
+    }
+
+    /* Drawer carrito */
+    .drawer{
+      position:fixed; top:0; right:0; height:100vh; width:380px; max-width:92vw;
+      background:#fff; border-left:2px solid var(--borde);
+      box-shadow:-10px 0 30px rgba(0,0,0,.15);
+      transform:translateX(100%); transition:transform .25s ease; z-index:1000;
+      display:flex; flex-direction:column;
+    }
+    .drawer.open{ transform:translateX(0) }
+    .drawer-header{
+      display:flex; justify-content:space-between; align-items:center;
+      padding:14px 16px; border-bottom:1px solid var(--borde);
+    }
+    .icon-btn{ background:#f3f3f3; border:1px solid #ddd; border-radius:10px; padding:6px 10px; cursor:pointer; }
+    .drawer-body{ padding:10px 12px; display:flex; flex-direction:column; height:100%; }
+    .cart-list{ list-style:none; margin:0; padding:0; gap:8px; display:flex; flex-direction:column; overflow:auto; }
+    .cart-item{
+      display:grid; grid-template-columns:1fr auto; gap:8px; align-items:center;
+      border:1px solid var(--borde); border-radius:12px; padding:10px;
+    }
+    .cart-item .name{ font-weight:700; }
+    .qty{
+      display:flex; align-items:center; gap:6px; border:1px solid #ddd; border-radius:10px; padding:4px 6px;
+    }
+    .qty button{ border:none; background:#f3f3f3; padding:4px 8px; border-radius:8px; cursor:pointer; font-weight:800; }
+    .drawer-footer{ margin-top:auto; border-top:1px solid var(--borde); padding-top:10px; }
+    .subtotal{ font-weight:800; margin-bottom:10px }
+    .drawer-actions{ display:flex; gap:8px; }
+    .btn-outline{ background:#fff; border:1px solid var(--rosa); color:var(--rosa); border-radius:10px; padding:10px 12px; font-weight:700; cursor:pointer; }
+    .btn-primary{ background:var(--rosa); color:#fff; border:none; border-radius:10px; padding:10px 12px; font-weight:800; cursor:pointer; }
+
   /* Formulario */
   form{ background:#fff; border:1px solid var(--borde); border-radius:16px; max-width:780px; margin:0 auto; padding:18px; box-shadow:0 6px 18px rgba(0,0,0,.06) }
   form h3{ margin:0 0 14px; color:var(--gris) }
@@ -78,250 +122,292 @@
   .btn-salir { background:#5c5c5c; color:#fff; }
 </style>
 </head>
+
 <body>
-<header>
-  <img src="img/logo 2024 marca registrada-04.png" alt="FLORA Logo"/>
-  <h2>Catálogo de Arreglos Florales</h2>
-</header>
+  <header>
+    <img src="img/logo 2024 marca registrada-04.png" alt="FLORA Logo"/>
+    <h2>Catálogo de Arreglos Florales</h2>
+  </header>
 
-<!-- VISTA 1 -->
-<section id="viewCatalog" class="view active">
-  <div id="catalogo" class="catalogo"></div>
-</section>
+  <!-- VISTA 1 -->
+  <section id="viewCatalog" class="view active">
+    <div id="catalogo" class="catalogo"></div>
+  </section>
 
-<!-- VISTA 2 -->
-<section id="viewForm" class="view">
-  <form id="pedidoForm" novalidate>
-    <span class="pill" id="resumenProducto">Producto: —</span>
-    <span id="badgeCliente" class="badge warn hidden">Nuevo cliente</span>
-    <h3>Datos del Pedido</h3>
+  <!-- VISTA 2 -->
+  <section id="viewForm" class="view">
+    <form id="pedidoForm" novalidate>
+      <span class="pill" id="resumenProducto">Producto: —</span>
+      <span id="badgeCliente" class="badge warn hidden">Nuevo cliente</span>
+      <h3>Datos del Pedido</h3>
 
-    <input type="hidden" name="producto" id="producto">
-    <input type="hidden" name="precio"   id="precio">
-    <input type="hidden" name="domicilio" id="domicilio">
-    <input type="hidden" name="total"    id="total">
-    <input type="hidden" name="cantidad" value="1">
+      <input type="hidden" name="producto" id="producto">
+      <input type="hidden" name="precio"   id="precio">
+      <input type="hidden" name="domicilio" id="domicilio">
+      <input type="hidden" name="total"    id="total">
+      <input type="hidden" name="cantidad" value="1">
 
-    <div class="grid">
-      <div><label>Identificación</label><input name="identificacion" id="identificacion" required /></div>
-      <div><label>Teléfono</label><input name="telefono" id="telefono" type="tel" required /></div>
-      <div><label>Nombre</label><input name="primerNombre" id="primerNombre" required /></div>
-      <div><label>Apellidos</label><input name="primerApellido" id="primerApellido" required /></div>
-      <div><label>Forma de Pago</label>
-        <select name="formaPago" required>
-          <option value="">Selecciona…</option><option>Efectivo</option><option>Transferencia</option>
-          <option>Tarjeta</option><option>Link</option><option>Contraentrega</option>
-        </select>
+      <div class="grid">
+        <div><label>Identificación</label><input name="identificacion" id="identificacion" required /></div>
+        <div><label>Teléfono</label><input name="telefono" id="telefono" type="tel" required /></div>
+        <div><label>Nombre</label><input name="primerNombre" id="primerNombre" required /></div>
+        <div><label>Apellidos</label><input name="primerApellido" id="primerApellido" required /></div>
+        <div><label>Forma de Pago</label>
+          <select name="formaPago" required>
+            <option value="">Selecciona…</option><option>Efectivo</option><option>Transferencia</option>
+            <option>Tarjeta</option><option>Link</option><option>Contraentrega</option>
+          </select>
+        </div>
+        <div><label>Fecha de Entrega</label><input name="fechaEntrega" id="fechaEntrega" type="date" required /></div>
+        <div><label>Hora de Entrega</label><input name="horaEntrega" id="horaEntrega" type="time" required step="900" /></div>
+        <div><label>Destinatario</label><input name="destinatario" id="destinatario" required /></div>
+        <div><label>Teléfono destino</label><input name="telefonoDestino" id="telefonoDestino" type="tel" required /></div>
+        <div><label>Barrio</label><select name="barrio" id="barrio" required><option value="">Selecciona…</option></select></div>
+        <div class="grid-1"><label>Dirección</label><input name="direccion" id="direccion" required /></div>
+        <div class="grid-1"><label>Total a pagar (incluye domicilio)</label><div id="labelTotal" class="pill">—</div></div>
+        <div class="grid-1"><label>Mensaje <span class="muted">(opcional)</span></label><textarea name="mensaje" id="mensaje"></textarea></div>
       </div>
-      <div><label>Fecha de Entrega</label><input name="fechaEntrega" id="fechaEntrega" type="date" required /></div>
-      <div><label>Hora de Entrega</label><input name="horaEntrega" id="horaEntrega" type="time" required step="900" /></div>
-      <div><label>Destinatario</label><input name="destinatario" id="destinatario" required /></div>
-      <div><label>Teléfono destino</label><input name="telefonoDestino" id="telefonoDestino" type="tel" required /></div>
-      <div><label>Barrio</label><select name="barrio" id="barrio" required><option value="">Selecciona…</option></select></div>
-      <div class="grid-1"><label>Dirección</label><input name="direccion" id="direccion" required /></div>
-      <div class="grid-1"><label>Total a pagar (incluye domicilio)</label><div id="labelTotal" class="pill">—</div></div>
-      <div class="grid-1"><label>Mensaje <span class="muted">(opcional)</span></label><textarea name="mensaje" id="mensaje"></textarea></div>
+
+      <div class="actions" style="margin-top:14px">
+        <button type="button" class="btn btn-outline" id="btnVolver">Volver a Catálogo</button>
+        <button type="submit" class="btn">Confirmar pedido</button>
+      </div>
+
+
+      <div id="status"></div>
+      
+    </form>
+  </section>
+
+  <!-- Modal -->
+  <div id="modalExito" class="modal">
+    <div class="modal-content">
+      <h2>✅ Pedido registrado con éxito</h2>
+      <p>¿Desea hacer otro pedido o salir?</p>
+      <button onclick="nuevoPedido()">🛒 Hacer otro pedido</button>
+      <button class="btn-salir" onclick="salir()">🚪 Salir</button>
     </div>
-
-    <div class="actions" style="margin-top:14px">
-      <button type="button" class="btn btn-outline" id="btnVolver">Volver a Catálogo</button>
-      <button type="submit" class="btn">Confirmar pedido</button>
-    </div>
-
-
-    <div id="status"></div>
-    
-  </form>
-</section>
-
-<!-- Modal -->
-<div id="modalExito" class="modal">
-  <div class="modal-content">
-    <h2>✅ Pedido registrado con éxito</h2>
-    <p>¿Desea hacer otro pedido o salir?</p>
-    <button onclick="nuevoPedido()">🛒 Hacer otro pedido</button>
-    <button class="btn-salir" onclick="salir()">🚪 Salir</button>
   </div>
-</div>
 
-<script>
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwW2TpbWuBO0kpE1wYnz9Eizyeus3KcMwVeO0fgp6EdBFZvo9JYsH0J9IZL_zRGlBQ/exec";
+  <!-- Botón flotante Carrito -->
+  <button id="cartFab" class="cart-fab" aria-label="Carrito">
+    🛒 <span id="cartCount">0</span>
+  </button>
 
-const state = { selected: null, barrios: {} };
-const fmtCOP = v => Number(v || 0).toLocaleString('es-CO');
+  <!-- Drawer del Carrito -->
+  <div id="cartDrawer" class="drawer" aria-hidden="true">
+    <div class="drawer-header">
+      <strong>Tu carrito</strong>
+      <button id="cartClose" class="icon-btn" aria-label="Cerrar">✕</button>
+    </div>
+    <div class="drawer-body">
+      <ul id="cartList" class="cart-list"></ul>
+      <div class="drawer-footer">
+        <div class="subtotal">
+          Subtotal: $<span id="cartSubtotal">0</span>
+        </div>
+        <div class="drawer-actions">
+          <button id="cartVaciar" class="btn-outline">Vaciar</button>
+          <button id="cartContinuar" class="btn-primary">Continuar</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
-async function init() {
-  try {
-    const res = await fetch(SCRIPT_URL);
-    const { catalogo, barrios } = await res.json();
-    state.barrios = barrios || {};
-    renderCatalog(catalogo || []);
-    fillBarrios(barrios || {});
-    const hoy = new Date().toISOString().slice(0,10);
-    document.getElementById('fechaEntrega').setAttribute('min', hoy);
-  } catch (e) {
-    document.getElementById('catalogo').innerHTML = "<p>Error cargando datos. Revisa la URL del WebApp.</p>";
+
+  <script>
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwW2TpbWuBO0kpE1wYnz9Eizyeus3KcMwVeO0fgp6EdBFZvo9JYsH0J9IZL_zRGlBQ/exec";
+
+  const state = { selected: null, barrios: {} };
+  const fmtCOP = v => Number(v || 0).toLocaleString('es-CO');
+
+  async function init() {
+    try {
+      const res = await fetch(SCRIPT_URL);
+      const { catalogo, barrios } = await res.json();
+      state.barrios = barrios || {};
+      renderCatalog(catalogo || []);
+      fillBarrios(barrios || {});
+      const hoy = new Date().toISOString().slice(0,10);
+      document.getElementById('fechaEntrega').setAttribute('min', hoy);
+    } catch (e) {
+      document.getElementById('catalogo').innerHTML = "<p>Error cargando datos. Revisa la URL del WebApp.</p>";
+    }
   }
-}
 
-function renderCatalog(items) {
-  const wrap = document.getElementById('catalogo');
-  wrap.innerHTML = "";
-  items.forEach(prod => {
-    const card = document.createElement('div');
-    card.className = 'card';
-    card.innerHTML = `
-      <img src="${prod.img}" alt="${prod.name}">
-      <div class="body">
-        <div class="name">${prod.name}</div>
-        <p class="price">$${fmtCOP(prod.price)}</p>
-        <button class="btn-add">Añadir</button>
-      </div>`;
-    card.querySelector('.btn-add').addEventListener('click', ev => {
-      ev.stopPropagation(); selectProduct(card, prod);
-      document.getElementById('btnContinuar').click();
+  function renderCatalog(items) {
+    const wrap = document.getElementById('catalogo');
+    wrap.innerHTML = "";
+    items.forEach(prod => {
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.innerHTML = `
+        <img src="${prod.img}" alt="${prod.name}">
+        <div class="body">
+          <div class="name">${prod.name}</div>
+          <p class="price">$${fmtCOP(prod.price)}</p>
+          <button class="btn-add">Añadir</button>
+        </div>`;
+      
+      // 👉 Solo añadir al carrito
+      card.querySelector('.btn-add').addEventListener('click', ev => {
+        ev.stopPropagation();
+        addToCart(prod);   // nueva función
+      });
+
+      wrap.appendChild(card);
     });
-    card.addEventListener('click', () => selectProduct(card, prod));
-    wrap.appendChild(card);
-  });
-}
-
-function selectProduct(card, prod) {
-  document.querySelectorAll('.card').forEach(c => c.classList.remove('selected'));
-  card.classList.add('selected'); state.selected = prod;
-  document.getElementById('producto').value = prod.name;
-  document.getElementById('precio').value = Number(prod.price || 0);
-  document.getElementById('resumenProducto').textContent =
-    `Producto: ${prod.name} — $${fmtCOP(prod.price)}`;
-  show('viewForm');
-}
-
-function fillBarrios(dict) {
-  const sel = document.getElementById('barrio');
-  sel.innerHTML = '<option value="">Selecciona…</option>';
-  Object.keys(dict).forEach(nombre => {
-    const opt = document.createElement('option');
-    opt.value = nombre; opt.textContent = nombre;
-    sel.appendChild(opt);
-  });
-}
-
-function show(id) {
-  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-  window.scrollTo({ top:0, behavior:'smooth' });
-}
-document.getElementById('btnVolver').addEventListener('click', () => show('viewCatalog'));
-
-document.getElementById('barrio').addEventListener('change', calcularTotal);
-function calcularTotal() {
-  const precio = Number(document.getElementById('precio').value || 0);
-  const barrio = document.getElementById('barrio').value;
-  const dom = Number(state.barrios[barrio] || 0);
-  const total = precio + dom;
-  document.getElementById('domicilio').value = dom;
-  document.getElementById('total').value = total;
-  document.getElementById('labelTotal').textContent =
-    barrio ? `Total: $${fmtCOP(total)} (incluye domicilio)` : "—";
-}
-
-document.getElementById('pedidoForm').addEventListener('submit', async e => {
-  e.preventDefault(); const status = document.getElementById('status');
-  if (!state.selected) { show('viewCatalog'); return; }
-  if (!document.getElementById('barrio').value) {
-    status.textContent = "Selecciona barrio."; status.className = "err"; return;
   }
-  try {
-    const fd = new FormData(e.target);
-    // --- NUEVO: concatenar fecha + hora ---
-    const fecha = document.getElementById('fechaEntrega').value;
-    const hora  = document.getElementById('horaEntrega').value;
-    if (fecha && hora) {
-      fd.set('fechaEntrega', `${fecha} ${hora}`);
-      // ó ISO: fd.set('fechaEntrega', `${fecha}T${hora}:00`);
-    }
-    const resp = await fetch(SCRIPT_URL, { method: "POST", body: fd });
-    const out = await resp.json();
-    if (out.status === "success") {
-      document.getElementById("modalExito").style.display = "flex";
-      e.target.reset();
+
+  function selectProduct(card, prod) {
+    document.querySelectorAll('.card').forEach(c => c.classList.remove('selected'));
+    card.classList.add('selected'); state.selected = prod;
+    document.getElementById('producto').value = prod.name;
+    document.getElementById('precio').value = Number(prod.price || 0);
+    document.getElementById('resumenProducto').textContent =
+      `Producto: ${prod.name} — $${fmtCOP(prod.price)}`;
+    show('viewForm');
+  }
+
+  function addToCart(prod) {
+    const found = state.cart.find(p => p.name === prod.name);
+    if (found) {
+      found.cantidad += 1;
     } else {
-      status.textContent = "❌ Error: " + (out.message || "No se pudo registrar."); status.className = "err";
+      state.cart.push({ ...prod, cantidad: 1 });
     }
-  } catch (err) { status.textContent = "❌ Error de conexión."; status.className = "err"; }
-});
+    updateCartBadge();
+    renderCart();
+    openCart();
+  }
 
-// ---------- Búsqueda y autorrelleno de cliente por Identificación (con debounce) ----------
-let lookupTimer = null;
+  function fillBarrios(dict) {
+    const sel = document.getElementById('barrio');
+    sel.innerHTML = '<option value="">Selecciona…</option>';
+    Object.keys(dict).forEach(nombre => {
+      const opt = document.createElement('option');
+      opt.value = nombre; opt.textContent = nombre;
+      sel.appendChild(opt);
+    });
+  }
 
-document.getElementById('identificacion').addEventListener('input', (e) => {
-  clearTimeout(lookupTimer);
-  const val = e.target.value.trim();
-  if (!val) { setClienteBadge(null); return; }
-  lookupTimer = setTimeout(() => buscarCliente(val), 400); // espera 400 ms
-});
+  function show(id) {
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    window.scrollTo({ top:0, behavior:'smooth' });
+  }
+  document.getElementById('btnVolver').addEventListener('click', () => show('viewCatalog'));
 
-async function buscarCliente(ident) {
-  try {
-    // El WebApp debe responder a ?cliente=IDENT con { cliente: { ... } } si existe
-    const res  = await fetch(`${SCRIPT_URL}?cliente=${encodeURIComponent(ident)}`);
-    const data = await res.json();
+  document.getElementById('barrio').addEventListener('change', calcularTotal);
+  function calcularTotal() {
+    const precio = Number(document.getElementById('precio').value || 0);
+    const barrio = document.getElementById('barrio').value;
+    const dom = Number(state.barrios[barrio] || 0);
+    const state = { selected: null, barrios: {}, clientes: [], cart: [], catalogo: [] };
+    const total = precio + dom;
+    document.getElementById('domicilio').value = dom;
+    document.getElementById('total').value = total;
+    document.getElementById('labelTotal').textContent =
+      barrio ? `Total: $${fmtCOP(total)} (incluye domicilio)` : "—";
+  }
 
-    if (data && data.cliente) {
-      setClienteBadge(true);
-      autofillCliente(data.cliente);
+  document.getElementById('pedidoForm').addEventListener('submit', async e => {
+    e.preventDefault(); const status = document.getElementById('status');
+    if (!state.selected) { show('viewCatalog'); return; }
+    if (!document.getElementById('barrio').value) {
+      status.textContent = "Selecciona barrio."; status.className = "err"; return;
+    }
+    try {
+      const fd = new FormData(e.target);
+      // --- NUEVO: concatenar fecha + hora ---
+      const fecha = document.getElementById('fechaEntrega').value;
+      const hora  = document.getElementById('horaEntrega').value;
+      if (fecha && hora) {
+        fd.set('fechaEntrega', `${fecha} ${hora}`);
+        // ó ISO: fd.set('fechaEntrega', `${fecha}T${hora}:00`);
+      }
+      const resp = await fetch(SCRIPT_URL, { method: "POST", body: fd });
+      const out = await resp.json();
+      if (out.status === "success") {
+        document.getElementById("modalExito").style.display = "flex";
+        e.target.reset();
+      } else {
+        status.textContent = "❌ Error: " + (out.message || "No se pudo registrar."); status.className = "err";
+      }
+    } catch (err) { status.textContent = "❌ Error de conexión."; status.className = "err"; }
+  });
+
+  // ---------- Búsqueda y autorrelleno de cliente por Identificación (con debounce) ----------
+  let lookupTimer = null;
+
+  document.getElementById('identificacion').addEventListener('input', (e) => {
+    clearTimeout(lookupTimer);
+    const val = e.target.value.trim();
+    if (!val) { setClienteBadge(null); return; }
+    lookupTimer = setTimeout(() => buscarCliente(val), 400); // espera 400 ms
+  });
+
+  async function buscarCliente(ident) {
+    try {
+      // El WebApp debe responder a ?cliente=IDENT con { cliente: { ... } } si existe
+      const res  = await fetch(`${SCRIPT_URL}?cliente=${encodeURIComponent(ident)}`);
+      const data = await res.json();
+
+      if (data && data.cliente) {
+        setClienteBadge(true);
+        autofillCliente(data.cliente);
+      } else {
+        setClienteBadge(false);
+        limpiarCliente(false);
+      }
+    } catch (err) {
+      setClienteBadge(null);
+      console.error('Lookup cliente error:', err);
+    }
+  }
+
+  function setClienteBadge(encontrado) {
+    const b = document.getElementById('badgeCliente');
+    b.classList.remove('hidden', 'ok', 'warn');
+    if (encontrado === true) {
+      b.textContent = "Cliente encontrado";
+      b.classList.add('ok');
+    } else if (encontrado === false) {
+      b.textContent = "Nuevo cliente";
+      b.classList.add('warn');
     } else {
-      setClienteBadge(false);
-      limpiarCliente(false);
+      b.classList.add('hidden');
     }
-  } catch (err) {
-    setClienteBadge(null);
-    console.error('Lookup cliente error:', err);
   }
-}
 
-function setClienteBadge(encontrado) {
-  const b = document.getElementById('badgeCliente');
-  b.classList.remove('hidden', 'ok', 'warn');
-  if (encontrado === true) {
-    b.textContent = "Cliente encontrado";
-    b.classList.add('ok');
-  } else if (encontrado === false) {
-    b.textContent = "Nuevo cliente";
-    b.classList.add('warn');
-  } else {
-    b.classList.add('hidden');
+  // NOTE: index.html separa nombres y apellidos en 4 campos.
+  // En index2.html tienes un solo campo para nombre y otro para apellidos,
+  // así que combinamos segundo nombre/apellido si existen.
+  function autofillCliente(c) {
+    const nombre =
+      [c.PrimerNombre, c.SegundoNombre].filter(Boolean).join(' ').trim();
+    const apellidos =
+      [c.PrimerApellido, c.SegundoApellido].filter(Boolean).join(' ').trim();
+
+    document.getElementById('primerNombre').value   = nombre || "";
+    document.getElementById('primerApellido').value = apellidos || "";
+    document.getElementById('telefono').value       = c.Telefono || "";
+    // Barrio y Dirección quedan para que el usuario los indique según el envío
   }
-}
 
-// NOTE: index.html separa nombres y apellidos en 4 campos.
-// En index2.html tienes un solo campo para nombre y otro para apellidos,
-// así que combinamos segundo nombre/apellido si existen.
-function autofillCliente(c) {
-  const nombre =
-    [c.PrimerNombre, c.SegundoNombre].filter(Boolean).join(' ').trim();
-  const apellidos =
-    [c.PrimerApellido, c.SegundoApellido].filter(Boolean).join(' ').trim();
-
-  document.getElementById('primerNombre').value   = nombre || "";
-  document.getElementById('primerApellido').value = apellidos || "";
-  document.getElementById('telefono').value       = c.Telefono || "";
-  // Barrio y Dirección quedan para que el usuario los indique según el envío
-}
-
-function limpiarCliente(clearId) {
-  if (clearId) document.getElementById('identificacion').value = "";
-  document.getElementById('primerNombre').value   = "";
-  document.getElementById('primerApellido').value = "";
-  document.getElementById('telefono').value       = "";
-}
+  function limpiarCliente(clearId) {
+    if (clearId) document.getElementById('identificacion').value = "";
+    document.getElementById('primerNombre').value   = "";
+    document.getElementById('primerApellido').value = "";
+    document.getElementById('telefono').value       = "";
+  }
 
 
 
-function nuevoPedido(){ document.getElementById("modalExito").style.display="none"; show('viewCatalog'); }
-function salir(){ window.location.href="https://https://joindatasolutions-lab.github.io/Flora_APP_V2/index2.html"; }
+  function nuevoPedido(){ document.getElementById("modalExito").style.display="none"; show('viewCatalog'); }
+  function salir(){ window.location.href="https://https://joindatasolutions-lab.github.io/Flora_APP_V2/index2.html"; }
 
-init();
-</script>
+  init();
+  </script>
 </body>
 </html>
