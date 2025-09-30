@@ -110,7 +110,7 @@
           <label>Apellido(s)</label>
           <input id="primerApellido" name="primerApellido" required>
         </div>
-        <!-- Razón social opcional, solo para NIT -->
+        <!-- Razón social opcional -->
         <div id="razonSocialWrap" style="display:none;">
           <label>Razón social (opcional)</label>
           <input id="razonSocial" name="razonSocial" placeholder="Nombre de la empresa">
@@ -136,7 +136,6 @@
           <option value="CONTRAENTREGA">Contraentrega</option>
         </select>
       </div>
-        
       <div><label>Mensaje</label><textarea id="mensaje" name="mensaje" placeholder="Escribe un mensaje opcional para acompañar el pedido"></textarea></div>
       <div class="actions" style="margin-top:14px">
         <button type="button" class="btn-outline" id="btnVolver">Regresar al catálogo</button>
@@ -258,7 +257,6 @@
       } else {
         ivaRow.classList.add("hidden");
       }
-
       totalSpan.textContent=fmtCOP(total);
     }
     function changeQty(idx,delta){
@@ -307,6 +305,13 @@
       });
     }
 
+    // Eventos
+    document.getElementById('cartFab').addEventListener('click',openCart);
+    document.getElementById('cartClose').addEventListener('click',closeCart);
+    document.getElementById('cartVaciar').addEventListener('click',clearCart);
+    document.getElementById('cartContinuar').addEventListener('click',proceedToCheckout);
+    document.getElementById('btnVolver').addEventListener('click',()=>show('viewCatalog'));
+
     // Mostrar u ocultar razón social
     document.getElementById('tipoIdent').addEventListener('change', e=>{
       const wrap = document.getElementById('razonSocialWrap');
@@ -323,3 +328,4 @@
   </script>
 </body>
 </html>
+
