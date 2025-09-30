@@ -100,6 +100,18 @@
         <div><label>Fecha de entrega</label><input id="fechaEntrega" name="fechaEntrega" type="date" required></div>
         <div><label>Hora de entrega</label><input id="horaEntrega" name="horaEntrega" type="time" required></div>
       </div>
+      <div>
+        <label for="formaPago">Medio de pago</label>
+        <select id="formaPago" name="formaPago" required>
+          <option value="">Selecciona…</option>
+          <option value="TRANSFERENCIA">TRANSFERENCIA</option>
+          <option value="TARJETA">TARJETA</option>
+          <option value="LINK">LINK</option>
+          <option value="EFECTIVO">EFECTIVO</option>
+          <option value="CUENTAS POR COBRAR">CUENTAS POR COBRAR</option>
+          <option value="CONTRAENTREGA">CONTRAENTREGA</option>
+        </select>
+      </div>
       <div class="grid-1"><label>Mensaje</label><textarea id="mensaje" name="mensaje" placeholder="Escribe un mensaje opcional para acompañar el pedido"></textarea></div>
       <div class="actions" style="margin-top:14px">
         <button type="button" class="btn-outline" id="btnVolver">Regresar al catálogo</button>
