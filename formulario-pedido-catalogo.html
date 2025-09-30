@@ -222,32 +222,46 @@
     function openCart(){document.getElementById('cartDrawer').classList.add('open');}
     function closeCart(){document.getElementById('cartDrawer').classList.remove('open');}
     function proceedToCheckout(){
-        if(state.cart.length===0){closeCart();return;}
-        
-        let subtotal = state.cart.reduce((a,i)=>a+i.qty*i.price,0);
-        const resumen = state.cart.map(i=>`${i.qty}× ${i.name}`).join(' | ');
+    if(state.cart.length===0){closeCart();return;}
+    
+    let subtotal = state.cart.reduce((a,i)=>a+i.qty*i.price,0);
+    const resumen = state.cart.map(i=>`${i.qty}× ${i.name}`).join(' | ');
 
-        // Detectar tipo de identificación seleccionado
-        const tipoIdent = document.querySelector('input[name="tipoIdent"]:checked').value;
+    // Detectar tipo de identificación
+    const tipoIdent = document.querySelector('input[name="tipoIdent"]:checked').value;
 
-        // Si es NIT, aplicar IVA del 19%
-        if (tipoIdent === "NIT") {
-            const iva = subtotal * 0.19;
-            subtotal = subtotal + iva;
+    // IVA solo si es NIT
+    let iva = 0;
+    if (tipoIdent === "NIT") {
+        iva = subtotal * 0.19;
+    }
 
-            document.getElementById('resumenProducto').textContent = 
-            `Carrito: ${resumen} — Subtotal + IVA (19%): $${fmtCOP(subtotal)}`;
-        } else {
-            document.getElementById('resumenProducto').textContent = 
-            `Carrito: ${resumen} — $${fmtCOP(subtotal)}`;
-        }
+    // Costo de domicilio (según barrio seleccionado)
+    let domicilio = 0;
+    const barrioSel = document.getElementById('barrio').value;
+    if (state.barrios[barrioSel]) {
+        domicilio = Number(state.barrios[barrioSel]) || 0;
+    }
 
-        document.getElementById('producto').value = resumen;
-        document.getElementById('precio').value = subtotal;
-        document.getElementById('cantidad').value = state.cart.reduce((a,i)=>a+i.qty,0);
+    // Total final
+    const total = subtotal + iva + domicilio;
 
-        closeCart(); 
-        show('viewForm');
+    // Mostrar resumen
+    if (tipoIdent === "NIT") {
+        document.getElementById('resumenProducto').textContent = 
+        `Carrito: ${resumen} — Subtotal: $${fmtCOP(subtotal)} + IVA (19%): $${fmtCOP(iva)} + Domicilio: $${fmtCOP(domicilio)} = Total: $${fmtCOP(total)}`;
+    } else {
+        document.getElementById('resumenProducto').textContent = 
+        `Carrito: ${resumen} — Subtotal: $${fmtCOP(subtotal)} + Domicilio: $${fmtCOP(domicilio)} = Total: $${fmtCOP(total)}`;
+    }
+
+    // Enviar valores al formulario oculto
+    document.getElementById('producto').value = resumen;
+    document.getElementById('precio').value = total;
+    document.getElementById('cantidad').value = state.cart.reduce((a,i)=>a+i.qty,0);
+
+    closeCart(); 
+    show('viewForm');
     }
 
     function show(id){
