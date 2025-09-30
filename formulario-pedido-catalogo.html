@@ -86,25 +86,30 @@
       <input type="hidden" id="producto" name="producto">
       <input type="hidden" id="precio" name="precio">
       <input type="hidden" id="cantidad" name="cantidad">
+      <input type="hidden" id="iva" name="iva">
+      <input type="hidden" id="domicilio" name="domicilio">
+
       <div class="grid">
-        <div><label>Tipo de identificación</label><br><label>
-            <input type="radio" name="tipoIdent" id="tipoCedula" value="CEDULA" checked>Cédula</label>
-            <label style="margin-left:12px;">
-            <input type="radio" name="tipoIdent" id="tipoNIT" value="NIT">NIT</label>
+        <div>
+          <label>Tipo de identificación</label><br>
+          <label><input type="radio" name="tipoIdent" id="tipoCedula" value="CEDULA" checked>Cédula</label>
+          <label style="margin-left:12px;"><input type="radio" name="tipoIdent" id="tipoNIT" value="NIT">NIT</label>
         </div>
-        <div><label>Identificación</label><input id="identificacion" name="identificacion"  placeholder="Cédula / NIT" required></div>
+        <div><label>Identificación</label><input id="identificacion" name="identificacion" placeholder="Cédula / NIT" required></div>
         <div><label>Teléfono</label><input id="telefono" name="telefono" placeholder="Ej: 3001234567" required></div>
         <div><label>Nombre</label><input id="primerNombre" name="primerNombre" required></div>
         <div><label>Apellido(s)</label><input id="primerApellido" name="primerApellido" required></div>
       </div>
+
       <div class="grid">
         <div><label>Destinatario</label><input id="destinatario" name="destinatario" required></div>
         <div><label for="telefonoDestino">Teléfono destino</label><input id="telefonoDestino" name="telefonoDestino" placeholder="Ej: 3201234567" required></div>
-        <div><label>Dirección</label><input id="direccion" name="direccion"  placeholder="Dirección, Casa, Edificio, Torre, Apto" required></div>
+        <div><label>Dirección</label><input id="direccion" name="direccion" placeholder="Dirección, Casa, Edificio, Torre, Apto" required></div>
         <div><label>Barrio</label><select id="barrio" name="barrio"></select></div>
         <div><label>Fecha de entrega</label><input id="fechaEntrega" name="fechaEntrega" type="date" required></div>
         <div><label>Hora de entrega</label><input id="horaEntrega" name="horaEntrega" type="time" required></div>
       </div>
+
       <div class="grid-1">
         <label for="formaPago">Medio de pago</label>
         <select id="formaPago" name="formaPago" required>
@@ -117,8 +122,12 @@
           <option value="CONTRAENTREGA">Contraentrega</option>
         </select>
       </div>
-        
-      <div><label>Mensaje</label><textarea id="mensaje" name="mensaje" placeholder="Escribe un mensaje opcional para acompañar el pedido"></textarea></div>
+
+      <div>
+        <label>Mensaje</label>
+        <textarea id="mensaje" name="mensaje" placeholder="Escribe un mensaje opcional para acompañar el pedido"></textarea>
+      </div>
+
       <div class="actions" style="margin-top:14px">
         <button type="button" class="btn-outline" id="btnVolver">Regresar al catálogo</button>
         <button type="submit" class="btn-primary" id="btnSubmit">Confirmar pedido</button>
@@ -221,151 +230,84 @@
     function clearCart(){state.cart=[];renderCart();updateCartBadge();}
     function openCart(){document.getElementById('cartDrawer').classList.add('open');}
     function closeCart(){document.getElementById('cartDrawer').classList.remove('open');}
+
     function proceedToCheckout(){
-    if(state.cart.length===0){closeCart();return;}
-    
-    let subtotal = state.cart.reduce((a,i)=>a+i.qty*i.price,0);
-    const resumen = state.cart.map(i=>`${i.qty}× ${i.name}`).join(' | ');
+      if(state.cart.length===0){closeCart();return;}
+      
+      let subtotal = state.cart.reduce((a,i)=>a+i.qty*i.price,0);
+      const resumen = state.cart.map(i=>`${i.qty}× ${i.name}`).join(' | ');
 
-    // Detectar tipo de identificación
-    const tipoIdent = document.querySelector('input[name="tipoIdent"]:checked').value;
+      // Tipo de identificación
+      const tipoIdent = document.querySelector('input[name="tipoIdent"]:checked').value;
 
-    // IVA solo si es NIT
-    let iva = 0;
-    if (tipoIdent === "NIT") {
+      // IVA
+      let iva = 0;
+      if (tipoIdent === "NIT") {
         iva = subtotal * 0.19;
-    }
+      }
 
-    // Costo de domicilio (según barrio seleccionado)
-    let domicilio = 0;
-    const barrioSel = document.getElementById('barrio').value;
-    if (state.barrios[barrioSel]) {
+      // Domicilio
+      let domicilio = 0;
+      const barrioSel = document.getElementById('barrio').value;
+      if (state.barrios[barrioSel]) {
         domicilio = Number(state.barrios[barrioSel]) || 0;
+      }
+
+      // Total
+      const total = subtotal + iva + domicilio;
+
+      // Mostrar resumen en varias líneas
+      let resumenHTML = `Carrito: ${resumen}<br>Subtotal: $${fmtCOP(subtotal)}`;
+      if (tipoIdent === "NIT") resumenHTML += `<br>IVA (19%): $${fmtCOP(iva)}`;
+      resumenHTML += `<br>Domicilio: $${fmtCOP(domicilio)}<br><strong>Total: $${fmtCOP(total)}</strong>`;
+
+      document.getElementById('resumenProducto').innerHTML = resumenHTML;
+
+      // Valores ocultos
+      document.getElementById('producto').value = resumen;
+      document.getElementById('precio').value = total;
+      document.getElementById('cantidad').value = state.cart.reduce((a,i)=>a+i.qty,0);
+      document.getElementById('iva').value = iva;
+      document.getElementById('domicilio').value = domicilio;
+
+      closeCart(); 
+      show('viewForm');
     }
 
-    // Total final
-    const total = subtotal + iva + domicilio;
-
-    // Mostrar resumen
-    if (tipoIdent === "NIT") {
-        document.getElementById('resumenProducto').textContent = 
-        `Carrito: ${resumen} — Subtotal: $${fmtCOP(subtotal)} + IVA (19%): $${fmtCOP(iva)} + Domicilio: $${fmtCOP(domicilio)} = Total: $${fmtCOP(total)}`;
-    } else {
-        document.getElementById('resumenProducto').textContent = 
-        `Carrito: ${resumen} — Subtotal: $${fmtCOP(subtotal)} + Domicilio: $${fmtCOP(domicilio)} = Total: $${fmtCOP(total)}`;
-    }
-
-    // Enviar valores al formulario oculto
-    document.getElementById('producto').value = resumen;
-    document.getElementById('precio').value = total;
-    document.getElementById('cantidad').value = state.cart.reduce((a,i)=>a+i.qty,0);
-
-    closeCart(); 
-    show('viewForm');
+    function fillBarrios(barrios){
+      const sel=document.getElementById('barrio');
+      sel.innerHTML="<option value=''>Seleccione…</option>";
+      for(const [nombre,val] of Object.entries(barrios)){
+        sel.innerHTML+=`<option value="${nombre}">${nombre} ($${fmtCOP(val)})</option>`;
+      }
     }
 
     function show(id){
       document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
       document.getElementById(id).classList.add('active');
-      window.scrollTo({top:0,behavior:'smooth'});
-    }
-    function fillBarrios(map){
-      const sel=document.getElementById('barrio');
-      sel.innerHTML='<option value="">Selecciona…</option>';
-      Object.keys(map).forEach(n=>{
-        const opt=document.createElement('option');
-        opt.value=n; opt.textContent=n; sel.appendChild(opt);
-      });
     }
 
-    // --- Cliente nuevo/viejo ---
-    let lookupTimer=null;
-    document.getElementById('identificacion').addEventListener('input',(e)=>{
-      clearTimeout(lookupTimer);
-      const val=e.target.value.trim();
-      if(!val){ setClienteBadge(null); return; }
-      lookupTimer=setTimeout(()=>buscarCliente(val),200);
-    });
-    async function buscarCliente(ident){
-      try{
-        const res=await fetch(`${SCRIPT_URL}?cliente=${encodeURIComponent(ident)}`);
-        const data=await res.json();
-        if(data && data.cliente){
-          setClienteBadge(true); autofillCliente(data.cliente);
-        } else {
-          setClienteBadge(false); limpiarCliente(false);
-        }
-      }catch(err){ setClienteBadge(null); console.error('Lookup error',err); }
-    }
-    function setClienteBadge(encontrado){
-      const b=document.getElementById('badgeCliente');
-      b.classList.remove('hidden','ok','warn');
-      if(encontrado===true){ b.textContent="Cliente encontrado"; b.classList.add('ok'); }
-      else if(encontrado===false){ b.textContent="Nuevo cliente"; b.classList.add('warn'); }
-      else{ b.classList.add('hidden'); }
-    }
-    function autofillCliente(c){
-      const nombre=[c.PrimerNombre,c.SegundoNombre].filter(Boolean).join(' ').trim();
-      const apellidos=[c.PrimerApellido,c.SegundoApellido].filter(Boolean).join(' ').trim();
-      document.getElementById('primerNombre').value=nombre||"";
-      document.getElementById('primerApellido').value=apellidos||"";
-      document.getElementById('telefono').value=c.Telefono||"";
-    }
-    function limpiarCliente(clearId){
-      if(clearId) document.getElementById('identificacion').value="";
-      document.getElementById('primerNombre').value="";
-      document.getElementById('primerApellido').value="";
-      document.getElementById('telefono').value="";
-    }
+    document.getElementById('cartFab').onclick=openCart;
+    document.getElementById('cartClose').onclick=closeCart;
+    document.getElementById('cartVaciar').onclick=clearCart;
+    document.getElementById('cartContinuar').onclick=proceedToCheckout;
+    document.getElementById('btnVolver').onclick=()=>show('viewCatalog');
 
-    // --- Envío del pedido ---
-    document.getElementById("pedidoForm").addEventListener("submit", async e=>{
+    document.getElementById('pedidoForm').onsubmit=async e=>{
       e.preventDefault();
       const fd=new FormData(e.target);
-      // Combinar fecha + hora antes de enviar
-        const fecha = document.getElementById("fechaEntrega").value;
-        const hora  = document.getElementById("horaEntrega").value;
-        if (fecha && hora) {
-        fd.set("fechaEntrega", `${fecha} ${hora}`);
-        }
-      const status=document.getElementById("status");
-      const btn=document.getElementById("btnSubmit");
-
-      btn.disabled=true;
-      btn.textContent="Procesando... ⏳";
-      status.textContent="Enviando pedido...";
-      status.className="";
-
+      document.getElementById('status').textContent="Enviando...";
       try{
         const res=await fetch(SCRIPT_URL,{method:"POST",body:fd});
-        const data=await res.json();
-
-        if(data.status==="success"){
-          status.textContent="✅ Pedido registrado correctamente";
-          status.className="good";
-          e.target.reset();
-          state.cart=[]; updateCartBadge();
-          setTimeout(()=>show('viewCatalog'), 1500);
-        } else {
-          status.textContent="❌ Error: "+(data.message||"No se pudo guardar");
-          status.className="err";
-        }
+        const out=await res.json();
+        document.getElementById('status').textContent="✅ Pedido enviado con éxito";
+        clearCart();
       }catch(err){
-        status.textContent="⚠️ Error de red: "+err;
-        status.className="err";
+        console.error(err);
+        document.getElementById('status').textContent="❌ Error al enviar el pedido";
       }
-      finally{
-        btn.disabled=false;
-        btn.textContent="Confirmar pedido";
-      }
-    });
+    };
 
-    // Eventos
-    document.getElementById('cartFab').addEventListener('click',openCart);
-    document.getElementById('cartClose').addEventListener('click',closeCart);
-    document.getElementById('cartVaciar').addEventListener('click',clearCart);
-    document.getElementById('cartContinuar').addEventListener('click',proceedToCheckout);
-    document.getElementById('btnVolver').addEventListener('click',()=>show('viewCatalog'));
     init();
   </script>
 </body>
