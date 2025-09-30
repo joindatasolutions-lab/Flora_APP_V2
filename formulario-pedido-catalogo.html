@@ -16,7 +16,6 @@
     .view.active{ display:block }
     @keyframes fade{ from{ opacity:.35; transform:translateY(4px) } to{ opacity:1; transform:none } }
 
-    /* Catálogo */
     .catalogo{ display:grid; gap:12px; grid-template-columns:repeat(2,1fr); max-width:1100px; margin:0 auto }
     @media(min-width:768px){ .catalogo{ grid-template-columns:repeat(3,1fr); } }
     @media(min-width:1024px){ .catalogo{ grid-template-columns:repeat(4,1fr); } }
@@ -28,11 +27,9 @@
     .price{ color:var(--gris); margin:0; font-size:.9rem }
     .btn-add{ position:absolute; left:0; bottom:0; width:100%; margin:0; padding:12px 0; font-size:.95rem; border:none; border-radius:0 0 18px 18px; background:var(--rosa); color:#fff; font-weight:700; cursor:pointer; }
 
-    /* FAB carrito */
     .cart-fab{ position:fixed; right:16px; bottom:16px; background:var(--rosa); color:#fff; border:none; border-radius:9999px; padding:10px 14px; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:8px; box-shadow:0 10px 24px rgba(0,0,0,.15); z-index:900; }
     .cart-fab #cartCount{ background:#fff; color:var(--rosa); border-radius:999px; padding:2px 8px; font-weight:800; min-width:24px; text-align:center; }
 
-    /* Drawer carrito */
     .drawer{ position:fixed; top:0; right:0; height:100vh; width:380px; max-width:92vw; background:#fff; border-left:2px solid var(--borde); box-shadow:-10px 0 30px rgba(0,0,0,.15); transform:translateX(100%); transition:transform .25s ease; z-index:1000; display:flex; flex-direction:column; }
     .drawer.open{ transform:translateX(0) }
     .drawer-header{ display:flex; justify-content:space-between; align-items:center; padding:14px 16px; border-bottom:1px solid var(--borde); }
@@ -49,7 +46,6 @@
     .btn-outline{ background:#fff; border:1px solid var(--rosa); color:var(--rosa); border-radius:10px; padding:10px 12px; font-weight:700; cursor:pointer; }
     .btn-primary{ background:var(--rosa); color:#fff; border:none; border-radius:10px; padding:10px 12px; font-weight:800; cursor:pointer; }
 
-    /* Formulario */
     form{ background:#fff; border:1px solid var(--borde); border-radius:16px; max-width:780px; margin:0 auto; padding:18px; }
     form h3{ margin:0 0 14px; color:var(--gris) }
     .grid{ display:grid; gap:12px; grid-template-columns:repeat(2,1fr) }
@@ -59,16 +55,11 @@
     textarea{ min-height:80px; resize:vertical }
     .pill{ display:inline-block; padding:8px 12px; border-radius:999px; background:#fff3f6; border:1px solid var(--rosa); margin:0 0 10px; color:#b35a74; font-weight:700 }
     #status{ text-align:center; margin-top:10px; font-weight:700 }
-    .err{ color:#b00020 } .good{ color:green }
-    .badge{ display:inline-block; padding:6px 10px; border-radius:999px; font-size:.85rem; margin-left:8px }
-    .ok{ background:#e7f8ec; color:#1a7f37; border:1px solid #bfe7c8 }
-    .warn{ background:#fff7e6; color:#a15d00; border:1px solid #ffd59e }
-    .hidden{ display:none }
   </style>
 </head>
 <body>
   <header>
-    <img src="img/logo 2024 marca registrada-04.png" alt="FLORA Logo"/>
+    <img src="img/logo.png" alt="FLORA Logo"/>
     <h2>Catálogo de Arreglos Florales</h2>
   </header>
 
@@ -81,7 +72,6 @@
   <section id="viewForm" class="view">
     <form id="pedidoForm">
       <span class="pill" id="resumenProducto">Producto: —</span>
-      <span id="badgeCliente" class="badge warn hidden">Nuevo cliente</span>
       <h3>Datos del Pedido</h3>
       <input type="hidden" id="producto" name="producto">
       <input type="hidden" id="precio" name="precio">
@@ -90,19 +80,26 @@
       <input type="hidden" id="domicilio" name="domicilio">
 
       <div class="grid">
-        <div class="grid">
-        <div><label for="tipoIdent">Tipo de identificación</label><select id="tipoIdent" name="tipoIdent" required>
-        <option value="CEDULA" selected>Cédula</option><option value="NIT">NIT</option></select></div>
-        <div><label>Identificación</label><input id="identificacion" name="identificacion"  placeholder="Cédula / NIT" required></div>
+        <div>
+          <label for="tipoIdent">Tipo de identificación</label>
+          <select id="tipoIdent" name="tipoIdent" required>
+            <option value="CEDULA" selected>Cédula</option>
+            <option value="NIT">NIT</option>
+          </select>
+        </div>
+        <div>
+          <label for="identificacion">Identificación</label>
+          <input id="identificacion" name="identificacion" placeholder="Ej: 123456789 o 900123456-1" required>
+        </div>
+      </div>
+
+      <div class="grid">
         <div><label>Teléfono</label><input id="telefono" name="telefono" placeholder="Ej: 3001234567" required></div>
         <div><label>Nombre</label><input id="primerNombre" name="primerNombre" required></div>
         <div><label>Apellido(s)</label><input id="primerApellido" name="primerApellido" required></div>
-      </div>
-  
-      <div class="grid">
         <div><label>Destinatario</label><input id="destinatario" name="destinatario" required></div>
         <div><label for="telefonoDestino">Teléfono destino</label><input id="telefonoDestino" name="telefonoDestino" placeholder="Ej: 3201234567" required></div>
-        <div><label>Dirección</label><input id="direccion" name="direccion" placeholder="Dirección, Casa, Edificio, Torre, Apto" required></div>
+        <div><label>Dirección</label><input id="direccion" name="direccion" required></div>
         <div><label>Barrio</label><select id="barrio" name="barrio"></select></div>
         <div><label>Fecha de entrega</label><input id="fechaEntrega" name="fechaEntrega" type="date" required></div>
         <div><label>Hora de entrega</label><input id="horaEntrega" name="horaEntrega" type="time" required></div>
@@ -123,7 +120,7 @@
 
       <div>
         <label>Mensaje</label>
-        <textarea id="mensaje" name="mensaje" placeholder="Escribe un mensaje opcional para acompañar el pedido"></textarea>
+        <textarea id="mensaje" name="mensaje" placeholder="Mensaje opcional"></textarea>
       </div>
 
       <div class="actions" style="margin-top:14px">
@@ -134,10 +131,8 @@
     </form>
   </section>
 
-  <!-- Botón flotante Carrito -->
   <button id="cartFab" class="cart-fab">🛒 <span id="cartCount">0</span></button>
 
-  <!-- Drawer Carrito -->
   <div id="cartDrawer" class="drawer">
     <div class="drawer-header">
       <strong>Tu carrito</strong>
@@ -148,15 +143,15 @@
       <div class="drawer-footer">
         <div class="subtotal">Subtotal: $<span id="cartSubtotal">0</span></div>
         <div class="drawer-actions">
-          <button id="cartVaciar" class="btn-outline">Vaciar</button>
-          <button id="cartContinuar" class="btn-primary">Continuar</button>
+          <button type="button" id="cartVaciar" class="btn-outline">Vaciar</button>
+          <button type="button" id="cartContinuar" class="btn-primary">Continuar</button>
         </div>
       </div>
     </div>
   </div>
 
   <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyhzPxOXpOxIInFgHoC1FdYABq2FtHeoPOwX6EP3XxRpG1asuOqb-p3u6uTYDbzKqHy/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycb.../exec"; // tu URL real
     const state = { catalogo: [], cart: [], barrios: {} };
     const fmtCOP = v => Number(v||0).toLocaleString('es-CO');
 
@@ -174,20 +169,16 @@
       const wrap = document.getElementById('catalogo');
       wrap.innerHTML = "";
       items.forEach(prod=>{
-        const imgUrl = prod.img || prod.image || "";
-        const name   = prod.name || prod.producto || "Producto";
-        const price  = Number(prod.price || prod.precio || 0);
         const card=document.createElement('div');
         card.className="card";
         card.innerHTML=`
-          <img src="${imgUrl}" alt="${name}"><div class="body">
-            <div class="name">${name}</div>
-            <p class="price">$${fmtCOP(price)}</p>
+          <img src="${prod.img}" alt="${prod.name}">
+          <div class="body">
+            <div class="name">${prod.name}</div>
+            <p class="price">$${fmtCOP(prod.price)}</p>
             <button class="btn-add">Añadir</button>
           </div>`;
-        card.querySelector('.btn-add').addEventListener('click',e=>{
-          e.stopPropagation(); addToCart({id:prod.id||name, name, price});
-        });
+        card.querySelector('.btn-add').onclick=()=>addToCart(prod);
         wrap.appendChild(card);
       });
     }
@@ -199,8 +190,7 @@
       updateCartBadge(); renderCart(); openCart();
     }
     function updateCartBadge(){
-      const count=state.cart.reduce((a,i)=>a+i.qty,0);
-      document.getElementById('cartCount').textContent=count;
+      document.getElementById('cartCount').textContent=state.cart.reduce((a,i)=>a+i.qty,0);
     }
     function renderCart(){
       const list=document.getElementById('cartList');
@@ -231,45 +221,29 @@
 
     function proceedToCheckout(){
       if(state.cart.length===0){closeCart();return;}
-      
       let subtotal = state.cart.reduce((a,i)=>a+i.qty*i.price,0);
       const resumen = state.cart.map(i=>`${i.qty}× ${i.name}`).join(' | ');
 
-      // Tipo de identificación
-      const tipoIdent = document.querySelector('input[name="tipoIdent"]:checked').value;
+      const tipoIdent = document.getElementById('tipoIdent').value;
+      let iva = (tipoIdent==="NIT") ? subtotal*0.19 : 0;
 
-      // IVA
-      let iva = 0;
-      if (tipoIdent === "NIT") {
-        iva = subtotal * 0.19;
-      }
-
-      // Domicilio
       let domicilio = 0;
-      const barrioSel = document.getElementById('barrio').value;
-      if (state.barrios[barrioSel]) {
-        domicilio = Number(state.barrios[barrioSel]) || 0;
-      }
+      const barrioSel=document.getElementById('barrio').value;
+      if(state.barrios[barrioSel]) domicilio=Number(state.barrios[barrioSel])||0;
 
-      // Total
-      const total = subtotal + iva + domicilio;
+      const total=subtotal+iva+domicilio;
+      let resumenHTML=`Carrito: ${resumen}<br>Subtotal: $${fmtCOP(subtotal)}`;
+      if(tipoIdent==="NIT") resumenHTML+=`<br>IVA (19%): $${fmtCOP(iva)}`;
+      resumenHTML+=`<br>Domicilio: $${fmtCOP(domicilio)}<br><strong>Total: $${fmtCOP(total)}</strong>`;
 
-      // Mostrar resumen en varias líneas
-      let resumenHTML = `Carrito: ${resumen}<br>Subtotal: $${fmtCOP(subtotal)}`;
-      if (tipoIdent === "NIT") resumenHTML += `<br>IVA (19%): $${fmtCOP(iva)}`;
-      resumenHTML += `<br>Domicilio: $${fmtCOP(domicilio)}<br><strong>Total: $${fmtCOP(total)}</strong>`;
+      document.getElementById('resumenProducto').innerHTML=resumenHTML;
+      document.getElementById('producto').value=resumen;
+      document.getElementById('precio').value=total;
+      document.getElementById('cantidad').value=state.cart.reduce((a,i)=>a+i.qty,0);
+      document.getElementById('iva').value=iva;
+      document.getElementById('domicilio').value=domicilio;
 
-      document.getElementById('resumenProducto').innerHTML = resumenHTML;
-
-      // Valores ocultos
-      document.getElementById('producto').value = resumen;
-      document.getElementById('precio').value = total;
-      document.getElementById('cantidad').value = state.cart.reduce((a,i)=>a+i.qty,0);
-      document.getElementById('iva').value = iva;
-      document.getElementById('domicilio').value = domicilio;
-
-      closeCart(); 
-      show('viewForm');
+      closeCart(); show('viewForm');
     }
 
     function fillBarrios(barrios){
