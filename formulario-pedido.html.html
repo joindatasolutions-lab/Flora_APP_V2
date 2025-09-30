@@ -87,6 +87,8 @@
       <input type="hidden" id="precio" name="precio">
       <input type="hidden" id="cantidad" name="cantidad">
       <div class="grid">
+        <div><label for="tipoIdent">Tipo de identificación</label><select id="tipoIdent" name="tipoIdent" required>
+        <option value="CEDULA" selected>Cédula</option><option value="NIT">NIT</option></select></div>
         <div><label>Identificación</label><input id="identificacion" name="identificacion"  placeholder="Cédula / NIT" required></div>
         <div><label>Teléfono</label><input id="telefono" name="telefono" placeholder="Ej: 3001234567" required></div>
         <div><label>Nombre</label><input id="primerNombre" name="primerNombre" required></div>

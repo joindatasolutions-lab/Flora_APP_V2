@@ -91,26 +91,14 @@
 
       <div class="grid">
         <div class="grid">
-        <div>
-            <label for="tipoIdent">Tipo de identificación</label>
-            <div style="display:flex; gap:20px; margin-top:6px;">
-            <label>
-                <input type="radio" name="tipoIdent" id="tipoCedula" value="CEDULA" checked>
-                Cédula
-            </label>
-            <label>
-                <input type="radio" name="tipoIdent" id="tipoNIT" value="NIT">
-                NIT
-            </label>
-            </div>
-        </div>
-  
-        <div><label>Identificación</label><input id="identificacion" name="identificacion" placeholder="Cédula / NIT" required></div>
+        <div><label for="tipoIdent">Tipo de identificación</label><select id="tipoIdent" name="tipoIdent" required>
+        <option value="CEDULA" selected>Cédula</option><option value="NIT">NIT</option></select></div>
+        <div><label>Identificación</label><input id="identificacion" name="identificacion"  placeholder="Cédula / NIT" required></div>
         <div><label>Teléfono</label><input id="telefono" name="telefono" placeholder="Ej: 3001234567" required></div>
         <div><label>Nombre</label><input id="primerNombre" name="primerNombre" required></div>
         <div><label>Apellido(s)</label><input id="primerApellido" name="primerApellido" required></div>
       </div>
-
+  
       <div class="grid">
         <div><label>Destinatario</label><input id="destinatario" name="destinatario" required></div>
         <div><label for="telefonoDestino">Teléfono destino</label><input id="telefonoDestino" name="telefonoDestino" placeholder="Ej: 3201234567" required></div>
