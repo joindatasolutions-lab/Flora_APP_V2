@@ -3,28 +3,30 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Flora - Tienda de Flores</title>
+  <title>Flora - Pedido</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
     :root{ --rosa:#e6a5b6; --rosa-osc:#c97b94; --bg:#fdfaf7; --gris:#5c5c5c; --borde:#ecd6dc; }
     *{ box-sizing:border-box }
-    body{ margin:0; font-family:'Inter', sans-serif; background:var(--bg); color:#333; display:flex; min-height:100vh; flex-direction:column }
+    body{ margin:0; font-family:'Inter', sans-serif; background:var(--bg); color:#333; }
+
     header{ text-align:center; padding:20px 16px }
-    header img{ max-width:220px; height:auto; display:block; margin:0 auto 8px }
+    header img{ max-width:220px; margin:0 auto 8px; display:block }
     header h2{ margin:8px 0 0; color:var(--gris) }
+
     .view{ display:none; padding:16px; }
     .view.active{ display:block }
 
     /* Catálogo */
     .catalogo{ display:grid; gap:12px; grid-template-columns:repeat(2,1fr); max-width:1100px; margin:0 auto }
-    @media(min-width:768px){ .catalogo{ grid-template-columns:repeat(3,1fr); } }
-    @media(min-width:1024px){ .catalogo{ grid-template-columns:repeat(4,1fr); } }
-    .card{ background:#fff; border:1px solid var(--borde); border-radius:18px; box-shadow:0 6px 18px rgba(0,0,0,.06); overflow:hidden; cursor:pointer; display:flex; flex-direction:column; align-items:center; padding:10px; position: relative; }
-    .card img{ width:100%; height:auto; object-fit:contain; border-bottom:1px solid var(--borde); }
+    @media(min-width:768px){ .catalogo{ grid-template-columns:repeat(3,1fr);} }
+    @media(min-width:1024px){ .catalogo{ grid-template-columns:repeat(4,1fr);} }
+    .card{ background:#fff; border:1px solid var(--borde); border-radius:18px; box-shadow:0 6px 18px rgba(0,0,0,.06); overflow:hidden; display:flex; flex-direction:column; align-items:center; padding:10px; position: relative; }
+    .card img{ width:100%; object-fit:contain; border-bottom:1px solid var(--borde); }
     .card .body{ padding:8px; text-align:center; flex-grow:1;padding-bottom: 64px; }
     .name{ font-weight:700; margin:6px 0 2px; font-size:.9rem }
     .price{ color:var(--gris); margin:0; font-size:.9rem }
-    .btn-add{ position:absolute; left:0; bottom:0; width:100%; padding:12px 0; font-size:.95rem; border:none; border-radius:0 0 18px 18px; background:var(--rosa); color:#fff; font-weight:700; cursor:pointer; }
+    .btn-add{ position:absolute; left:0; bottom:0; width:100%; padding:12px 0; border:none; border-radius:0 0 18px 18px; background:var(--rosa); color:#fff; font-weight:700; cursor:pointer; }
 
     /* FAB carrito */
     .cart-fab{ position:fixed; right:16px; bottom:16px; background:var(--rosa); color:#fff; border:none; border-radius:9999px; padding:10px 14px; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:8px; box-shadow:0 10px 24px rgba(0,0,0,.15); z-index:900; }
@@ -51,8 +53,7 @@
     .grid{ display:grid; gap:12px; grid-template-columns:repeat(2,1fr) }
     .grid-1{ grid-template-columns:1fr }
     label{ font-size:.92rem; color:#444 }
-    input, select, textarea{ width:100%; padding:10px 12px; border:1px solid #d9d9d9; border-radius:10px; font-size:14px; background:#fff }
-    textarea{ min-height:80px; resize:vertical }
+    input, select{ width:100%; padding:10px 12px; border:1px solid #d9d9d9; border-radius:10px; font-size:14px; background:#fff }
     .hidden{ display:none }
     .resumen{ background:#fafafa; border:1px solid var(--borde); border-radius:12px; padding:14px; margin:18px 0; }
     .resumen h4{ margin:0 0 10px; }
@@ -60,12 +61,16 @@
     .resumen li{ font-size:.9rem; display:flex; justify-content:space-between; margin-bottom:4px; }
     .resumen .total{ font-weight:700; }
 
-    /* Botones Vaciar y Continuar */
-    .drawer-actions{ display:flex; justify-content:space-between; margin-top:12px; }
-    .drawer-actions .btn-outline{ background:#fff; border:1px solid var(--rosa); color:var(--rosa); border-radius:10px; padding:8px 14px; font-weight:600; cursor:pointer; transition:all 0.2s; }
-    .drawer-actions .btn-outline:hover{ background:var(--rosa); color:#fff; }
-    .drawer-actions .btn-primary{ background:var(--rosa); color:#fff; border:none; border-radius:10px; padding:8px 14px; font-weight:700; cursor:pointer; transition:background 0.2s; }
-    .drawer-actions .btn-primary:hover{ background:var(--rosa-osc); }
+    /* Botones */
+    .drawer-actions, .actions{ display:flex; justify-content:space-between; margin-top:12px; }
+    .btn-outline{ background:#fff; border:1px solid var(--rosa); color:var(--rosa); border-radius:10px; padding:10px 18px; font-weight:600; cursor:pointer; transition:all 0.2s; }
+    .btn-outline:hover{ background:var(--rosa); color:#fff; }
+    .btn-primary{ background:var(--rosa); color:#fff; border:none; border-radius:10px; padding:10px 18px; font-weight:700; cursor:pointer; transition:background 0.2s; }
+    .btn-primary:hover{ background:var(--rosa-osc); }
+
+    .badge{ font-size:.8rem; padding:4px 8px; border-radius:6px; font-weight:600; }
+    .badge-success{ background:#d1f5d3; color:#2d7a2d; }
+    .badge-warning{ background:#fff2cc; color:#946200; }
   </style>
 </head>
 <body>
@@ -87,46 +92,47 @@
       <div class="grid">
         <div>
           <label for="tipoIdent">Tipo de identificación</label>
-          <select id="tipoIdent" name="tipoIdent" required>
+          <select id="tipoIdent" required>
             <option value="">Selecciona…</option>
             <option value="CEDULA">Cédula</option>
             <option value="NIT">NIT</option>
           </select>
         </div>
+        <div><span id="clienteStatus"></span></div>
       </div>
 
       <!-- Campos Cédula -->
       <div id="fieldsCedula" class="hidden">
         <div class="grid">
-          <div><label>Identificación</label><input id="cedulaIdent" name="cedulaIdent" required></div>
-          <div><label>Teléfono</label><input id="cedulaTel" name="cedulaTel" required></div>
-          <div><label>Nombre</label><input id="cedulaNombre" name="cedulaNombre" required></div>
-          <div><label>Apellido(s)</label><input id="cedulaApellido" name="cedulaApellido" required></div>
-          <div class="grid-1"><label>Correo electrónico (opcional)</label><input id="cedulaEmail" name="cedulaEmail" type="email"></div>
+          <div><label>Identificación</label><input id="cedulaIdent" required></div>
+          <div><label>Teléfono</label><input id="cedulaTel" required></div>
+          <div><label>Nombre</label><input id="cedulaNombre" required></div>
+          <div><label>Apellido(s)</label><input id="cedulaApellido" required></div>
+          <div class="grid-1"><label>Correo electrónico (opcional)</label><input id="cedulaEmail" type="email"></div>
         </div>
       </div>
 
       <!-- Campos NIT -->
       <div id="fieldsNit" class="hidden">
         <div class="grid">
-          <div><label>Identificación</label><input id="nitIdent" name="nitIdent" required></div>
-          <div><label>Teléfono</label><input id="nitTel" name="nitTel" required></div>
-          <div><label>Nombre de la empresa</label><input id="nitEmpresa" name="nitEmpresa" required></div>
-          <div class="grid-1"><label>Correo electrónico (opcional)</label><input id="nitEmail" name="nitEmail" type="email"></div>
+          <div><label>Identificación</label><input id="nitIdent" required></div>
+          <div><label>Teléfono</label><input id="nitTel" required></div>
+          <div><label>Nombre de la empresa</label><input id="nitEmpresa" required></div>
+          <div class="grid-1"><label>Correo electrónico (opcional)</label><input id="nitEmail" type="email"></div>
         </div>
       </div>
 
       <!-- Datos entrega -->
       <div class="grid">
-        <div><label>Destinatario</label><input id="destinatario" name="destinatario" required></div>
-        <div><label>Teléfono destino</label><input id="telefonoDestino" name="telefonoDestino" required></div>
-        <div><label>Dirección</label><input id="direccion" name="direccion" required></div>
-        <div><label>Barrio</label><select id="barrio" name="barrio"></select></div>
-        <div><label>Fecha de entrega</label><input id="fechaEntrega" name="fechaEntrega" type="date" required></div>
-        <div><label>Hora de entrega</label><input id="horaEntrega" name="horaEntrega" type="time" required></div>
+        <div><label>Destinatario</label><input id="destinatario" required></div>
+        <div><label>Teléfono destino</label><input id="telefonoDestino" required></div>
+        <div><label>Dirección</label><input id="direccion" required></div>
+        <div><label>Barrio</label><select id="barrio"></select></div>
+        <div><label>Fecha de entrega</label><input id="fechaEntrega" type="date" required></div>
+        <div><label>Hora de entrega</label><input id="horaEntrega" type="time" required></div>
       </div>
 
-      <!-- Resumen del pedido -->
+      <!-- Resumen pedido -->
       <div id="resumenPedido" class="resumen hidden">
         <h4>Resumen del pedido</h4>
         <ul id="resumenLista"></ul>
@@ -143,10 +149,10 @@
     </form>
   </section>
 
-  <!-- Botón flotante Carrito -->
+  <!-- FAB carrito -->
   <button id="cartFab" class="cart-fab">🛒 <span id="cartCount">0</span></button>
 
-  <!-- Drawer Carrito -->
+  <!-- Drawer carrito -->
   <div id="cartDrawer" class="drawer">
     <div class="drawer-header">
       <strong>Tu carrito</strong>
@@ -184,135 +190,93 @@
 
     function renderCatalog(items){
       const wrap = document.getElementById('catalogo');
-      wrap.innerHTML = "";
+      wrap.innerHTML="";
       items.forEach(prod=>{
-        const imgUrl = prod.img || prod.image || "";
-        const name   = prod.name || prod.producto || "Producto";
-        const price  = Number(prod.price || prod.precio || 0);
-        const card=document.createElement('div');
-        card.className="card";
+        const imgUrl=prod.img||""; const name=prod.name||"Producto"; const price=Number(prod.price||0);
+        const card=document.createElement('div'); card.className="card";
         card.innerHTML=`<img src="${imgUrl}" alt="${name}"><div class="body"><div class="name">${name}</div><p class="price">$${fmtCOP(price)}</p><button class="btn-add">Añadir</button></div>`;
-        card.querySelector('.btn-add').addEventListener('click',e=>{
-          e.stopPropagation(); addToCart({id:prod.id||name, name, price});
-        });
+        card.querySelector('.btn-add').addEventListener('click',()=>addToCart({name,price}));
         wrap.appendChild(card);
       });
     }
 
-    function addToCart(prod){
-      const idx=state.cart.findIndex(i=>i.name===prod.name);
-      if(idx>=0) state.cart[idx].qty+=1;
-      else state.cart.push({name:prod.name, price:prod.price, qty:1});
+    function addToCart(prod){ const idx=state.cart.findIndex(i=>i.name===prod.name);
+      if(idx>=0) state.cart[idx].qty++; else state.cart.push({name:prod.name,price:prod.price,qty:1});
       updateCartBadge(); renderCart(); openCart();
     }
-
     function updateCartBadge(){ document.getElementById('cartCount').textContent=state.cart.reduce((a,i)=>a+i.qty,0); }
+    function updateQty(index,change){ state.cart[index].qty+=change; if(state.cart[index].qty<=0) state.cart.splice(index,1); updateCartBadge(); renderCart(); renderResumen(); }
+    function calcularTotales(){ const subtotal=state.cart.reduce((a,i)=>a+i.qty*i.price,0); const barrioSel=document.getElementById("barrio")?.value||""; const domicilio=state.barrios[barrioSel]?Number(state.barrios[barrioSel]):0; const tipo=document.getElementById('tipoIdent')?.value||"CEDULA"; let iva=0,total=subtotal+domicilio; if(tipo==="NIT"){ iva=Math.round(subtotal*0.19); total+=iva; } return {subtotal,domicilio,iva,total}; }
+    function renderCart(){ const list=document.getElementById('cartList'); list.innerHTML=""; if(state.cart.length===0){ list.innerHTML="<li>Carrito vacío</li>"; return; } state.cart.forEach((it,idx)=>{ const li=document.createElement('li'); li.className="cart-item"; li.innerHTML=`<div><div class="name">${it.name}</div><div>$${fmtCOP(it.price)}</div></div><div class="qty-controls"><button class="qty-btn" onclick="updateQty(${idx},-1)">-</button><span class="qty-value">${it.qty}</span><button class="qty-btn" onclick="updateQty(${idx},1)">+</button></div>`; list.appendChild(li); }); const {subtotal,domicilio,iva,total}=calcularTotales(); document.getElementById('cartSubtotal').textContent=fmtCOP(subtotal); document.getElementById('cartDomicilio').textContent=fmtCOP(domicilio); document.getElementById('cartTotal').textContent=fmtCOP(total); if(iva>0){ document.getElementById('ivaRow').classList.remove("hidden"); document.getElementById('cartIVA').textContent=fmtCOP(iva);} else document.getElementById('ivaRow').classList.add("hidden"); }
+    function renderResumen(){ if(state.cart.length===0){ document.getElementById('resumenPedido').classList.add("hidden"); return; } document.getElementById('resumenPedido').classList.remove("hidden"); const lista=document.getElementById('resumenLista'); lista.innerHTML=""; state.cart.forEach(it=>{ const li=document.createElement('li'); li.textContent=`${it.qty}× ${it.name} — $${fmtCOP(it.qty*it.price)}`; lista.appendChild(li); }); const {subtotal,domicilio,iva,total}=calcularTotales(); document.getElementById('resumenSubtotal').textContent=fmtCOP(subtotal); document.getElementById('resumenDomicilio').textContent=fmtCOP(domicilio); document.getElementById('resumenTotal').textContent=fmtCOP(total); if(iva>0){ document.getElementById('resumenIvaRow').classList.remove("hidden"); document.getElementById('resumenIVA').textContent=fmtCOP(iva);} else document.getElementById('resumenIvaRow').classList.add("hidden"); }
 
-    function updateQty(index, change) {
-      state.cart[index].qty += change;
-      if (state.cart[index].qty <= 0) {
-        state.cart.splice(index, 1);
-      }
-      updateCartBadge();
-      renderCart();
-      renderResumen();
-    }
-
-    function calcularTotales(){
-      const subtotal=state.cart.reduce((a,i)=>a+i.qty*i.price,0);
-      const barrioSel=document.getElementById("barrio")?.value || "";
-      const domicilio=state.barrios[barrioSel] ? Number(state.barrios[barrioSel]) : 0;
-      const tipo=document.getElementById('tipoIdent')?.value || "CEDULA";
-      let iva=0, total=subtotal+domicilio;
-      if(tipo==="NIT"){ iva=Math.round(subtotal*0.19); total+=iva; }
-      return {subtotal, domicilio, iva, total};
-    }
-
-    function renderCart(){
-      const list=document.getElementById('cartList');
-      list.innerHTML="";
-      if(state.cart.length===0){ list.innerHTML="<li>Carrito vacío</li>"; return; }
-      state.cart.forEach((it,idx)=>{
-        const li=document.createElement('li'); li.className="cart-item";
-        li.innerHTML=`
-          <div>
-            <div class="name">${it.name}</div>
-            <div>$${fmtCOP(it.price)}</div>
-          </div>
-          <div class="qty-controls">
-            <button class="qty-btn" onclick="updateQty(${idx}, -1)">-</button>
-            <span class="qty-value">${it.qty}</span>
-            <button class="qty-btn" onclick="updateQty(${idx}, 1)">+</button>
-          </div>
-        `;
-        list.appendChild(li);
-      });
-
-      const {subtotal,domicilio,iva,total}=calcularTotales();
-      document.getElementById('cartSubtotal').textContent=fmtCOP(subtotal);
-      document.getElementById('cartDomicilio').textContent=fmtCOP(domicilio);
-      document.getElementById('cartTotal').textContent=fmtCOP(total);
-
-      if(iva>0){ document.getElementById('ivaRow').classList.remove("hidden"); document.getElementById('cartIVA').textContent=fmtCOP(iva);}
-      else document.getElementById('ivaRow').classList.add("hidden");
-    }
-
-    function renderResumen(){
-      if(state.cart.length===0){ document.getElementById('resumenPedido').classList.add("hidden"); return; }
-      document.getElementById('resumenPedido').classList.remove("hidden");
-      const lista=document.getElementById('resumenLista');
-      lista.innerHTML="";
-      state.cart.forEach(it=>{
-        const li=document.createElement('li');
-        li.textContent=`${it.qty}× ${it.name} — $${fmtCOP(it.qty*it.price)}`;
-        lista.appendChild(li);
-      });
-      const {subtotal,domicilio,iva,total}=calcularTotales();
-      document.getElementById('resumenSubtotal').textContent=fmtCOP(subtotal);
-      document.getElementById('resumenDomicilio').textContent=fmtCOP(domicilio);
-      document.getElementById('resumenTotal').textContent=fmtCOP(total);
-      if(iva>0){ document.getElementById('resumenIvaRow').classList.remove("hidden"); document.getElementById('resumenIVA').textContent=fmtCOP(iva); }
-      else document.getElementById('resumenIvaRow').classList.add("hidden");
-    }
-
-    function fillBarrios(obj){
-      const sel=document.getElementById("barrio");
-      sel.innerHTML="";
-      Object.keys(obj).forEach(b=>{
-        const op=document.createElement("option");
-        op.value=b; op.textContent=b; sel.appendChild(op);
-      });
-      sel.addEventListener("change",()=>{ renderCart(); renderResumen(); });
-    }
-
+    function fillBarrios(obj){ const sel=document.getElementById("barrio"); sel.innerHTML=""; Object.keys(obj).forEach(b=>{ const op=document.createElement("option"); op.value=b; op.textContent=b; sel.appendChild(op); }); sel.addEventListener("change",()=>{ renderCart(); renderResumen(); }); }
     function openCart(){ document.getElementById('cartDrawer').classList.add("open"); }
     function closeCart(){ document.getElementById('cartDrawer').classList.remove("open"); }
 
     document.getElementById('cartFab').addEventListener('click',openCart);
     document.getElementById('cartClose').addEventListener('click',closeCart);
     document.getElementById('cartVaciar').addEventListener('click',()=>{ state.cart=[]; updateCartBadge(); renderCart(); renderResumen(); });
+    document.getElementById('cartContinuar').addEventListener('click',()=>{ closeCart(); document.getElementById('viewCatalog').classList.remove("active"); document.getElementById('viewForm').classList.add("active"); renderResumen(); });
+    document.getElementById('btnVolver').addEventListener('click',()=>{ document.getElementById('viewForm').classList.remove("active"); document.getElementById('viewCatalog').classList.add("active"); });
 
-    document.getElementById('cartContinuar').addEventListener('click',()=>{
-      closeCart();
-      document.getElementById('viewCatalog').classList.remove("active");
-      document.getElementById('viewForm').classList.add("active");
-      renderResumen();
-    });
+    document.getElementById("tipoIdent").addEventListener("change",e=>{ const tipo=e.target.value; document.getElementById("fieldsCedula").classList.toggle("hidden",tipo!=="CEDULA"); document.getElementById("fieldsNit").classList.toggle("hidden",tipo!=="NIT"); renderCart(); renderResumen(); });
 
-    document.getElementById('btnVolver').addEventListener('click',()=>{
+    // Validación cliente existente/nuevo
+    async function checkCliente(ident,tipo){
+      if(!ident) return;
+      const res=await fetch(`${SCRIPT_URL}?modulo=clientes&tipo=${tipo}&id=${ident}`);
+      const data=await res.json();
+      const status=document.getElementById("clienteStatus");
+      if(data.existe){
+        status.innerHTML=`<span class="badge badge-success">Cliente existente</span>`;
+        if(tipo==="CEDULA"){ document.getElementById("cedulaTel").value=data.telefono||""; document.getElementById("cedulaNombre").value=data.nombre||""; document.getElementById("cedulaApellido").value=data.apellido||""; document.getElementById("cedulaEmail").value=data.email||""; }
+        if(tipo==="NIT"){ document.getElementById("nitTel").value=data.telefono||""; document.getElementById("nitEmpresa").value=data.empresa||""; document.getElementById("nitEmail").value=data.email||""; }
+      }else{
+        status.innerHTML=`<span class="badge badge-warning">Nuevo cliente</span>`;
+      }
+    }
+
+    document.getElementById("cedulaIdent").addEventListener("blur",()=>checkCliente(document.getElementById("cedulaIdent").value,"CEDULA"));
+    document.getElementById("nitIdent").addEventListener("blur",()=>checkCliente(document.getElementById("nitIdent").value,"NIT"));
+
+    // Enviar pedido
+    document.getElementById("pedidoForm").addEventListener("submit",async e=>{
+      e.preventDefault();
+      const tipo=document.getElementById("tipoIdent").value;
+      let cliente={tipo};
+      if(tipo==="CEDULA"){
+        cliente.ident=document.getElementById("cedulaIdent").value;
+        cliente.tel=document.getElementById("cedulaTel").value;
+        cliente.nombre=document.getElementById("cedulaNombre").value;
+        cliente.apellido=document.getElementById("cedulaApellido").value;
+        cliente.email=document.getElementById("cedulaEmail").value;
+      } else {
+        cliente.ident=document.getElementById("nitIdent").value;
+        cliente.tel=document.getElementById("nitTel").value;
+        cliente.empresa=document.getElementById("nitEmpresa").value;
+        cliente.email=document.getElementById("nitEmail").value;
+      }
+      const entrega={
+        destinatario:document.getElementById("destinatario").value,
+        telefono:document.getElementById("telefonoDestino").value,
+        direccion:document.getElementById("direccion").value,
+        barrio:document.getElementById("barrio").value,
+        fecha:document.getElementById("fechaEntrega").value,
+        hora:document.getElementById("horaEntrega").value
+      };
+      const {subtotal,domicilio,iva,total}=calcularTotales();
+      const pedido={cliente,entrega,items:state.cart,subtotal,domicilio,iva,total};
+      const res=await fetch(SCRIPT_URL,{method:"POST",body:JSON.stringify(pedido)});
+      const r=await res.json();
+      alert("✅ Pedido registrado: "+r.status);
+      state.cart=[]; updateCartBadge(); renderCart(); renderResumen();
       document.getElementById('viewForm').classList.remove("active");
       document.getElementById('viewCatalog').classList.add("active");
-    });
-
-    // Mostrar/ocultar campos según identificación
-    document.getElementById("tipoIdent").addEventListener("change",e=>{
-      const tipo=e.target.value;
-      document.getElementById("fieldsCedula").classList.toggle("hidden", tipo!=="CEDULA");
-      document.getElementById("fieldsNit").classList.toggle("hidden", tipo!=="NIT");
-      renderCart(); renderResumen();
     });
 
     init();
   </script>
 </body>
 </html>
+
