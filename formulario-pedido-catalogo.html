@@ -39,6 +39,12 @@
     .cart-item{ display:grid; grid-template-columns:1fr auto; gap:8px; align-items:center; border:1px solid var(--borde); border-radius:12px; padding:10px; }
     .drawer-footer{ margin-top:auto; border-top:1px solid var(--borde); padding-top:10px; }
 
+    /* Controles cantidad */
+    .qty-controls{ display:flex; align-items:center; gap:6px; }
+    .qty-btn{ background:var(--rosa); border:none; color:#fff; font-weight:bold; font-size:14px; border-radius:6px; width:28px; height:28px; cursor:pointer; transition:background 0.2s; }
+    .qty-btn:hover{ background:var(--rosa-osc); }
+    .qty-value{ min-width:20px; text-align:center; font-weight:600; }
+
     /* Formulario */
     form{ background:#fff; border:1px solid var(--borde); border-radius:16px; max-width:780px; margin:0 auto; padding:18px; }
     form h3{ margin:0 0 14px; color:var(--gris) }
@@ -53,6 +59,13 @@
     .resumen ul{ list-style:none; padding:0; margin:0 0 10px; }
     .resumen li{ font-size:.9rem; display:flex; justify-content:space-between; margin-bottom:4px; }
     .resumen .total{ font-weight:700; }
+
+    /* Botones Vaciar y Continuar */
+    .drawer-actions{ display:flex; justify-content:space-between; margin-top:12px; }
+    .drawer-actions .btn-outline{ background:#fff; border:1px solid var(--rosa); color:var(--rosa); border-radius:10px; padding:8px 14px; font-weight:600; cursor:pointer; transition:all 0.2s; }
+    .drawer-actions .btn-outline:hover{ background:var(--rosa); color:#fff; }
+    .drawer-actions .btn-primary{ background:var(--rosa); color:#fff; border:none; border-radius:10px; padding:8px 14px; font-weight:700; cursor:pointer; transition:background 0.2s; }
+    .drawer-actions .btn-primary:hover{ background:var(--rosa-osc); }
   </style>
 </head>
 <body>
@@ -192,7 +205,18 @@
       else state.cart.push({name:prod.name, price:prod.price, qty:1});
       updateCartBadge(); renderCart(); openCart();
     }
+
     function updateCartBadge(){ document.getElementById('cartCount').textContent=state.cart.reduce((a,i)=>a+i.qty,0); }
+
+    function updateQty(index, change) {
+      state.cart[index].qty += change;
+      if (state.cart[index].qty <= 0) {
+        state.cart.splice(index, 1);
+      }
+      updateCartBadge();
+      renderCart();
+      renderResumen();
+    }
 
     function calcularTotales(){
       const subtotal=state.cart.reduce((a,i)=>a+i.qty*i.price,0);
@@ -208,9 +232,19 @@
       const list=document.getElementById('cartList');
       list.innerHTML="";
       if(state.cart.length===0){ list.innerHTML="<li>Carrito vacío</li>"; return; }
-      state.cart.forEach(it=>{
+      state.cart.forEach((it,idx)=>{
         const li=document.createElement('li'); li.className="cart-item";
-        li.innerHTML=`<div><div class="name">${it.name}</div><div>$${fmtCOP(it.price)}</div></div><div>${it.qty}</div>`;
+        li.innerHTML=`
+          <div>
+            <div class="name">${it.name}</div>
+            <div>$${fmtCOP(it.price)}</div>
+          </div>
+          <div class="qty-controls">
+            <button class="qty-btn" onclick="updateQty(${idx}, -1)">-</button>
+            <span class="qty-value">${it.qty}</span>
+            <button class="qty-btn" onclick="updateQty(${idx}, 1)">+</button>
+          </div>
+        `;
         list.appendChild(li);
       });
 
@@ -224,53 +258,61 @@
     }
 
     function renderResumen(){
-      if(state.cart.length===0) return;
+      if(state.cart.length===0){ document.getElementById('resumenPedido').classList.add("hidden"); return; }
+      document.getElementById('resumenPedido').classList.remove("hidden");
       const lista=document.getElementById('resumenLista');
       lista.innerHTML="";
       state.cart.forEach(it=>{
         const li=document.createElement('li');
-        li.textContent=`${it.qty}× ${it.name}`;
-        const span=document.createElement('span'); span.textContent=`$${fmtCOP(it.qty*it.price)}`;
-        li.appendChild(span);
+        li.textContent=`${it.qty}× ${it.name} — $${fmtCOP(it.qty*it.price)}`;
         lista.appendChild(li);
       });
       const {subtotal,domicilio,iva,total}=calcularTotales();
       document.getElementById('resumenSubtotal').textContent=fmtCOP(subtotal);
       document.getElementById('resumenDomicilio').textContent=fmtCOP(domicilio);
       document.getElementById('resumenTotal').textContent=fmtCOP(total);
-
-      if(iva>0){ document.getElementById('resumenIvaRow').classList.remove("hidden"); document.getElementById('resumenIVA').textContent=fmtCOP(iva);}
+      if(iva>0){ document.getElementById('resumenIvaRow').classList.remove("hidden"); document.getElementById('resumenIVA').textContent=fmtCOP(iva); }
       else document.getElementById('resumenIvaRow').classList.add("hidden");
-
-      document.getElementById('resumenPedido').classList.remove("hidden");
     }
 
-    function clearCart(){state.cart=[];renderCart();updateCartBadge();}
-    function openCart(){document.getElementById('cartDrawer').classList.add('open');}
-    function closeCart(){document.getElementById('cartDrawer').classList.remove('open');}
-    function proceedToCheckout(){ if(state.cart.length>0){ closeCart(); show('viewForm'); renderResumen(); } }
+    function fillBarrios(obj){
+      const sel=document.getElementById("barrio");
+      sel.innerHTML="";
+      Object.keys(obj).forEach(b=>{
+        const op=document.createElement("option");
+        op.value=b; op.textContent=b; sel.appendChild(op);
+      });
+      sel.addEventListener("change",()=>{ renderCart(); renderResumen(); });
+    }
 
-    function show(id){ document.querySelectorAll('.view').forEach(v=>v.classList.remove('active')); document.getElementById(id).classList.add('active'); window.scrollTo({top:0,behavior:'smooth'}); }
-    function fillBarrios(map){ const sel=document.getElementById('barrio'); sel.innerHTML='<option value="">Selecciona…</option>'; Object.keys(map).forEach(n=>{ const opt=document.createElement('option'); opt.value=n; opt.textContent=n; sel.appendChild(opt); }); }
+    function openCart(){ document.getElementById('cartDrawer').classList.add("open"); }
+    function closeCart(){ document.getElementById('cartDrawer').classList.remove("open"); }
 
-    // Eventos
     document.getElementById('cartFab').addEventListener('click',openCart);
     document.getElementById('cartClose').addEventListener('click',closeCart);
-    document.getElementById('cartVaciar').addEventListener('click',clearCart);
-    document.getElementById('cartContinuar').addEventListener('click',proceedToCheckout);
-    document.getElementById('btnVolver').addEventListener('click',()=>show('viewCatalog'));
+    document.getElementById('cartVaciar').addEventListener('click',()=>{ state.cart=[]; updateCartBadge(); renderCart(); renderResumen(); });
 
-    document.getElementById('tipoIdent').addEventListener('change', e=>{
-      if(e.target.value==="CEDULA"){ document.getElementById('fieldsCedula').classList.remove("hidden"); document.getElementById('fieldsNit').classList.add("hidden"); }
-      else if(e.target.value==="NIT"){ document.getElementById('fieldsNit').classList.remove("hidden"); document.getElementById('fieldsCedula').classList.add("hidden"); }
-      else{ document.getElementById('fieldsCedula').classList.add("hidden"); document.getElementById('fieldsNit').classList.add("hidden"); }
-      renderCart(); renderResumen();
+    document.getElementById('cartContinuar').addEventListener('click',()=>{
+      closeCart();
+      document.getElementById('viewCatalog').classList.remove("active");
+      document.getElementById('viewForm').classList.add("active");
+      renderResumen();
     });
 
-    document.getElementById('barrio').addEventListener('change',()=>{renderCart();renderResumen();});
+    document.getElementById('btnVolver').addEventListener('click',()=>{
+      document.getElementById('viewForm').classList.remove("active");
+      document.getElementById('viewCatalog').classList.add("active");
+    });
+
+    // Mostrar/ocultar campos según identificación
+    document.getElementById("tipoIdent").addEventListener("change",e=>{
+      const tipo=e.target.value;
+      document.getElementById("fieldsCedula").classList.toggle("hidden", tipo!=="CEDULA");
+      document.getElementById("fieldsNit").classList.toggle("hidden", tipo!=="NIT");
+      renderCart(); renderResumen();
+    });
 
     init();
   </script>
 </body>
 </html>
-
