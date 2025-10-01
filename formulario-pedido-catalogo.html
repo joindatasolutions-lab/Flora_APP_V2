@@ -12,21 +12,19 @@
     header{ text-align:center; padding:20px 16px }
     header img{ max-width:220px; height:auto; display:block; margin:0 auto 8px }
     header h2{ margin:8px 0 0; color:var(--gris) }
-    .view{ display:none; padding:16px; animation:fade .25s ease }
+    .view{ display:none; padding:16px; }
     .view.active{ display:block }
-    @keyframes fade{ from{ opacity:.35; transform:translateY(4px) } to{ opacity:1; transform:none } }
 
     /* Catálogo */
     .catalogo{ display:grid; gap:12px; grid-template-columns:repeat(2,1fr); max-width:1100px; margin:0 auto }
     @media(min-width:768px){ .catalogo{ grid-template-columns:repeat(3,1fr); } }
     @media(min-width:1024px){ .catalogo{ grid-template-columns:repeat(4,1fr); } }
-    .card{ background:#fff; border:1px solid var(--borde); border-radius:18px; box-shadow:0 6px 18px rgba(0,0,0,.06); overflow:hidden; transition:transform .15s ease, box-shadow .15s ease, border-color .2s; cursor:pointer; display:flex; flex-direction:column; align-items:center; padding:10px; position: relative; }
-    .card:hover{ transform:translateY(-2px); box-shadow:0 10px 24px rgba(0,0,0,.09); border-color:var(--rosa) }
-    .card img{ width:100%; height:auto; object-fit:contain; border-bottom:1px solid var(--borde); filter:saturate(1.02) }
+    .card{ background:#fff; border:1px solid var(--borde); border-radius:18px; box-shadow:0 6px 18px rgba(0,0,0,.06); overflow:hidden; cursor:pointer; display:flex; flex-direction:column; align-items:center; padding:10px; position: relative; }
+    .card img{ width:100%; height:auto; object-fit:contain; border-bottom:1px solid var(--borde); }
     .card .body{ padding:8px; text-align:center; flex-grow:1;padding-bottom: 64px; }
     .name{ font-weight:700; margin:6px 0 2px; font-size:.9rem }
     .price{ color:var(--gris); margin:0; font-size:.9rem }
-    .btn-add{ position:absolute; left:0; bottom:0; width:100%; margin:0; padding:12px 0; font-size:.95rem; border:none; border-radius:0 0 18px 18px; background:var(--rosa); color:#fff; font-weight:700; cursor:pointer; }
+    .btn-add{ position:absolute; left:0; bottom:0; width:100%; padding:12px 0; font-size:.95rem; border:none; border-radius:0 0 18px 18px; background:var(--rosa); color:#fff; font-weight:700; cursor:pointer; }
 
     /* FAB carrito */
     .cart-fab{ position:fixed; right:16px; bottom:16px; background:var(--rosa); color:#fff; border:none; border-radius:9999px; padding:10px 14px; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:8px; box-shadow:0 10px 24px rgba(0,0,0,.15); z-index:900; }
@@ -36,18 +34,10 @@
     .drawer{ position:fixed; top:0; right:0; height:100vh; width:380px; max-width:92vw; background:#fff; border-left:2px solid var(--borde); box-shadow:-10px 0 30px rgba(0,0,0,.15); transform:translateX(100%); transition:transform .25s ease; z-index:1000; display:flex; flex-direction:column; }
     .drawer.open{ transform:translateX(0) }
     .drawer-header{ display:flex; justify-content:space-between; align-items:center; padding:14px 16px; border-bottom:1px solid var(--borde); }
-    .icon-btn{ background:#f3f3f3; border:1px solid #ddd; border-radius:10px; padding:6px 10px; cursor:pointer; }
     .drawer-body{ padding:10px 12px; display:flex; flex-direction:column; height:100%; }
     .cart-list{ list-style:none; margin:0; padding:0; gap:8px; display:flex; flex-direction:column; overflow:auto; }
     .cart-item{ display:grid; grid-template-columns:1fr auto; gap:8px; align-items:center; border:1px solid var(--borde); border-radius:12px; padding:10px; }
-    .cart-item .name{ font-weight:700; }
-    .qty{ display:flex; align-items:center; gap:6px; border:1px solid #ddd; border-radius:10px; padding:4px 6px; }
-    .qty button{ border:none; background:#f3f3f3; padding:4px 8px; border-radius:8px; cursor:pointer; font-weight:800; }
     .drawer-footer{ margin-top:auto; border-top:1px solid var(--borde); padding-top:10px; }
-    .subtotal{ font-weight:800; margin-bottom:6px }
-    .drawer-actions{ display:flex; gap:8px; margin-top:10px; }
-    .btn-outline{ background:#fff; border:1px solid var(--rosa); color:var(--rosa); border-radius:10px; padding:10px 12px; font-weight:700; cursor:pointer; }
-    .btn-primary{ background:var(--rosa); color:#fff; border:none; border-radius:10px; padding:10px 12px; font-weight:800; cursor:pointer; }
 
     /* Formulario */
     form{ background:#fff; border:1px solid var(--borde); border-radius:16px; max-width:780px; margin:0 auto; padding:18px; }
@@ -57,13 +47,12 @@
     label{ font-size:.92rem; color:#444 }
     input, select, textarea{ width:100%; padding:10px 12px; border:1px solid #d9d9d9; border-radius:10px; font-size:14px; background:#fff }
     textarea{ min-height:80px; resize:vertical }
-    .pill{ display:inline-block; padding:8px 12px; border-radius:999px; background:#fff3f6; border:1px solid var(--rosa); margin:0 0 10px; color:#b35a74; font-weight:700 }
-    #status{ text-align:center; margin-top:10px; font-weight:700 }
-    .err{ color:#b00020 } .good{ color:green }
-    .badge{ display:inline-block; padding:6px 10px; border-radius:999px; font-size:.85rem; margin-left:8px }
-    .ok{ background:#e7f8ec; color:#1a7f37; border:1px solid #bfe7c8 }
-    .warn{ background:#fff7e6; color:#a15d00; border:1px solid #ffd59e }
     .hidden{ display:none }
+    .resumen{ background:#fafafa; border:1px solid var(--borde); border-radius:12px; padding:14px; margin:18px 0; }
+    .resumen h4{ margin:0 0 10px; }
+    .resumen ul{ list-style:none; padding:0; margin:0 0 10px; }
+    .resumen li{ font-size:.9rem; display:flex; justify-content:space-between; margin-bottom:4px; }
+    .resumen .total{ font-weight:700; }
   </style>
 </head>
 <body>
@@ -80,68 +69,64 @@
   <!-- Vista formulario -->
   <section id="viewForm" class="view">
     <form id="pedidoForm">
-      <span class="pill" id="resumenProducto">Producto: —</span>
-      <span id="badgeCliente" class="badge warn hidden">Nuevo cliente</span>
       <h3>Datos del Pedido</h3>
-      <input type="hidden" id="producto" name="producto">
-      <input type="hidden" id="precio" name="precio">
-      <input type="hidden" id="cantidad" name="cantidad">
+
       <div class="grid">
         <div>
           <label for="tipoIdent">Tipo de identificación</label>
           <select id="tipoIdent" name="tipoIdent" required>
-            <option value="CEDULA" selected>Cédula</option>
+            <option value="">Selecciona…</option>
+            <option value="CEDULA">Cédula</option>
             <option value="NIT">NIT</option>
           </select>
         </div>
-        <div>
-          <label>Identificación</label>
-          <input id="identificacion" name="identificacion"  placeholder="Cédula / NIT" required>
-        </div>
-        <div>
-          <label>Teléfono</label>
-          <input id="telefono" name="telefono" placeholder="Ej: 3001234567" required>
-        </div>
-        <div>
-          <label>Nombre</label>
-          <input id="primerNombre" name="primerNombre" required>
-        </div>
-        <div>
-          <label>Apellido(s)</label>
-          <input id="primerApellido" name="primerApellido" required>
-        </div>
-        <!-- Razón social opcional -->
-        <div id="razonSocialWrap" style="display:none;">
-          <label>Razón social (opcional)</label>
-          <input id="razonSocial" name="razonSocial" placeholder="Nombre de la empresa">
+      </div>
+
+      <!-- Campos Cédula -->
+      <div id="fieldsCedula" class="hidden">
+        <div class="grid">
+          <div><label>Identificación</label><input id="cedulaIdent" name="cedulaIdent" required></div>
+          <div><label>Teléfono</label><input id="cedulaTel" name="cedulaTel" required></div>
+          <div><label>Nombre</label><input id="cedulaNombre" name="cedulaNombre" required></div>
+          <div><label>Apellido(s)</label><input id="cedulaApellido" name="cedulaApellido" required></div>
+          <div class="grid-1"><label>Correo electrónico (opcional)</label><input id="cedulaEmail" name="cedulaEmail" type="email"></div>
         </div>
       </div>
+
+      <!-- Campos NIT -->
+      <div id="fieldsNit" class="hidden">
+        <div class="grid">
+          <div><label>Identificación</label><input id="nitIdent" name="nitIdent" required></div>
+          <div><label>Teléfono</label><input id="nitTel" name="nitTel" required></div>
+          <div><label>Nombre de la empresa</label><input id="nitEmpresa" name="nitEmpresa" required></div>
+          <div class="grid-1"><label>Correo electrónico (opcional)</label><input id="nitEmail" name="nitEmail" type="email"></div>
+        </div>
+      </div>
+
+      <!-- Datos entrega -->
       <div class="grid">
         <div><label>Destinatario</label><input id="destinatario" name="destinatario" required></div>
-        <div><label for="telefonoDestino">Teléfono destino</label><input id="telefonoDestino" name="telefonoDestino" placeholder="Ej: 3201234567" required></div>
-        <div><label>Dirección</label><input id="direccion" name="direccion"  placeholder="Dirección, Casa, Edificio, Torre, Apto" required></div>
+        <div><label>Teléfono destino</label><input id="telefonoDestino" name="telefonoDestino" required></div>
+        <div><label>Dirección</label><input id="direccion" name="direccion" required></div>
         <div><label>Barrio</label><select id="barrio" name="barrio"></select></div>
         <div><label>Fecha de entrega</label><input id="fechaEntrega" name="fechaEntrega" type="date" required></div>
         <div><label>Hora de entrega</label><input id="horaEntrega" name="horaEntrega" type="time" required></div>
       </div>
-      <div class="grid-1">
-        <label for="formaPago">Medio de pago</label>
-        <select id="formaPago" name="formaPago" required>
-          <option value="">Selecciona…</option>
-          <option value="TRANSFERENCIA">Transferencia</option>
-          <option value="TARJETA">Tarjeta</option>
-          <option value="LINK">Link</option>
-          <option value="EFECTIVO">Efectivo</option>
-          <option value="CUENTAS POR COBRAR">Cuentas Por Cobrar</option>
-          <option value="CONTRAENTREGA">Contraentrega</option>
-        </select>
+
+      <!-- Resumen del pedido -->
+      <div id="resumenPedido" class="resumen hidden">
+        <h4>Resumen del pedido</h4>
+        <ul id="resumenLista"></ul>
+        <div>Subtotal: $<span id="resumenSubtotal">0</span></div>
+        <div>Domicilio: $<span id="resumenDomicilio">0</span></div>
+        <div id="resumenIvaRow" class="hidden">IVA (19%): $<span id="resumenIVA">0</span></div>
+        <div class="total">Total: $<span id="resumenTotal">0</span></div>
       </div>
-      <div><label>Mensaje</label><textarea id="mensaje" name="mensaje" placeholder="Escribe un mensaje opcional para acompañar el pedido"></textarea></div>
-      <div class="actions" style="margin-top:14px">
-        <button type="button" class="btn-outline" id="btnVolver">Regresar al catálogo</button>
-        <button type="submit" class="btn-primary" id="btnSubmit">Confirmar pedido</button>
+
+      <div class="actions">
+        <button type="button" class="btn-outline" id="btnVolver">Regresar</button>
+        <button type="submit" class="btn-primary">Confirmar pedido</button>
       </div>
-      <div id="status"></div>
     </form>
   </section>
 
@@ -152,15 +137,15 @@
   <div id="cartDrawer" class="drawer">
     <div class="drawer-header">
       <strong>Tu carrito</strong>
-      <button id="cartClose" class="icon-btn">✕</button>
+      <button id="cartClose">✕</button>
     </div>
     <div class="drawer-body">
       <ul id="cartList" class="cart-list"></ul>
       <div class="drawer-footer">
-        <div class="subtotal">Subtotal: $<span id="cartSubtotal">0</span></div>
-        <div class="subtotal">Domicilio: $<span id="cartDomicilio">0</span></div>
-        <div class="subtotal hidden" id="ivaRow">IVA (19%): $<span id="cartIVA">0</span></div>
-        <div class="subtotal">Total: $<span id="cartTotal">0</span></div>
+        <div>Subtotal: $<span id="cartSubtotal">0</span></div>
+        <div>Domicilio: $<span id="cartDomicilio">0</span></div>
+        <div id="ivaRow" class="hidden">IVA (19%): $<span id="cartIVA">0</span></div>
+        <div><strong>Total: $<span id="cartTotal">0</span></strong></div>
         <div class="drawer-actions">
           <button id="cartVaciar" class="btn-outline">Vaciar</button>
           <button id="cartContinuar" class="btn-primary">Continuar</button>
@@ -193,12 +178,7 @@
         const price  = Number(prod.price || prod.precio || 0);
         const card=document.createElement('div');
         card.className="card";
-        card.innerHTML=`
-          <img src="${imgUrl}" alt="${name}"><div class="body">
-            <div class="name">${name}</div>
-            <p class="price">$${fmtCOP(price)}</p>
-            <button class="btn-add">Añadir</button>
-          </div>`;
+        card.innerHTML=`<img src="${imgUrl}" alt="${name}"><div class="body"><div class="name">${name}</div><p class="price">$${fmtCOP(price)}</p><button class="btn-add">Añadir</button></div>`;
         card.querySelector('.btn-add').addEventListener('click',e=>{
           e.stopPropagation(); addToCart({id:prod.id||name, name, price});
         });
@@ -212,98 +192,66 @@
       else state.cart.push({name:prod.name, price:prod.price, qty:1});
       updateCartBadge(); renderCart(); openCart();
     }
-    function updateCartBadge(){
-      const count=state.cart.reduce((a,i)=>a+i.qty,0);
-      document.getElementById('cartCount').textContent=count;
-    }
-    function renderCart(){
-      const list=document.getElementById('cartList');
-      const sub=document.getElementById('cartSubtotal');
-      const domSpan=document.getElementById('cartDomicilio');
-      const ivaRow=document.getElementById('ivaRow');
-      const ivaSpan=document.getElementById('cartIVA');
-      const totalSpan=document.getElementById('cartTotal');
-      
-      if(state.cart.length===0){
-        list.innerHTML=`<li class="cart-item"><span class="name">Tu carrito está vacío.</span></li>`;
-        sub.textContent="0"; domSpan.textContent="0"; ivaRow.classList.add("hidden"); totalSpan.textContent="0";
-        return;
-      }
+    function updateCartBadge(){ document.getElementById('cartCount').textContent=state.cart.reduce((a,i)=>a+i.qty,0); }
 
-      list.innerHTML=state.cart.map((it,idx)=>`
-        <li class="cart-item">
-          <div><div class="name">${it.name}</div><div class="price">$${fmtCOP(it.price)}</div></div>
-          <div class="qty">
-            <button onclick="changeQty(${idx},-1)">−</button>
-            <span>${it.qty}</span>
-            <button onclick="changeQty(${idx},1)">+</button>
-          </div>
-        </li>`).join('');
-
+    function calcularTotales(){
       const subtotal=state.cart.reduce((a,i)=>a+i.qty*i.price,0);
-      sub.textContent=fmtCOP(subtotal);
-
       const barrioSel=document.getElementById("barrio")?.value || "";
       const domicilio=state.barrios[barrioSel] ? Number(state.barrios[barrioSel]) : 0;
-      domSpan.textContent=fmtCOP(domicilio);
-
       const tipo=document.getElementById('tipoIdent')?.value || "CEDULA";
       let iva=0, total=subtotal+domicilio;
-      if(tipo==="NIT"){
-        iva=Math.round(subtotal*0.19);
-        ivaSpan.textContent=fmtCOP(iva);
-        ivaRow.classList.remove("hidden");
-        total+=iva;
-      } else {
-        ivaRow.classList.add("hidden");
-      }
-      totalSpan.textContent=fmtCOP(total);
+      if(tipo==="NIT"){ iva=Math.round(subtotal*0.19); total+=iva; }
+      return {subtotal, domicilio, iva, total};
     }
-    function changeQty(idx,delta){
-      state.cart[idx].qty+=delta;
-      if(state.cart[idx].qty<=0) state.cart.splice(idx,1);
-      renderCart(); updateCartBadge();
+
+    function renderCart(){
+      const list=document.getElementById('cartList');
+      list.innerHTML="";
+      if(state.cart.length===0){ list.innerHTML="<li>Carrito vacío</li>"; return; }
+      state.cart.forEach(it=>{
+        const li=document.createElement('li'); li.className="cart-item";
+        li.innerHTML=`<div><div class="name">${it.name}</div><div>$${fmtCOP(it.price)}</div></div><div>${it.qty}</div>`;
+        list.appendChild(li);
+      });
+
+      const {subtotal,domicilio,iva,total}=calcularTotales();
+      document.getElementById('cartSubtotal').textContent=fmtCOP(subtotal);
+      document.getElementById('cartDomicilio').textContent=fmtCOP(domicilio);
+      document.getElementById('cartTotal').textContent=fmtCOP(total);
+
+      if(iva>0){ document.getElementById('ivaRow').classList.remove("hidden"); document.getElementById('cartIVA').textContent=fmtCOP(iva);}
+      else document.getElementById('ivaRow').classList.add("hidden");
     }
+
+    function renderResumen(){
+      if(state.cart.length===0) return;
+      const lista=document.getElementById('resumenLista');
+      lista.innerHTML="";
+      state.cart.forEach(it=>{
+        const li=document.createElement('li');
+        li.textContent=`${it.qty}× ${it.name}`;
+        const span=document.createElement('span'); span.textContent=`$${fmtCOP(it.qty*it.price)}`;
+        li.appendChild(span);
+        lista.appendChild(li);
+      });
+      const {subtotal,domicilio,iva,total}=calcularTotales();
+      document.getElementById('resumenSubtotal').textContent=fmtCOP(subtotal);
+      document.getElementById('resumenDomicilio').textContent=fmtCOP(domicilio);
+      document.getElementById('resumenTotal').textContent=fmtCOP(total);
+
+      if(iva>0){ document.getElementById('resumenIvaRow').classList.remove("hidden"); document.getElementById('resumenIVA').textContent=fmtCOP(iva);}
+      else document.getElementById('resumenIvaRow').classList.add("hidden");
+
+      document.getElementById('resumenPedido').classList.remove("hidden");
+    }
+
     function clearCart(){state.cart=[];renderCart();updateCartBadge();}
     function openCart(){document.getElementById('cartDrawer').classList.add('open');}
     function closeCart(){document.getElementById('cartDrawer').classList.remove('open');}
+    function proceedToCheckout(){ if(state.cart.length>0){ closeCart(); show('viewForm'); renderResumen(); } }
 
-    function proceedToCheckout(){
-      if(state.cart.length===0){closeCart();return;}
-      const subtotal=state.cart.reduce((a,i)=>a+i.qty*i.price,0);
-      const barrioSel=document.getElementById("barrio")?.value || "";
-      const domicilio=state.barrios[barrioSel] ? Number(state.barrios[barrioSel]) : 0;
-
-      const tipo=document.getElementById('tipoIdent')?.value || "CEDULA";
-      let iva=0, total=subtotal+domicilio;
-      if(tipo==="NIT"){
-        iva=Math.round(subtotal*0.19);
-        total+=iva;
-      }
-
-      const resumen=state.cart.map(i=>`${i.qty}× ${i.name}`).join(' | ');
-      document.getElementById('producto').value=resumen;
-      document.getElementById('precio').value=total;
-      document.getElementById('cantidad').value=state.cart.reduce((a,i)=>a+i.qty,0);
-      document.getElementById('resumenProducto').textContent=`Carrito: ${resumen} — $${fmtCOP(total)} (Subtotal $${fmtCOP(subtotal)}, Domicilio $${fmtCOP(domicilio)}${iva>0 ? ", IVA $"+fmtCOP(iva) : ""})`;
-
-      closeCart(); show('viewForm');
-    }
-
-    function show(id){
-      document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
-      document.getElementById(id).classList.add('active');
-      window.scrollTo({top:0,behavior:'smooth'});
-    }
-
-    function fillBarrios(map){
-      const sel=document.getElementById('barrio');
-      sel.innerHTML='<option value="">Selecciona…</option>';
-      Object.keys(map).forEach(n=>{
-        const opt=document.createElement('option');
-        opt.value=n; opt.textContent=n; sel.appendChild(opt);
-      });
-    }
+    function show(id){ document.querySelectorAll('.view').forEach(v=>v.classList.remove('active')); document.getElementById(id).classList.add('active'); window.scrollTo({top:0,behavior:'smooth'}); }
+    function fillBarrios(map){ const sel=document.getElementById('barrio'); sel.innerHTML='<option value="">Selecciona…</option>'; Object.keys(map).forEach(n=>{ const opt=document.createElement('option'); opt.value=n; opt.textContent=n; sel.appendChild(opt); }); }
 
     // Eventos
     document.getElementById('cartFab').addEventListener('click',openCart);
@@ -312,20 +260,16 @@
     document.getElementById('cartContinuar').addEventListener('click',proceedToCheckout);
     document.getElementById('btnVolver').addEventListener('click',()=>show('viewCatalog'));
 
-    // Mostrar u ocultar razón social
     document.getElementById('tipoIdent').addEventListener('change', e=>{
-      const wrap = document.getElementById('razonSocialWrap');
-      if(e.target.value==="NIT"){
-        wrap.style.display="block";
-      } else {
-        wrap.style.display="none";
-        document.getElementById('razonSocial').value="";
-      }
-      renderCart();
+      if(e.target.value==="CEDULA"){ document.getElementById('fieldsCedula').classList.remove("hidden"); document.getElementById('fieldsNit').classList.add("hidden"); }
+      else if(e.target.value==="NIT"){ document.getElementById('fieldsNit').classList.remove("hidden"); document.getElementById('fieldsCedula').classList.add("hidden"); }
+      else{ document.getElementById('fieldsCedula').classList.add("hidden"); document.getElementById('fieldsNit').classList.add("hidden"); }
+      renderCart(); renderResumen();
     });
+
+    document.getElementById('barrio').addEventListener('change',()=>{renderCart();renderResumen();});
 
     init();
   </script>
 </body>
 </html>
-
