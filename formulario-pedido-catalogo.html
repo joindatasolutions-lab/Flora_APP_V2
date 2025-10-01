@@ -3,74 +3,28 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Flora - Pedido</title>
+  <title>Flora - Tienda de Flores</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
     :root{ --rosa:#e6a5b6; --rosa-osc:#c97b94; --bg:#fdfaf7; --gris:#5c5c5c; --borde:#ecd6dc; }
-    *{ box-sizing:border-box }
-    body{ margin:0; font-family:'Inter', sans-serif; background:var(--bg); color:#333; }
-
+    body{ margin:0; font-family:'Inter',sans-serif; background:var(--bg); color:#333; display:flex; flex-direction:column; min-height:100vh }
     header{ text-align:center; padding:20px 16px }
     header img{ max-width:220px; margin:0 auto 8px; display:block }
     header h2{ margin:8px 0 0; color:var(--gris) }
-
-    .view{ display:none; padding:16px; }
-    .view.active{ display:block }
-
-    /* Catálogo */
-    .catalogo{ display:grid; gap:12px; grid-template-columns:repeat(2,1fr); max-width:1100px; margin:0 auto }
-    @media(min-width:768px){ .catalogo{ grid-template-columns:repeat(3,1fr);} }
-    @media(min-width:1024px){ .catalogo{ grid-template-columns:repeat(4,1fr);} }
-    .card{ background:#fff; border:1px solid var(--borde); border-radius:18px; box-shadow:0 6px 18px rgba(0,0,0,.06); overflow:hidden; display:flex; flex-direction:column; align-items:center; padding:10px; position: relative; }
-    .card img{ width:100%; object-fit:contain; border-bottom:1px solid var(--borde); }
-    .card .body{ padding:8px; text-align:center; flex-grow:1;padding-bottom: 64px; }
-    .name{ font-weight:700; margin:6px 0 2px; font-size:.9rem }
-    .price{ color:var(--gris); margin:0; font-size:.9rem }
-    .btn-add{ position:absolute; left:0; bottom:0; width:100%; padding:12px 0; border:none; border-radius:0 0 18px 18px; background:var(--rosa); color:#fff; font-weight:700; cursor:pointer; }
-
-    /* FAB carrito */
-    .cart-fab{ position:fixed; right:16px; bottom:16px; background:var(--rosa); color:#fff; border:none; border-radius:9999px; padding:10px 14px; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:8px; box-shadow:0 10px 24px rgba(0,0,0,.15); z-index:900; }
-    .cart-fab #cartCount{ background:#fff; color:var(--rosa); border-radius:999px; padding:2px 8px; font-weight:800; min-width:24px; text-align:center; }
-
-    /* Drawer carrito */
-    .drawer{ position:fixed; top:0; right:0; height:100vh; width:380px; max-width:92vw; background:#fff; border-left:2px solid var(--borde); box-shadow:-10px 0 30px rgba(0,0,0,.15); transform:translateX(100%); transition:transform .25s ease; z-index:1000; display:flex; flex-direction:column; }
-    .drawer.open{ transform:translateX(0) }
-    .drawer-header{ display:flex; justify-content:space-between; align-items:center; padding:14px 16px; border-bottom:1px solid var(--borde); }
-    .drawer-body{ padding:10px 12px; display:flex; flex-direction:column; height:100%; }
-    .cart-list{ list-style:none; margin:0; padding:0; gap:8px; display:flex; flex-direction:column; overflow:auto; }
-    .cart-item{ display:grid; grid-template-columns:1fr auto; gap:8px; align-items:center; border:1px solid var(--borde); border-radius:12px; padding:10px; }
-    .drawer-footer{ margin-top:auto; border-top:1px solid var(--borde); padding-top:10px; }
-
-    /* Controles cantidad */
-    .qty-controls{ display:flex; align-items:center; gap:6px; }
-    .qty-btn{ background:var(--rosa); border:none; color:#fff; font-weight:bold; font-size:14px; border-radius:6px; width:28px; height:28px; cursor:pointer; transition:background 0.2s; }
-    .qty-btn:hover{ background:var(--rosa-osc); }
-    .qty-value{ min-width:20px; text-align:center; font-weight:600; }
-
-    /* Formulario */
-    form{ background:#fff; border:1px solid var(--borde); border-radius:16px; max-width:780px; margin:0 auto; padding:18px; }
-    form h3{ margin:0 0 14px; color:var(--gris) }
-    .grid{ display:grid; gap:12px; grid-template-columns:repeat(2,1fr) }
-    .grid-1{ grid-template-columns:1fr }
-    label{ font-size:.92rem; color:#444 }
-    input, select{ width:100%; padding:10px 12px; border:1px solid #d9d9d9; border-radius:10px; font-size:14px; background:#fff }
-    .hidden{ display:none }
-    .resumen{ background:#fafafa; border:1px solid var(--borde); border-radius:12px; padding:14px; margin:18px 0; }
-    .resumen h4{ margin:0 0 10px; }
-    .resumen ul{ list-style:none; padding:0; margin:0 0 10px; }
-    .resumen li{ font-size:.9rem; display:flex; justify-content:space-between; margin-bottom:4px; }
-    .resumen .total{ font-weight:700; }
-
-    /* Botones */
-    .drawer-actions, .actions{ display:flex; justify-content:space-between; margin-top:12px; }
-    .btn-outline{ background:#fff; border:1px solid var(--rosa); color:var(--rosa); border-radius:10px; padding:10px 18px; font-weight:600; cursor:pointer; transition:all 0.2s; }
-    .btn-outline:hover{ background:var(--rosa); color:#fff; }
-    .btn-primary{ background:var(--rosa); color:#fff; border:none; border-radius:10px; padding:10px 18px; font-weight:700; cursor:pointer; transition:background 0.2s; }
-    .btn-primary:hover{ background:var(--rosa-osc); }
-
-    .badge{ font-size:.8rem; padding:4px 8px; border-radius:6px; font-weight:600; }
-    .badge-success{ background:#d1f5d3; color:#2d7a2d; }
-    .badge-warning{ background:#fff2cc; color:#946200; }
+    form{ max-width:720px; margin:0 auto; background:#fff; padding:20px; border-radius:12px; border:1px solid var(--borde) }
+    h3{ margin-top:0 }
+    label{ font-weight:600; display:block; margin-bottom:4px }
+    input,select{ width:100%; padding:8px; border:1px solid #ccc; border-radius:6px; margin-bottom:12px }
+    .actions{ display:flex; justify-content:space-between; gap:12px; margin-top:16px }
+    .btn-outline{ background:#fff; border:1px solid var(--rosa); color:var(--rosa); border-radius:8px; padding:10px 14px; font-weight:600; cursor:pointer; }
+    .btn-outline:hover{ background:var(--rosa); color:#fff }
+    .btn-primary{ background:var(--rosa); color:#fff; border:none; border-radius:8px; padding:10px 14px; font-weight:700; cursor:pointer; }
+    .btn-primary:disabled{ background:#f3c7d1; cursor:not-allowed }
+    #status{ text-align:center; margin-top:10px; font-weight:700 }
+    .good{ color:green } .err{ color:#b00020 }
+    #badgeCliente{ display:inline-block; padding:4px 8px; border-radius:6px; font-size:13px; margin-left:10px }
+    #badgeCliente.nuevo{ background:#f5e6a7; color:#7d6608 }
+    #badgeCliente.existe{ background:#c8f7c5; color:#145a32 }
   </style>
 </head>
 <body>
@@ -79,204 +33,163 @@
     <h2>Catálogo de Arreglos Florales</h2>
   </header>
 
-  <!-- Vista catálogo -->
-  <section id="viewCatalog" class="view active">
-    <div id="catalogo" class="catalogo"></div>
-  </section>
+  <form id="pedidoForm">
+    <h3>Datos del Pedido <span id="badgeCliente"></span></h3>
 
-  <!-- Vista formulario -->
-  <section id="viewForm" class="view">
-    <form id="pedidoForm">
-      <h3>Datos del Pedido</h3>
+    <label for="tipoIdentificacion">Tipo de identificación</label>
+    <select id="tipoIdentificacion" name="tipoIdentificacion" required>
+      <option value="CEDULA">Cédula</option>
+      <option value="NIT">NIT</option>
+    </select>
 
-      <div class="grid">
-        <div>
-          <label for="tipoIdent">Tipo de identificación</label>
-          <select id="tipoIdent" required>
-            <option value="">Selecciona…</option>
-            <option value="CEDULA">Cédula</option>
-            <option value="NIT">NIT</option>
-          </select>
-        </div>
-        <div><span id="clienteStatus"></span></div>
-      </div>
+    <label for="identificacion">Identificación</label>
+    <input id="identificacion" name="identificacion" required>
 
-      <!-- Campos Cédula -->
-      <div id="fieldsCedula" class="hidden">
-        <div class="grid">
-          <div><label>Identificación</label><input id="cedulaIdent" required></div>
-          <div><label>Teléfono</label><input id="cedulaTel" required></div>
-          <div><label>Nombre</label><input id="cedulaNombre" required></div>
-          <div><label>Apellido(s)</label><input id="cedulaApellido" required></div>
-          <div class="grid-1"><label>Correo electrónico (opcional)</label><input id="cedulaEmail" type="email"></div>
-        </div>
-      </div>
+    <label for="telefono">Teléfono</label>
+    <input id="telefono" name="telefono" required>
 
-      <!-- Campos NIT -->
-      <div id="fieldsNit" class="hidden">
-        <div class="grid">
-          <div><label>Identificación</label><input id="nitIdent" required></div>
-          <div><label>Teléfono</label><input id="nitTel" required></div>
-          <div><label>Nombre de la empresa</label><input id="nitEmpresa" required></div>
-          <div class="grid-1"><label>Correo electrónico (opcional)</label><input id="nitEmail" type="email"></div>
-        </div>
-      </div>
+    <div id="camposCedula">
+      <label for="primerNombre">Nombre</label>
+      <input id="primerNombre" name="primerNombre">
 
-      <!-- Datos entrega -->
-      <div class="grid">
-        <div><label>Destinatario</label><input id="destinatario" required></div>
-        <div><label>Teléfono destino</label><input id="telefonoDestino" required></div>
-        <div><label>Dirección</label><input id="direccion" required></div>
-        <div><label>Barrio</label><select id="barrio"></select></div>
-        <div><label>Fecha de entrega</label><input id="fechaEntrega" type="date" required></div>
-        <div><label>Hora de entrega</label><input id="horaEntrega" type="time" required></div>
-      </div>
+      <label for="primerApellido">Apellido</label>
+      <input id="primerApellido" name="primerApellido">
 
-      <!-- Resumen pedido -->
-      <div id="resumenPedido" class="resumen hidden">
-        <h4>Resumen del pedido</h4>
-        <ul id="resumenLista"></ul>
-        <div>Subtotal: $<span id="resumenSubtotal">0</span></div>
-        <div>Domicilio: $<span id="resumenDomicilio">0</span></div>
-        <div id="resumenIvaRow" class="hidden">IVA (19%): $<span id="resumenIVA">0</span></div>
-        <div class="total">Total: $<span id="resumenTotal">0</span></div>
-      </div>
-
-      <div class="actions">
-        <button type="button" class="btn-outline" id="btnVolver">Regresar</button>
-        <button type="submit" class="btn-primary">Confirmar pedido</button>
-      </div>
-    </form>
-  </section>
-
-  <!-- FAB carrito -->
-  <button id="cartFab" class="cart-fab">🛒 <span id="cartCount">0</span></button>
-
-  <!-- Drawer carrito -->
-  <div id="cartDrawer" class="drawer">
-    <div class="drawer-header">
-      <strong>Tu carrito</strong>
-      <button id="cartClose">✕</button>
+      <label for="email">Correo electrónico (opcional)</label>
+      <input id="email" name="email" type="email">
     </div>
-    <div class="drawer-body">
-      <ul id="cartList" class="cart-list"></ul>
-      <div class="drawer-footer">
-        <div>Subtotal: $<span id="cartSubtotal">0</span></div>
-        <div>Domicilio: $<span id="cartDomicilio">0</span></div>
-        <div id="ivaRow" class="hidden">IVA (19%): $<span id="cartIVA">0</span></div>
-        <div><strong>Total: $<span id="cartTotal">0</span></strong></div>
-        <div class="drawer-actions">
-          <button id="cartVaciar" class="btn-outline">Vaciar</button>
-          <button id="cartContinuar" class="btn-primary">Continuar</button>
-        </div>
-      </div>
+
+    <div id="camposNIT" style="display:none">
+      <label for="nombreEmpresa">Nombre de la empresa</label>
+      <input id="nombreEmpresa" name="nombreEmpresa">
+
+      <label for="emailEmpresa">Correo electrónico (opcional)</label>
+      <input id="emailEmpresa" name="email" type="email">
     </div>
-  </div>
+
+    <label for="destinatario">Destinatario</label>
+    <input id="destinatario" name="destinatario">
+
+    <label for="telefonoDestino">Teléfono destino</label>
+    <input id="telefonoDestino" name="telefonoDestino">
+
+    <label for="direccion">Dirección</label>
+    <input id="direccion" name="direccion">
+
+    <label for="barrio">Barrio</label>
+    <select id="barrio" name="barrio"></select>
+
+    <label for="fechaEntrega">Fecha de entrega</label>
+    <input id="fechaEntrega" name="fechaEntrega" type="date">
+
+    <label for="horaEntrega">Hora de entrega</label>
+    <input id="horaEntrega" name="horaEntrega" type="time">
+
+    <div class="actions">
+      <button type="button" class="btn-outline" id="btnVolver">Regresar</button>
+      <button type="submit" class="btn-primary" id="btnSubmit">Confirmar pedido</button>
+    </div>
+    <div id="status"></div>
+  </form>
 
   <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwQkyMazevj59OZwkexMBrVZt4Jq0IHY7jskbT8szAtrRtwzPbcSy414g-Et9WzAPA8/exec";
-    const state = { catalogo: [], cart: [], barrios: {} };
-    const fmtCOP = v => Number(v||0).toLocaleString('es-CO');
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyhzPxOXpOxIInFgHoC1FdYABq2FtHeoPOwX6EP3XxRpG1asuOqb-p3u6uTYDbzKqHy/exec";
+    const identInput = document.getElementById("identificacion");
+    const tipoSelect = document.getElementById("tipoIdentificacion");
+    const badge = document.getElementById("badgeCliente");
 
-    async function init(){
-      const res = await fetch(SCRIPT_URL);
-      const data = await res.json();
-      state.catalogo = data.catalogo || [];
-      state.barrios  = data.barrios  || {};
-      renderCatalog(state.catalogo);
-      fillBarrios(state.barrios);
-      document.getElementById('fechaEntrega').setAttribute('min', new Date().toISOString().slice(0,10));
-    }
-
-    function renderCatalog(items){
-      const wrap = document.getElementById('catalogo');
-      wrap.innerHTML="";
-      items.forEach(prod=>{
-        const imgUrl=prod.img||""; const name=prod.name||"Producto"; const price=Number(prod.price||0);
-        const card=document.createElement('div'); card.className="card";
-        card.innerHTML=`<img src="${imgUrl}" alt="${name}"><div class="body"><div class="name">${name}</div><p class="price">$${fmtCOP(price)}</p><button class="btn-add">Añadir</button></div>`;
-        card.querySelector('.btn-add').addEventListener('click',()=>addToCart({name,price}));
-        wrap.appendChild(card);
-      });
-    }
-
-    function addToCart(prod){ const idx=state.cart.findIndex(i=>i.name===prod.name);
-      if(idx>=0) state.cart[idx].qty++; else state.cart.push({name:prod.name,price:prod.price,qty:1});
-      updateCartBadge(); renderCart(); openCart();
-    }
-    function updateCartBadge(){ document.getElementById('cartCount').textContent=state.cart.reduce((a,i)=>a+i.qty,0); }
-    function updateQty(index,change){ state.cart[index].qty+=change; if(state.cart[index].qty<=0) state.cart.splice(index,1); updateCartBadge(); renderCart(); renderResumen(); }
-    function calcularTotales(){ const subtotal=state.cart.reduce((a,i)=>a+i.qty*i.price,0); const barrioSel=document.getElementById("barrio")?.value||""; const domicilio=state.barrios[barrioSel]?Number(state.barrios[barrioSel]):0; const tipo=document.getElementById('tipoIdent')?.value||"CEDULA"; let iva=0,total=subtotal+domicilio; if(tipo==="NIT"){ iva=Math.round(subtotal*0.19); total+=iva; } return {subtotal,domicilio,iva,total}; }
-    function renderCart(){ const list=document.getElementById('cartList'); list.innerHTML=""; if(state.cart.length===0){ list.innerHTML="<li>Carrito vacío</li>"; return; } state.cart.forEach((it,idx)=>{ const li=document.createElement('li'); li.className="cart-item"; li.innerHTML=`<div><div class="name">${it.name}</div><div>$${fmtCOP(it.price)}</div></div><div class="qty-controls"><button class="qty-btn" onclick="updateQty(${idx},-1)">-</button><span class="qty-value">${it.qty}</span><button class="qty-btn" onclick="updateQty(${idx},1)">+</button></div>`; list.appendChild(li); }); const {subtotal,domicilio,iva,total}=calcularTotales(); document.getElementById('cartSubtotal').textContent=fmtCOP(subtotal); document.getElementById('cartDomicilio').textContent=fmtCOP(domicilio); document.getElementById('cartTotal').textContent=fmtCOP(total); if(iva>0){ document.getElementById('ivaRow').classList.remove("hidden"); document.getElementById('cartIVA').textContent=fmtCOP(iva);} else document.getElementById('ivaRow').classList.add("hidden"); }
-    function renderResumen(){ if(state.cart.length===0){ document.getElementById('resumenPedido').classList.add("hidden"); return; } document.getElementById('resumenPedido').classList.remove("hidden"); const lista=document.getElementById('resumenLista'); lista.innerHTML=""; state.cart.forEach(it=>{ const li=document.createElement('li'); li.textContent=`${it.qty}× ${it.name} — $${fmtCOP(it.qty*it.price)}`; lista.appendChild(li); }); const {subtotal,domicilio,iva,total}=calcularTotales(); document.getElementById('resumenSubtotal').textContent=fmtCOP(subtotal); document.getElementById('resumenDomicilio').textContent=fmtCOP(domicilio); document.getElementById('resumenTotal').textContent=fmtCOP(total); if(iva>0){ document.getElementById('resumenIvaRow').classList.remove("hidden"); document.getElementById('resumenIVA').textContent=fmtCOP(iva);} else document.getElementById('resumenIvaRow').classList.add("hidden"); }
-
-    function fillBarrios(obj){ const sel=document.getElementById("barrio"); sel.innerHTML=""; Object.keys(obj).forEach(b=>{ const op=document.createElement("option"); op.value=b; op.textContent=b; sel.appendChild(op); }); sel.addEventListener("change",()=>{ renderCart(); renderResumen(); }); }
-    function openCart(){ document.getElementById('cartDrawer').classList.add("open"); }
-    function closeCart(){ document.getElementById('cartDrawer').classList.remove("open"); }
-
-    document.getElementById('cartFab').addEventListener('click',openCart);
-    document.getElementById('cartClose').addEventListener('click',closeCart);
-    document.getElementById('cartVaciar').addEventListener('click',()=>{ state.cart=[]; updateCartBadge(); renderCart(); renderResumen(); });
-    document.getElementById('cartContinuar').addEventListener('click',()=>{ closeCart(); document.getElementById('viewCatalog').classList.remove("active"); document.getElementById('viewForm').classList.add("active"); renderResumen(); });
-    document.getElementById('btnVolver').addEventListener('click',()=>{ document.getElementById('viewForm').classList.remove("active"); document.getElementById('viewCatalog').classList.add("active"); });
-
-    document.getElementById("tipoIdent").addEventListener("change",e=>{ const tipo=e.target.value; document.getElementById("fieldsCedula").classList.toggle("hidden",tipo!=="CEDULA"); document.getElementById("fieldsNit").classList.toggle("hidden",tipo!=="NIT"); renderCart(); renderResumen(); });
-
-    // Validación cliente existente/nuevo
-    async function checkCliente(ident,tipo){
-      if(!ident) return;
-      const res=await fetch(`${SCRIPT_URL}?modulo=clientes&tipo=${tipo}&id=${ident}`);
-      const data=await res.json();
-      const status=document.getElementById("clienteStatus");
-      if(data.existe){
-        status.innerHTML=`<span class="badge badge-success">Cliente existente</span>`;
-        if(tipo==="CEDULA"){ document.getElementById("cedulaTel").value=data.telefono||""; document.getElementById("cedulaNombre").value=data.nombre||""; document.getElementById("cedulaApellido").value=data.apellido||""; document.getElementById("cedulaEmail").value=data.email||""; }
-        if(tipo==="NIT"){ document.getElementById("nitTel").value=data.telefono||""; document.getElementById("nitEmpresa").value=data.empresa||""; document.getElementById("nitEmail").value=data.email||""; }
+    // Mostrar campos según tipo
+    tipoSelect.addEventListener("change",()=>{
+      if(tipoSelect.value==="NIT"){
+        document.getElementById("camposCedula").style.display="none";
+        document.getElementById("camposNIT").style.display="block";
       }else{
-        status.innerHTML=`<span class="badge badge-warning">Nuevo cliente</span>`;
+        document.getElementById("camposCedula").style.display="block";
+        document.getElementById("camposNIT").style.display="none";
       }
-    }
-
-    document.getElementById("cedulaIdent").addEventListener("blur",()=>checkCliente(document.getElementById("cedulaIdent").value,"CEDULA"));
-    document.getElementById("nitIdent").addEventListener("blur",()=>checkCliente(document.getElementById("nitIdent").value,"NIT"));
-
-    // Enviar pedido
-    document.getElementById("pedidoForm").addEventListener("submit",async e=>{
-      e.preventDefault();
-      const tipo=document.getElementById("tipoIdent").value;
-      let cliente={tipo};
-      if(tipo==="CEDULA"){
-        cliente.ident=document.getElementById("cedulaIdent").value;
-        cliente.tel=document.getElementById("cedulaTel").value;
-        cliente.nombre=document.getElementById("cedulaNombre").value;
-        cliente.apellido=document.getElementById("cedulaApellido").value;
-        cliente.email=document.getElementById("cedulaEmail").value;
-      } else {
-        cliente.ident=document.getElementById("nitIdent").value;
-        cliente.tel=document.getElementById("nitTel").value;
-        cliente.empresa=document.getElementById("nitEmpresa").value;
-        cliente.email=document.getElementById("nitEmail").value;
-      }
-      const entrega={
-        destinatario:document.getElementById("destinatario").value,
-        telefono:document.getElementById("telefonoDestino").value,
-        direccion:document.getElementById("direccion").value,
-        barrio:document.getElementById("barrio").value,
-        fecha:document.getElementById("fechaEntrega").value,
-        hora:document.getElementById("horaEntrega").value
-      };
-      const {subtotal,domicilio,iva,total}=calcularTotales();
-      const pedido={cliente,entrega,items:state.cart,subtotal,domicilio,iva,total};
-      const res=await fetch(SCRIPT_URL,{method:"POST",body:JSON.stringify(pedido)});
-      const r=await res.json();
-      alert("✅ Pedido registrado: "+r.status);
-      state.cart=[]; updateCartBadge(); renderCart(); renderResumen();
-      document.getElementById('viewForm').classList.remove("active");
-      document.getElementById('viewCatalog').classList.add("active");
     });
 
-    init();
+    // Buscar cliente existente
+    identInput.addEventListener("blur", async ()=>{
+      const idVal = identInput.value.trim();
+      if(!idVal) return;
+      try{
+        const res = await fetch(`${SCRIPT_URL}?cliente=${encodeURIComponent(idVal)}`);
+        const data = await res.json();
+        if(data.cliente){
+          badge.textContent="Cliente encontrado";
+          badge.className="existe";
+          rellenarFormulario(data.cliente);
+        }else{
+          badge.textContent="Nuevo cliente";
+          badge.className="nuevo";
+          limpiarFormulario();
+        }
+      }catch(err){
+        console.error("Error buscando cliente",err);
+      }
+    });
+
+    function rellenarFormulario(cliente){
+      tipoSelect.value = cliente.Tipo || "CEDULA";
+      if(cliente.Tipo==="NIT"){
+        document.getElementById("nombreEmpresa").value = cliente.PrimerNombre || "";
+        document.getElementById("emailEmpresa").value = cliente.Email || "";
+        document.getElementById("camposCedula").style.display="none";
+        document.getElementById("camposNIT").style.display="block";
+      }else{
+        document.getElementById("primerNombre").value = cliente.PrimerNombre || "";
+        document.getElementById("primerApellido").value = cliente.PrimerApellido || "";
+        document.getElementById("email").value = cliente.Email || "";
+        document.getElementById("camposCedula").style.display="block";
+        document.getElementById("camposNIT").style.display="none";
+      }
+      document.getElementById("telefono").value = cliente.Telefono || "";
+    }
+
+    function limpiarFormulario(){
+      document.getElementById("primerNombre").value="";
+      document.getElementById("primerApellido").value="";
+      document.getElementById("nombreEmpresa").value="";
+      document.getElementById("email").value="";
+      document.getElementById("emailEmpresa").value="";
+      document.getElementById("telefono").value="";
+    }
+
+    // Enviar pedido
+    document.getElementById("pedidoForm").addEventListener("submit", async e=>{
+      e.preventDefault();
+      const fd=new FormData(e.target);
+      const fecha=document.getElementById("fechaEntrega").value;
+      const hora=document.getElementById("horaEntrega").value;
+      if(fecha && hora){ fd.set("fechaEntrega", `${fecha} ${hora}`); }
+
+      const btn=document.getElementById("btnSubmit");
+      const status=document.getElementById("status");
+      btn.disabled=true;
+      btn.textContent="Procesando... ⏳";
+      status.textContent="Enviando pedido...";
+
+      try{
+        const res=await fetch(SCRIPT_URL,{method:"POST",body:fd});
+        const data=await res.json();
+        if(data.status==="success"){
+          status.textContent="✅ Pedido registrado correctamente";
+          status.className="good";
+          e.target.reset();
+          setTimeout(()=>window.location.reload(),1500);
+        }else{
+          status.textContent="❌ Error: "+(data.message||"No se pudo guardar");
+          status.className="err";
+        }
+      }catch(err){
+        status.textContent="⚠️ Error de red: "+err;
+        status.className="err";
+      }finally{
+        btn.disabled=false;
+        btn.textContent="Confirmar pedido";
+      }
+    });
   </script>
 </body>
 </html>
-
