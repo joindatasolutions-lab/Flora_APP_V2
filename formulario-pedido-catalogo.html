@@ -3,24 +3,24 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Flora - Tienda de Flores</title>
+  <title>Formulario de Pedido - Flora</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
     :root{ --rosa:#e6a5b6; --rosa-osc:#c97b94; --bg:#fdfaf7; --gris:#5c5c5c; --borde:#ecd6dc; }
-    body{ margin:0; font-family:'Inter',sans-serif; background:var(--bg); color:#333; display:flex; flex-direction:column; min-height:100vh }
-    header{ text-align:center; padding:20px 16px }
-    header img{ max-width:220px; margin:0 auto 8px; display:block }
-    header h2{ margin:8px 0 0; color:var(--gris) }
-    form{ max-width:720px; margin:0 auto; background:#fff; padding:20px; border-radius:12px; border:1px solid var(--borde) }
-    h3{ margin-top:0 }
-    label{ font-weight:600; display:block; margin-bottom:4px }
-    input,select{ width:100%; padding:8px; border:1px solid #ccc; border-radius:6px; margin-bottom:12px }
-    .actions{ display:flex; justify-content:space-between; gap:12px; margin-top:16px }
-    .btn-outline{ background:#fff; border:1px solid var(--rosa); color:var(--rosa); border-radius:8px; padding:10px 14px; font-weight:600; cursor:pointer; }
+    body{ margin:0; font-family:'Inter',sans-serif; background:var(--bg); color:#333 }
+    header{ text-align:center; padding:20px }
+    header img{ max-width:220px; margin-bottom:8px }
+    h2{ margin:0; color:var(--gris) }
+
+    form{ max-width:760px; margin:20px auto; background:#fff; padding:20px; border-radius:12px; border:1px solid var(--borde) }
+    label{ font-weight:600; display:block; margin:12px 0 4px }
+    input,select{ width:100%; padding:8px; border:1px solid #ccc; border-radius:6px }
+    .actions{ display:flex; justify-content:space-between; gap:12px; margin-top:20px }
+    .btn-outline{ background:#fff; border:1px solid var(--rosa); color:var(--rosa); border-radius:8px; padding:10px 14px; font-weight:600; cursor:pointer }
     .btn-outline:hover{ background:var(--rosa); color:#fff }
-    .btn-primary{ background:var(--rosa); color:#fff; border:none; border-radius:8px; padding:10px 14px; font-weight:700; cursor:pointer; }
+    .btn-primary{ background:var(--rosa); color:#fff; border:none; border-radius:8px; padding:10px 14px; font-weight:700; cursor:pointer }
     .btn-primary:disabled{ background:#f3c7d1; cursor:not-allowed }
-    #status{ text-align:center; margin-top:10px; font-weight:700 }
+    #status{ text-align:center; margin-top:12px; font-weight:700 }
     .good{ color:green } .err{ color:#b00020 }
     #badgeCliente{ display:inline-block; padding:4px 8px; border-radius:6px; font-size:13px; margin-left:10px }
     #badgeCliente.nuevo{ background:#f5e6a7; color:#7d6608 }
@@ -30,11 +30,11 @@
 <body>
   <header>
     <img src="img/logo 2024 marca registrada-04.png" alt="FLORA Logo"/>
-    <h2>Catálogo de Arreglos Florales</h2>
+    <h2>Formulario de Pedido</h2>
   </header>
 
   <form id="pedidoForm">
-    <h3>Datos del Pedido <span id="badgeCliente"></span></h3>
+    <h3>Datos del Cliente <span id="badgeCliente"></span></h3>
 
     <label for="tipoIdentificacion">Tipo de identificación</label>
     <select id="tipoIdentificacion" name="tipoIdentificacion" required>
@@ -48,6 +48,7 @@
     <label for="telefono">Teléfono</label>
     <input id="telefono" name="telefono" required>
 
+    <!-- Campos para personas -->
     <div id="camposCedula">
       <label for="primerNombre">Nombre</label>
       <input id="primerNombre" name="primerNombre">
@@ -59,6 +60,7 @@
       <input id="email" name="email" type="email">
     </div>
 
+    <!-- Campos para empresas -->
     <div id="camposNIT" style="display:none">
       <label for="nombreEmpresa">Nombre de la empresa</label>
       <input id="nombreEmpresa" name="nombreEmpresa">
@@ -66,6 +68,8 @@
       <label for="emailEmpresa">Correo electrónico (opcional)</label>
       <input id="emailEmpresa" name="email" type="email">
     </div>
+
+    <h3>Datos del Pedido</h3>
 
     <label for="destinatario">Destinatario</label>
     <input id="destinatario" name="destinatario">
@@ -94,11 +98,12 @@
 
   <script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyhzPxOXpOxIInFgHoC1FdYABq2FtHeoPOwX6EP3XxRpG1asuOqb-p3u6uTYDbzKqHy/exec";
+
     const identInput = document.getElementById("identificacion");
     const tipoSelect = document.getElementById("tipoIdentificacion");
     const badge = document.getElementById("badgeCliente");
 
-    // Mostrar campos según tipo
+    // Mostrar/ocultar campos según tipo
     tipoSelect.addEventListener("change",()=>{
       if(tipoSelect.value==="NIT"){
         document.getElementById("camposCedula").style.display="none";
@@ -109,7 +114,7 @@
       }
     });
 
-    // Buscar cliente existente
+    // Buscar cliente en blur
     identInput.addEventListener("blur", async ()=>{
       const idVal = identInput.value.trim();
       if(!idVal) return;
