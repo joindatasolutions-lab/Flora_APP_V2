@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Flora - Tienda de Flores</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{ --rosa:#e6a5b6; --rosa-osc:#c97b94; --bg:#fdfaf7; --gris:#5c5c5c; --borde:#ecd6dc; }
+    *{ box-sizing:border-box }
+    body{ margin:0; font-family:'Inter', sans-serif; background:var(--bg); color:#333; display:flex; min-height:100vh; flex-direction:column }
+    header{ text-align:center; padding:20px 16px }
+    header img{ max-width:220px; height:auto; display:block; margin:0 auto 8px }
+    header h2{ margin:8px 0 0; color:var(--gris) }
+    .view{ display:none; padding:16px; animation:fade .25s ease }
+    .view.active{ display:block }
+    @keyframes fade{ from{ opacity:.35; transform:translateY(4px) } to{ opacity:1; transform:none } }
+
+    /* Catálogo */
+    .catalogo{ display:grid; gap:12px; grid-template-columns:repeat(2,1fr); max-width:1100px; margin:0 auto }
+    @media(min-width:768px){ .catalogo{ grid-template-columns:repeat(3,1fr); } }
+    @media(min-width:1024px){ .catalogo{ grid-template-columns:repeat(4,1fr); } }
+    .card{ background:#fff; border:1px solid var(--borde); border-radius:18px; box-shadow:0 6px 18px rgba(0,0,0,.06); overflow:hidden; transition:transform .15s ease, box-shadow .15s ease, border-color .2s; cursor:pointer; display:flex; flex-direction:column; align-items:center; padding:10px; position: relative; }
+    .card:hover{ transform:translateY(-2px); box-shadow:0 10px 24px rgba(0,0,0,.09); border-color:var(--rosa) }
+    .card img{ width:100%; height:auto; object-fit:contain; border-bottom:1px solid var(--borde); filter:saturate(1.02) }
+    .card .body{ padding:8px; text-align:center; flex-grow:1;padding-bottom: 64px; }
+    .name{ font-weight:700; margin:6px 0 2px; font-size:.9rem }
+    .price{ color:var(--gris); margin:0; font-size:.9rem }
+    .btn-add{ position:absolute; left:0; bottom:0; width:100%; margin:0; padding:12px 0; font-size:.95rem; border:none; border-radius:0 0 18px 18px; background:var(--rosa); color:#fff; font-weight:700; cursor:pointer; }
+
+    /* FAB carrito */
+    .cart-fab{ position:fixed; right:16px; bottom:16px; background:var(--rosa); color:#fff; border:none; border-radius:9999px; padding:10px 14px; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:8px; box-shadow:0 10px 24px rgba(0,0,0,.15); z-index:900; }
+    .cart-fab #cartCount{ background:#fff; color:var(--rosa); border-radius:999px; padding:2px 8px; font-weight:800; min-width:24px; text-align:center; }
+
+    /* Drawer carrito */
+    .drawer{ position:fixed; top:0; right:0; height:100vh; width:380px; max-width:92vw; background:#fff; border-left:2px solid var(--borde); box-shadow:-10px 0 30px rgba(0,0,0,.15); transform:translateX(100%); transition:transform .25s ease; z-index:1000; display:flex; flex-direction:column; }
+    .drawer.open{ transform:translateX(0) }
+    .drawer-header{ display:flex; justify-content:space-between; align-items:center; padding:14px 16px; border-bottom:1px solid var(--borde); }
+    .icon-btn{ background:#f3f3f3; border:1px solid #ddd; border-radius:10px; padding:6px 10px; cursor:pointer; }
+    .drawer-body{ padding:10px 12px; display:flex; flex-direction:column; height:100%; }
+    .cart-list{ list-style:none; margin:0; padding:0; gap:8px; display:flex; flex-direction:column; overflow:auto; }
+    .cart-item{ display:grid; grid-template-columns:1fr auto; gap:8px; align-items:center; border:1px solid var(--borde); border-radius:12px; padding:10px; }
+    .cart-item .name{ font-weight:700; }
+    .qty{ display:flex; align-items:center; gap:6px; border:1px solid #ddd; border-radius:10px; padding:4px 6px; }
+    .qty button{ border:none; background:#f3f3f3; padding:4px 8px; border-radius:8px; cursor:pointer; font-weight:800; }
+    .drawer-footer{ margin-top:auto; border-top:1px solid var(--borde); padding-top:10px; }
+    .subtotal{ font-weight:800; margin-bottom:10px }
+    .drawer-actions{ display:flex; gap:8px; }
+    .btn-outline{ background:#fff; border:1px solid var(--rosa); color:var(--rosa); border-radius:10px; padding:10px 12px; font-weight:700; cursor:pointer; }
+    .btn-primary{ background:var(--rosa); color:#fff; border:none; border-radius:10px; padding:10px 12px; font-weight:800; cursor:pointer; }
+
+    /* Formulario */
+    form{ background:#fff; border:1px solid var(--borde); border-radius:16px; max-width:780px; margin:0 auto; padding:18px; }
+    form h3{ margin:0 0 14px; color:var(--gris) }
+    .grid{ display:grid; gap:12px; grid-template-columns:repeat(2,1fr) }
+    .grid-1{ grid-template-columns:1fr }
+    label{ font-size:.92rem; color:#444 }
+    input, select, textarea{ width:100%; padding:10px 12px; border:1px solid #d9d9d9; border-radius:10px; font-size:14px; background:#fff }
+    textarea{ min-height:80px; resize:vertical }
+    .pill{ display:inline-block; padding:8px 12px; border-radius:999px; background:#fff3f6; border:1px solid var(--rosa); margin:0 0 10px; color:#b35a74; font-weight:700 }
+    #status{ text-align:center; margin-top:10px; font-weight:700 }
+    .err{ color:#b00020 } .good{ color:green }
+    .badge{ display:inline-block; padding:6px 10px; border-radius:999px; font-size:.85rem; margin-left:8px }
+    .ok{ background:#e7f8ec; color:#1a7f37; border:1px solid #bfe7c8 }
+    .warn{ background:#fff7e6; color:#a15d00; border:1px solid #ffd59e }
+    .hidden{ display:none }
+  </style>
+</head>
+<body>
+  <header>
+    <img src="img/logo 2024 marca registrada-04.png" alt="FLORA Logo"/>
+    <h2>Catálogo de Arreglos Florales</h2>
+  </header>
+
+  <!-- Vista catálogo -->
+  <section id="viewCatalog" class="view active">
+    <div id="catalogo" class="catalogo"></div>
+  </section>
+
+  <!-- Vista formulario -->
+  <section id="viewForm" class="view">
+    <form id="pedidoForm">
+      <span class="pill" id="resumenProducto">Producto: —</span>
+      <span id="badgeCliente" class="badge warn hidden">Nuevo cliente</span>
+      <h3>Datos del Pedido</h3>
+      <input type="hidden" id="producto" name="producto">
+      <input type="hidden" id="precio" name="precio">
+      <input type="hidden" id="cantidad" name="cantidad">
+      <div class="grid">
+        <div>
+          <label for="tipoIdent">Tipo de identificación</label>
+          <select id="tipoIdent" name="tipoIdent" required>
+            <option value="CEDULA" selected>Cédula</option>
+            <option value="NIT">NIT</option>
+          </select>
+        </div>
+        <div><label>Identificación</label><input id="identificacion" name="identificacion"  placeholder="Cédula / NIT" required></div>
+        <div><label>Teléfono</label><input id="telefono" name="telefono" placeholder="Ej: 3001234567" required></div>
+        <div><label>Nombre</label><input id="primerNombre" name="primerNombre" required></div>
+        <div id="apellidoWrapper"><label>Apellido(s)</label><input id="primerApellido" name="primerApellido"></div>
+        <div id="emailWrapper"><label>Email (opcional)</label><input type="email" id="email" name="email" placeholder="ejemplo@email.com"></div>
+      </div>
+      <div class="grid">
+        <div><label>Destinatario</label><input id="destinatario" name="destinatario" required></div>
+        <div><label for="telefonoDestino">Teléfono destino</label><input id="telefonoDestino" name="telefonoDestino" placeholder="Ej: 3201234567" required></div>
+        <div><label>Dirección</label><input id="direccion" name="direccion"  placeholder="Dirección, Casa, Edificio, Torre, Apto" required></div>
+        <div><label>Barrio</label><select id="barrio" name="barrio"></select></div>
+        <div><label>Fecha de entrega</label><input id="fechaEntrega" name="fechaEntrega" type="date" required></div>
+        <div><label>Hora de entrega</label><input id="horaEntrega" name="horaEntrega" type="time" required></div>
+      </div>
+      <div class="grid-1">
+        <label for="formaPago">Medio de pago</label>
+        <select id="formaPago" name="formaPago" required>
+          <option value="">Selecciona…</option>
+          <option value="TRANSFERENCIA">Transferencia</option>
+          <option value="TARJETA">Tarjeta</option>
+          <option value="LINK">Link</option>
+          <option value="EFECTIVO">Efectivo</option>
+          <option value="CUENTAS POR COBRAR">Cuentas Por Cobrar</option>
+          <option value="CONTRAENTREGA">Contraentrega</option>
+        </select>
+      </div>
+        
+      <div><label>Mensaje</label><textarea id="mensaje" name="mensaje" placeholder="Escribe un mensaje opcional para acompañar el pedido"></textarea></div>
+      <div class="actions" style="margin-top:14px">
+        <button type="button" class="btn-outline" id="btnVolver">Regresar al catálogo</button>
+        <button type="submit" class="btn-primary" id="btnSubmit">Confirmar pedido</button>
+      </div>
+      <div id="status"></div>
+    </form>
+  </section>
+
+  <!-- Botón flotante Carrito -->
+  <button id="cartFab" class="cart-fab">🛒 <span id="cartCount">0</span></button>
+
+  <!-- Drawer Carrito -->
+  <div id="cartDrawer" class="drawer">
+    <div class="drawer-header">
+      <strong>Tu carrito</strong>
+      <button id="cartClose" class="icon-btn">✕</button>
+    </div>
+    <div class="drawer-body">
+      <ul id="cartList" class="cart-list"></ul>
+      <div class="drawer-footer">
+        <div class="subtotal">Subtotal: $<span id="cartSubtotal">0</span></div>
+        <div class="drawer-actions">
+          <button id="cartVaciar" class="btn-outline">Vaciar</button>
+          <button id="cartContinuar" class="btn-primary">Continuar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyhzPxOXpOxIInFgHoC1FdYABq2FtHeoPOwX6EP3XxRpG1asuOqb-p3u6uTYDbzKqHy/exec";
+    const state = { catalogo: [], cart: [], barrios: {} };
+    const fmtCOP = v => Number(v||0).toLocaleString('es-CO');
+
+    async function init(){
+      const res = await fetch(SCRIPT_URL);
+      const data = await res.json();
+      state.catalogo = data.catalogo || [];
+      state.barrios  = data.barrios  || {};
+      renderCatalog(state.catalogo);
+      fillBarrios(state.barrios);
+      document.getElementById('fechaEntrega').setAttribute('min', new Date().toISOString().slice(0,10));
+    }
+
+    function renderCatalog(items){
+      const wrap = document.getElementById('catalogo');
+      wrap.innerHTML = "";
+      items.forEach(prod=>{
+        const imgUrl = prod.img || prod.image || "";
+        const name   = prod.name || prod.producto || "Producto";
+        const price  = Number(prod.price || prod.precio || 0);
+        const card=document.createElement('div');
+        card.className="card";
+        card.innerHTML=`
+          <img src="${imgUrl}" alt="${name}"><div class="body">
+            <div class="name">${name}</div>
+            <p class="price">$${fmtCOP(price)}</p>
+            <button class="btn-add">Añadir</button>
+          </div>`;
+        card.querySelector('.btn-add').addEventListener('click',e=>{
+          e.stopPropagation(); addToCart({id:prod.id||name, name, price});
+        });
+        wrap.appendChild(card);
+      });
+    }
+
+    function addToCart(prod){
+      const idx=state.cart.findIndex(i=>i.name===prod.name);
+      if(idx>=0) state.cart[idx].qty+=1;
+      else state.cart.push({name:prod.name, price:prod.price, qty:1});
+      updateCartBadge(); renderCart(); openCart();
+    }
+    function updateCartBadge(){
+      const count=state.cart.reduce((a,i)=>a+i.qty,0);
+      document.getElementById('cartCount').textContent=count;
+    }
+    function renderCart(){
+      const list=document.getElementById('cartList');
+      const sub=document.getElementById('cartSubtotal');
+      if(state.cart.length===0){
+        list.innerHTML=`<li class="cart-item"><span class="name">Tu carrito está vacío.</span></li>`;
+        sub.textContent="0"; return;
+      }
+      list.innerHTML=state.cart.map((it,idx)=>`
+        <li class="cart-item">
+          <div><div class="name">${it.name}</div><div class="price">$${fmtCOP(it.price)}</div></div>
+          <div class="qty">
+            <button onclick="changeQty(${idx},-1)">−</button>
+            <span>${it.qty}</span>
+            <button onclick="changeQty(${idx},1)">+</button>
+          </div>
+        </li>`).join('');
+      sub.textContent=fmtCOP(state.cart.reduce((a,i)=>a+i.qty*i.price,0));
+    }
+    function changeQty(idx,delta){
+      state.cart[idx].qty+=delta;
+      if(state.cart[idx].qty<=0) state.cart.splice(idx,1);
+      renderCart(); updateCartBadge();
+    }
+    function clearCart(){state.cart=[];renderCart();updateCartBadge();}
+    function openCart(){document.getElementById('cartDrawer').classList.add('open');}
+    function closeCart(){document.getElementById('cartDrawer').classList.remove('open');}
+    function proceedToCheckout(){
+      if(state.cart.length===0){closeCart();return;}
+      const subtotal=state.cart.reduce((a,i)=>a+i.qty*i.price,0);
+      const resumen=state.cart.map(i=>`${i.qty}× ${i.name}`).join(' | ');
+      document.getElementById('producto').value=resumen;
+      document.getElementById('precio').value=subtotal;
+      document.getElementById('cantidad').value=state.cart.reduce((a,i)=>a+i.qty,0);
+      document.getElementById('resumenProducto').textContent=`Carrito: ${resumen} — $${fmtCOP(subtotal)}`;
+      closeCart(); show('viewForm');
+    }
+    function show(id){
+      document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      window.scrollTo({top:0,behavior:'smooth'});
+    }
+    function fillBarrios(map){
+      const sel=document.getElementById('barrio');
+      sel.innerHTML='<option value="">Selecciona…</option>';
+      Object.keys(map).forEach(n=>{
+        const opt=document.createElement('option');
+        opt.value=n; opt.textContent=n; sel.appendChild(opt);
+      });
+    }
+
+    // --- Cliente nuevo/viejo ---
+    let lookupTimer=null;
+    document.getElementById('identificacion').addEventListener('input',(e)=>{
+      clearTimeout(lookupTimer);
+      const val=e.target.value.trim();
+      if(!val){ setClienteBadge(null); return; }
+      lookupTimer=setTimeout(()=>buscarCliente(val),200);
+    });
+    async function buscarCliente(ident){
+      try{
+        const res=await fetch(`${SCRIPT_URL}?cliente=${encodeURIComponent(ident)}`);
+        const data=await res.json();
+        if(data && data.cliente){
+          setClienteBadge(true); autofillCliente(data.cliente);
+        } else {
+          setClienteBadge(false); limpiarCliente(false);
+        }
+      }catch(err){ setClienteBadge(null); console.error('Lookup error',err); }
+    }
+    function setClienteBadge(encontrado){
+      const b=document.getElementById('badgeCliente');
+      b.classList.remove('hidden','ok','warn');
+      if(encontrado===true){ b.textContent="Cliente encontrado"; b.classList.add('ok'); }
+      else if(encontrado===false){ b.textContent="Nuevo cliente"; b.classList.add('warn'); }
+      else{ b.classList.add('hidden'); }
+    }
+    function autofillCliente(c){
+      const nombre=[c.PrimerNombre,c.SegundoNombre].filter(Boolean).join(' ').trim();
+      const apellidos=[c.PrimerApellido,c.SegundoApellido].filter(Boolean).join(' ').trim();
+      document.getElementById('primerNombre').value=nombre||"";
+      document.getElementById('primerApellido').value=apellidos||"";
+      document.getElementById('telefono').value=c.Telefono||"";
+    }
+    function limpiarCliente(clearId){
+      if(clearId) document.getElementById('identificacion').value="";
+      document.getElementById('primerNombre').value="";
+      document.getElementById('primerApellido').value="";
+      document.getElementById('telefono').value="";
+    }
+
+    // --- Mostrar/Ocultar campos según tipo de identificación ---
+    const tipoIdent = document.getElementById("tipoIdent");
+    const apellidoWrapper = document.getElementById("apellidoWrapper");
+    const emailWrapper = document.getElementById("emailWrapper");
+
+    function actualizarCampos() {
+      if (tipoIdent.value === "CEDULA") {
+        apellidoWrapper.style.display = "block";
+        document.getElementById("primerApellido").required = true;
+        emailWrapper.style.display = "block";
+      } else {
+        apellidoWrapper.style.display = "none";
+        document.getElementById("primerApellido").required = false;
+        emailWrapper.style.display = "block";
+      }
+    }
+    tipoIdent.addEventListener("change", actualizarCampos);
+    window.addEventListener("DOMContentLoaded", actualizarCampos);
+
+    // --- Envío del pedido ---
+    document.getElementById("pedidoForm").addEventListener("submit", async e=>{
+      e.preventDefault();
+      const fd=new FormData(e.target);
+      const fecha = document.getElementById("fechaEntrega").value;
+      const hora  = document.getElementById("horaEntrega").value;
+      if (fecha && hora) {
+        fd.set("fechaEntrega", `${fecha} ${hora}`);
+      }
+      const status=document.getElementById("status");
+      const btn=document.getElementById("btnSubmit");
+
+      btn.disabled=true;
+      btn.textContent="Procesando... ⏳";
+      status.textContent="Enviando pedido...";
+      status.className="";
+
+      try{
+        const res=await fetch(SCRIPT_URL,{method:"POST",body:fd});
+        const data=await res.json();
+
+        if(data.status==="success"){
+          status.textContent="✅ Pedido registrado correctamente";
+          status.className="good";
+          e.target.reset();
+          state.cart=[]; updateCartBadge();
+          setTimeout(()=>show('viewCatalog'), 1500);
+        } else {
+          status.textContent="❌ Error: "+(data.message||"No se pudo guardar");
+          status.className="err";
+        }
+      }catch(err){
+        status.textContent="⚠️ Error de red: "+err;
+        status.className="err";
+      }
+      finally{
+        btn.disabled=false;
+        btn.textContent="Confirmar pedido";
+      }
+    });
+
+    // Eventos
+    document.getElementById('cartFab').addEventListener('click',openCart);
+    document.getElementById('cartClose').addEventListener('click',closeCart);
+    document.getElementById('cartVaciar').addEventListener('click',clearCart);
+    document.getElementById('cartContinuar').addEventListener('click',proceedToCheckout);
+    document.getElementById('btnVolver').addEventListener('click',()=>show('viewCatalog'));
+    init();
+  </script>
+</body>
+</html>
