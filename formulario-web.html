@@ -198,22 +198,30 @@
       const count=state.cart.reduce((a,i)=>a+i.qty,0);
       document.getElementById('cartCount').textContent=count;
     }
+    
     function renderCart(){
-      const list=document.getElementById('cartList');
-      const sub=document.getElementById('cartSubtotal');
-      if(state.cart.length===0){
-        list.innerHTML=`<li class="cart-item"><span class="name">Tu carrito está vacío.</span></li>`;
-        sub.textContent="0"; return;
-      }
+        const list=document.getElementById('cartList');
+        const sub=document.getElementById('cartSubtotal');
+        const drawerFooter=document.querySelector(".drawer-footer");
 
-      const subtotalBase = state.cart.reduce((a,i)=>a+i.qty*i.price,0);
-      let subtotal = subtotalBase;
-
-        // Si el tipo de identificación es NIT, aplicamos IVA
-        if (document.getElementById("tipoIdent").value === "NIT") {
-            subtotal = Math.round(subtotalBase * 1.19);
+        if(state.cart.length===0){
+            list.innerHTML=`<li class="cart-item"><span class="name">Tu carrito está vacío.</span></li>`;
+            sub.textContent="0";
+            drawerFooter.innerHTML = `<div class="subtotal">Subtotal: $0</div>`; 
+            return;
         }
 
+        const subtotalBase = state.cart.reduce((a,i)=>a+i.qty*i.price,0);
+        let subtotal = subtotalBase;
+        let iva = 0;
+
+        // Si es NIT, calculamos IVA
+        if (document.getElementById("tipoIdent").value === "NIT") {
+            iva = Math.round(subtotalBase * 0.19);
+            subtotal = subtotalBase + iva;
+        }
+
+        // Renderizamos items
         list.innerHTML=state.cart.map((it,idx)=>`
             <li class="cart-item">
             <div><div class="name">${it.name}</div><div class="price">$${fmtCOP(it.price)}</div></div>
@@ -224,7 +232,30 @@
             </div>
             </li>`).join('');
 
-        sub.textContent=fmtCOP(subtotal);
+        // Mostramos desglose en el footer
+        if (iva > 0) {
+            drawerFooter.innerHTML = `
+            <div class="subtotal">Subtotal: $${fmtCOP(subtotalBase)}</div>
+            <div class="subtotal">IVA (19%): $${fmtCOP(iva)}</div>
+            <div class="subtotal"><strong>Total: $${fmtCOP(subtotal)}</strong></div>
+            <div class="drawer-actions">
+                <button id="cartVaciar" class="btn-outline">Vaciar</button>
+                <button id="cartContinuar" class="btn-primary">Continuar</button>
+            </div>
+            `;
+        } else {
+            drawerFooter.innerHTML = `
+            <div class="subtotal"><strong>Total: $${fmtCOP(subtotalBase)}</strong></div>
+            <div class="drawer-actions">
+                <button id="cartVaciar" class="btn-outline">Vaciar</button>
+                <button id="cartContinuar" class="btn-primary">Continuar</button>
+            </div>
+            `;
+        }
+
+        // Reasignamos eventos porque reescribimos el HTML del footer
+        document.getElementById('cartVaciar').addEventListener('click',clearCart);
+        document.getElementById('cartContinuar').addEventListener('click',proceedToCheckout);
     }
 
     function changeQty(idx,delta){
@@ -252,7 +283,7 @@
         document.getElementById('resumenProducto').textContent=`Carrito: ${resumen} — $${fmtCOP(subtotal)}`;
         closeCart(); show('viewForm');
     }
-    
+
     function show(id){
       document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
       document.getElementById(id).classList.add('active');
