@@ -205,17 +205,28 @@
         list.innerHTML=`<li class="cart-item"><span class="name">Tu carrito está vacío.</span></li>`;
         sub.textContent="0"; return;
       }
-      list.innerHTML=state.cart.map((it,idx)=>`
-        <li class="cart-item">
-          <div><div class="name">${it.name}</div><div class="price">$${fmtCOP(it.price)}</div></div>
-          <div class="qty">
-            <button onclick="changeQty(${idx},-1)">−</button>
-            <span>${it.qty}</span>
-            <button onclick="changeQty(${idx},1)">+</button>
-          </div>
-        </li>`).join('');
-      sub.textContent=fmtCOP(state.cart.reduce((a,i)=>a+i.qty*i.price,0));
+
+      const subtotalBase = state.cart.reduce((a,i)=>a+i.qty*i.price,0);
+      let subtotal = subtotalBase;
+
+        // Si el tipo de identificación es NIT, aplicamos IVA
+        if (document.getElementById("tipoIdent").value === "NIT") {
+            subtotal = Math.round(subtotalBase * 1.19);
+        }
+
+        list.innerHTML=state.cart.map((it,idx)=>`
+            <li class="cart-item">
+            <div><div class="name">${it.name}</div><div class="price">$${fmtCOP(it.price)}</div></div>
+            <div class="qty">
+                <button onclick="changeQty(${idx},-1)">−</button>
+                <span>${it.qty}</span>
+                <button onclick="changeQty(${idx},1)">+</button>
+            </div>
+            </li>`).join('');
+
+        sub.textContent=fmtCOP(subtotal);
     }
+
     function changeQty(idx,delta){
       state.cart[idx].qty+=delta;
       if(state.cart[idx].qty<=0) state.cart.splice(idx,1);
