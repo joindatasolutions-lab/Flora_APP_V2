@@ -201,27 +201,24 @@
     
     function renderCart(){
         const list=document.getElementById('cartList');
-        const sub=document.getElementById('cartSubtotal');
         const drawerFooter=document.querySelector(".drawer-footer");
 
         if(state.cart.length===0){
             list.innerHTML=`<li class="cart-item"><span class="name">Tu carrito está vacío.</span></li>`;
-            sub.textContent="0";
-            drawerFooter.innerHTML = `<div class="subtotal">Subtotal: $0</div>`; 
+            drawerFooter.innerHTML = `<div class="subtotal">Total: $0</div>`; 
             return;
         }
 
         const subtotalBase = state.cart.reduce((a,i)=>a+i.qty*i.price,0);
-        let subtotal = subtotalBase;
         let iva = 0;
+        let total = subtotalBase;
 
-        // Si es NIT, calculamos IVA
         if (document.getElementById("tipoIdent").value === "NIT") {
             iva = Math.round(subtotalBase * 0.19);
-            subtotal = subtotalBase + iva;
+            total = subtotalBase + iva;
         }
 
-        // Renderizamos items
+        // Render items
         list.innerHTML=state.cart.map((it,idx)=>`
             <li class="cart-item">
             <div><div class="name">${it.name}</div><div class="price">$${fmtCOP(it.price)}</div></div>
@@ -232,12 +229,12 @@
             </div>
             </li>`).join('');
 
-        // Mostramos desglose en el footer
+        // Footer con desglose
         if (iva > 0) {
             drawerFooter.innerHTML = `
             <div class="subtotal">Subtotal: $${fmtCOP(subtotalBase)}</div>
             <div class="subtotal">IVA (19%): $${fmtCOP(iva)}</div>
-            <div class="subtotal"><strong>Total: $${fmtCOP(subtotal)}</strong></div>
+            <div class="subtotal"><strong>Total: $${fmtCOP(total)}</strong></div>
             <div class="drawer-actions">
                 <button id="cartVaciar" class="btn-outline">Vaciar</button>
                 <button id="cartContinuar" class="btn-primary">Continuar</button>
@@ -253,7 +250,7 @@
             `;
         }
 
-        // Reasignamos eventos porque reescribimos el HTML del footer
+        // Reasignar eventos
         document.getElementById('cartVaciar').addEventListener('click',clearCart);
         document.getElementById('cartContinuar').addEventListener('click',proceedToCheckout);
     }
