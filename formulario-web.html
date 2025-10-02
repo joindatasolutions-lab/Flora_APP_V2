@@ -87,6 +87,7 @@
       <input type="hidden" id="precio" name="precio">
       <input type="hidden" id="cantidad" name="cantidad">
       <input type="hidden" id="domicilio" name="domicilio">
+      <input type="hidden" id="iva" name="iva">
       <div class="grid">
         <div>
           <label for="tipoIdent">Tipo de identificación</label>
@@ -153,7 +154,7 @@
   </div>
 
   <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyhzPxOXpOxIInFgHoC1FdYABq2FtHeoPOwX6EP3XxRpG1asuOqb-p3u6uTYDbzKqHy/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw1axDe8SZA32TRsesRaL6j5CFLL6CIVF9TMWC28shyg3Rj4eEOWp5e-cpqbEhFhALq/exec";
     const state = { catalogo: [], cart: [], barrios: {} };
     const fmtCOP = v => Number(v||0).toLocaleString('es-CO');
 
@@ -300,6 +301,7 @@
       document.getElementById('precio').value     = total;  // ya con IVA + domicilio si aplica
       document.getElementById('cantidad').value   = state.cart.reduce((a,i)=>a+i.qty,0);
       document.getElementById('domicilio').value  = domicilio; // 👈 asegúrate de tener este input hidden en el form
+      document.getElementById('iva').value        = iva;
 
       // --- Mostrar resumen en formulario ---
       let resumenTxt = `Carrito: ${resumen} — Subtotal: $${fmtCOP(subtotalBase)}`;
