@@ -266,24 +266,25 @@
 
     function proceedToCheckout(){
         if(state.cart.length===0){closeCart();return;}
+
         const subtotalBase=state.cart.reduce((a,i)=>a+i.qty*i.price,0);
-        let subtotal = subtotalBase;
         let iva = 0;
+        let total = subtotalBase;
 
         if (document.getElementById("tipoIdent").value === "NIT") {
             iva = Math.round(subtotalBase * 0.19);
-            subtotal = subtotalBase + iva;
+            total = subtotalBase + iva;
         }
 
         const resumen=state.cart.map(i=>`${i.qty}× ${i.name}`).join(' | ');
         document.getElementById('producto').value=resumen;
-        document.getElementById('precio').value=subtotal;
+        document.getElementById('precio').value=total;
         document.getElementById('cantidad').value=state.cart.reduce((a,i)=>a+i.qty,0);
 
-        // 👉 Aquí mostramos el desglose si hay IVA
+        // 👉 Mostrar desglose también en el resumen
         if (iva > 0) {
             document.getElementById('resumenProducto').textContent=
-            `Carrito: ${resumen} — Subtotal: $${fmtCOP(subtotalBase)} + IVA (19%): $${fmtCOP(iva)} = Total: $${fmtCOP(subtotal)}`;
+            `Carrito: ${resumen} — Subtotal: $${fmtCOP(subtotalBase)} + IVA (19%): $${fmtCOP(iva)} = Total: $${fmtCOP(total)}`;
         } else {
             document.getElementById('resumenProducto').textContent=
             `Carrito: ${resumen} — $${fmtCOP(subtotalBase)}`;
@@ -291,6 +292,7 @@
 
         closeCart(); show('viewForm');
     }
+
 
     function show(id){
       document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
