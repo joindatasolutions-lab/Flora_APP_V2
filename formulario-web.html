@@ -202,6 +202,8 @@
     function renderCart(){
       const list = document.getElementById('cartList');
       const drawerFooter = document.querySelector(".drawer-footer");
+      const barrioSel = document.getElementById("barrio")?.value || "";
+      const domicilio = state.barrios[barrioSel] || 0;
 
       if(state.cart.length === 0){
           list.innerHTML = `<li class="cart-item"><span class="name">Tu carrito está vacío.</span></li>`;
@@ -221,6 +223,9 @@
           total = subtotalBase + iva;
       }
 
+      // --- Sumar domicilio ---
+      total = total + domicilio;
+
       // --- Renderizar items ---
       list.innerHTML = state.cart.map((it,idx)=>`
           <li class="cart-item">
@@ -236,30 +241,22 @@
           </li>`).join('');
 
       // --- Footer con desglose ---
-      if (iva > 0) {
-          drawerFooter.innerHTML = `
-              <div class="subtotal">Subtotal: $${fmtCOP(subtotalBase)}</div>
-              <div class="subtotal">IVA (19%): $${fmtCOP(iva)}</div>
-              <div class="subtotal"><strong>Total: $${fmtCOP(total)}</strong></div>
-              <div class="drawer-actions">
-                  <button id="cartVaciar" class="btn-outline">Vaciar</button>
-                  <button id="cartContinuar" class="btn-primary">Continuar</button>
-              </div>
-          `;
-      } else {
-          drawerFooter.innerHTML = `
-              <div class="subtotal"><strong>Total: $${fmtCOP(subtotalBase)}</strong></div>
-              <div class="drawer-actions">
-                  <button id="cartVaciar" class="btn-outline">Vaciar</button>
-                  <button id="cartContinuar" class="btn-primary">Continuar</button>
-              </div>
-          `;
-      }
+      let footerHTML = `<div class="subtotal">Subtotal: $${fmtCOP(subtotalBase)}</div>`;
+      if (iva > 0) footerHTML += `<div class="subtotal">IVA (19%): $${fmtCOP(iva)}</div>`;
+      if (domicilio > 0) footerHTML += `<div class="subtotal">Domicilio: $${fmtCOP(domicilio)}</div>`;
+      footerHTML += `<div class="subtotal"><strong>Total: $${fmtCOP(total)}</strong></div>
+          <div class="drawer-actions">
+              <button id="cartVaciar" class="btn-outline">Vaciar</button>
+              <button id="cartContinuar" class="btn-primary">Continuar</button>
+          </div>`;
+
+      drawerFooter.innerHTML = footerHTML;
 
       // --- Reasignar eventos ---
       document.getElementById('cartVaciar').addEventListener('click', clearCart);
       document.getElementById('cartContinuar').addEventListener('click', proceedToCheckout);
-    } 
+    }
+ 
 
     function changeQty(idx,delta){
       state.cart[idx].qty+=delta;
@@ -436,6 +433,10 @@
     document.getElementById('tipoIdent').addEventListener('change', ()=>{
         renderCart();        // refresca el carrito con IVA si aplica
         proceedToCheckout(); // si ya estás en formulario, actualiza resumenProducto
+    });
+    document.getElementById('barrio').addEventListener('change', ()=>{
+    renderCart();
+    proceedToCheckout();
     });
   </script>
 </body>
