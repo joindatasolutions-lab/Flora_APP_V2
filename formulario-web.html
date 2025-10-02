@@ -200,60 +200,66 @@
     }
     
     function renderCart(){
-        const list=document.getElementById('cartList');
-        const drawerFooter=document.querySelector(".drawer-footer");
+      const list = document.getElementById('cartList');
+      const drawerFooter = document.querySelector(".drawer-footer");
 
-        if(state.cart.length===0){
-            list.innerHTML=`<li class="cart-item"><span class="name">Tu carrito está vacío.</span></li>`;
-            drawerFooter.innerHTML = `<div class="subtotal">Total: $0</div>`; 
-            return;
-        }
+      if(state.cart.length === 0){
+          list.innerHTML = `<li class="cart-item"><span class="name">Tu carrito está vacío.</span></li>`;
+          drawerFooter.innerHTML = `<div class="subtotal">Total: $0</div>`; 
+          return;
+      }
 
-        const subtotalBase = state.cart.reduce((a,i)=>a+i.qty*i.price,0);
-        let iva = 0;
-        let total = subtotalBase;
+      // --- Calcular subtotal ---
+      const subtotalBase = state.cart.reduce((a,i)=>a+i.qty*i.price,0);
+      let iva = 0;
+      let total = subtotalBase;
 
-        if (document.getElementById("tipoIdent").value === "NIT") {
-            iva = Math.round(subtotalBase * 0.19);
-            total = subtotalBase + iva;
-        }
+      // --- Aplicar IVA si el tipo es NIT ---
+      const tipoIdent = document.getElementById("tipoIdent")?.value || "CEDULA";
+      if (tipoIdent === "NIT") {
+          iva = Math.round(subtotalBase * 0.19);
+          total = subtotalBase + iva;
+      }
 
-        // Render items
-        list.innerHTML=state.cart.map((it,idx)=>`
-            <li class="cart-item">
-            <div><div class="name">${it.name}</div><div class="price">$${fmtCOP(it.price)}</div></div>
-            <div class="qty">
-                <button onclick="changeQty(${idx},-1)">−</button>
-                <span>${it.qty}</span>
-                <button onclick="changeQty(${idx},1)">+</button>
-            </div>
-            </li>`).join('');
+      // --- Renderizar items ---
+      list.innerHTML = state.cart.map((it,idx)=>`
+          <li class="cart-item">
+              <div>
+                  <div class="name">${it.name}</div>
+                  <div class="price">$${fmtCOP(it.price)}</div>
+              </div>
+              <div class="qty">
+                  <button onclick="changeQty(${idx},-1)">−</button>
+                  <span>${it.qty}</span>
+                  <button onclick="changeQty(${idx},1)">+</button>
+              </div>
+          </li>`).join('');
 
-        // Footer con desglose
-        if (iva > 0) {
-            drawerFooter.innerHTML = `
-            <div class="subtotal">Subtotal: $${fmtCOP(subtotalBase)}</div>
-            <div class="subtotal">IVA (19%): $${fmtCOP(iva)}</div>
-            <div class="subtotal"><strong>Total: $${fmtCOP(total)}</strong></div>
-            <div class="drawer-actions">
-                <button id="cartVaciar" class="btn-outline">Vaciar</button>
-                <button id="cartContinuar" class="btn-primary">Continuar</button>
-            </div>
-            `;
-        } else {
-            drawerFooter.innerHTML = `
-            <div class="subtotal"><strong>Total: $${fmtCOP(subtotalBase)}</strong></div>
-            <div class="drawer-actions">
-                <button id="cartVaciar" class="btn-outline">Vaciar</button>
-                <button id="cartContinuar" class="btn-primary">Continuar</button>
-            </div>
-            `;
-        }
+      // --- Footer con desglose ---
+      if (iva > 0) {
+          drawerFooter.innerHTML = `
+              <div class="subtotal">Subtotal: $${fmtCOP(subtotalBase)}</div>
+              <div class="subtotal">IVA (19%): $${fmtCOP(iva)}</div>
+              <div class="subtotal"><strong>Total: $${fmtCOP(total)}</strong></div>
+              <div class="drawer-actions">
+                  <button id="cartVaciar" class="btn-outline">Vaciar</button>
+                  <button id="cartContinuar" class="btn-primary">Continuar</button>
+              </div>
+          `;
+      } else {
+          drawerFooter.innerHTML = `
+              <div class="subtotal"><strong>Total: $${fmtCOP(subtotalBase)}</strong></div>
+              <div class="drawer-actions">
+                  <button id="cartVaciar" class="btn-outline">Vaciar</button>
+                  <button id="cartContinuar" class="btn-primary">Continuar</button>
+              </div>
+          `;
+      }
 
-        // Reasignar eventos
-        document.getElementById('cartVaciar').addEventListener('click',clearCart);
-        document.getElementById('cartContinuar').addEventListener('click',proceedToCheckout);
-    }
+      // --- Reasignar eventos ---
+      document.getElementById('cartVaciar').addEventListener('click', clearCart);
+      document.getElementById('cartContinuar').addEventListener('click', proceedToCheckout);
+    } 
 
     function changeQty(idx,delta){
       state.cart[idx].qty+=delta;
@@ -265,32 +271,42 @@
     function closeCart(){document.getElementById('cartDrawer').classList.remove('open');}
 
     function proceedToCheckout(){
-        if(state.cart.length===0){closeCart();return;}
+      if(state.cart.length === 0){
+          closeCart();
+          return;
+      }
 
-        const subtotalBase=state.cart.reduce((a,i)=>a+i.qty*i.price,0);
-        let iva = 0;
-        let total = subtotalBase;
+      // --- Calcular subtotal ---
+      const subtotalBase = state.cart.reduce((a,i)=>a+i.qty*i.price,0);
+      let iva = 0;
+      let total = subtotalBase;
 
-        if (document.getElementById("tipoIdent").value === "NIT") {
-            iva = Math.round(subtotalBase * 0.19);
-            total = subtotalBase + iva;
-        }
+      // --- Aplicar IVA si es NIT ---
+      const tipoIdent = document.getElementById("tipoIdent")?.value || "CEDULA";
+      if (tipoIdent === "NIT") {
+          iva = Math.round(subtotalBase * 0.19);
+          total = subtotalBase + iva;
+      }
 
-        const resumen=state.cart.map(i=>`${i.qty}× ${i.name}`).join(' | ');
-        document.getElementById('producto').value=resumen;
-        document.getElementById('precio').value=total;
-        document.getElementById('cantidad').value=state.cart.reduce((a,i)=>a+i.qty,0);
+      // --- Resumen de productos ---
+      const resumen = state.cart.map(i => `${i.qty}× ${i.name}`).join(' | ');
 
-        // 👉 Mostrar desglose también en el resumen
-        if (iva > 0) {
-            document.getElementById('resumenProducto').textContent=
-            `Carrito: ${resumen} — Subtotal: $${fmtCOP(subtotalBase)} + IVA (19%): $${fmtCOP(iva)} = Total: $${fmtCOP(total)}`;
-        } else {
-            document.getElementById('resumenProducto').textContent=
-            `Carrito: ${resumen} — $${fmtCOP(subtotalBase)}`;
-        }
+      // --- Guardar en campos ocultos ---
+      document.getElementById('producto').value = resumen;
+      document.getElementById('precio').value   = total;  // ya con IVA si aplica
+      document.getElementById('cantidad').value = state.cart.reduce((a,i)=>a+i.qty,0);
 
-        closeCart(); show('viewForm');
+      // --- Mostrar resumen en formulario ---
+      if (iva > 0) {
+          document.getElementById('resumenProducto').textContent = 
+            `Carrito: ${resumen} — Subtotal: $${fmtCOP(subtotalBase)} + IVA: $${fmtCOP(iva)} = Total: $${fmtCOP(total)}`;
+      } else {
+          document.getElementById('resumenProducto').textContent = 
+            `Carrito: ${resumen} — Total: $${fmtCOP(total)}`;
+      }
+
+      closeCart();
+      show('viewForm');
     }
 
 
