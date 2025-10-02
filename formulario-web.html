@@ -267,7 +267,7 @@
     function openCart(){document.getElementById('cartDrawer').classList.add('open');}
     function closeCart(){document.getElementById('cartDrawer').classList.remove('open');}
 
-    function proceedToCheckout(){
+    function proceedToCheckout(){ 
       if(state.cart.length === 0){
           closeCart();
           return;
@@ -275,6 +275,9 @@
 
       // --- Calcular subtotal ---
       const subtotalBase = state.cart.reduce((a,i)=>a+i.qty*i.price,0);
+      const barrioSel = document.getElementById("barrio")?.value || "";
+      const domicilio = state.barrios[barrioSel] || 0;
+
       let iva = 0;
       let total = subtotalBase;
 
@@ -285,28 +288,29 @@
           total = subtotalBase + iva;
       }
 
+      // --- Sumar domicilio ---
+      total = total + domicilio;
+
       // --- Resumen de productos ---
       const resumen = state.cart.map(i => `${i.qty}× ${i.name}`).join(' | ');
 
       // --- Guardar en campos ocultos ---
-      document.getElementById('producto').value = resumen;
-      document.getElementById('precio').value   = total;  // ya con IVA si aplica
-      document.getElementById('cantidad').value = state.cart.reduce((a,i)=>a+i.qty,0);
+      document.getElementById('producto').value   = resumen;
+      document.getElementById('precio').value     = total;  // ya con IVA + domicilio si aplica
+      document.getElementById('cantidad').value   = state.cart.reduce((a,i)=>a+i.qty,0);
+      document.getElementById('domicilio').value  = domicilio; // 👈 asegúrate de tener este input hidden en el form
 
       // --- Mostrar resumen en formulario ---
-      if (iva > 0) {
-          document.getElementById('resumenProducto').textContent = 
-            `Carrito: ${resumen} — Subtotal: $${fmtCOP(subtotalBase)} + IVA: $${fmtCOP(iva)} = Total: $${fmtCOP(total)}`;
-      } else {
-          document.getElementById('resumenProducto').textContent = 
-            `Carrito: ${resumen} — Total: $${fmtCOP(total)}`;
-      }
+      let resumenTxt = `Carrito: ${resumen} — Subtotal: $${fmtCOP(subtotalBase)}`;
+      if (iva > 0) resumenTxt += ` + IVA: $${fmtCOP(iva)}`;
+      if (domicilio > 0) resumenTxt += ` + Domicilio: $${fmtCOP(domicilio)}`;
+      resumenTxt += ` = Total: $${fmtCOP(total)}`;
+
+      document.getElementById('resumenProducto').textContent = resumenTxt;
 
       closeCart();
       show('viewForm');
     }
-
-
 
     function show(id){
       document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
