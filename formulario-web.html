@@ -88,6 +88,7 @@
       <input type="hidden" id="cantidad" name="cantidad">
       <input type="hidden" id="domicilio" name="domicilio">
       <input type="hidden" id="iva" name="iva">
+      <input type="hidden" id="total" name="total"> 
       <div class="grid">
         <div>
           <label for="tipoIdent">Tipo de identificación</label>
@@ -298,10 +299,11 @@
 
       // --- Guardar en campos ocultos ---
       document.getElementById('producto').value   = resumen;
-      document.getElementById('precio').value     = total;  // ya con IVA + domicilio si aplica
+      document.getElementById('precio').value     = subtotalBase;  // ya con IVA + domicilio si aplica
       document.getElementById('cantidad').value   = state.cart.reduce((a,i)=>a+i.qty,0);
       document.getElementById('domicilio').value  = domicilio; // 👈 asegúrate de tener este input hidden en el form
       document.getElementById('iva').value        = iva;
+      document.getElementById('total').value      = total;
 
       // --- Mostrar resumen en formulario ---
       let resumenTxt = `Carrito: ${resumen} — Subtotal: $${fmtCOP(subtotalBase)}`;
