@@ -310,6 +310,7 @@
     }
 
 
+
     function show(id){
       document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
       document.getElementById(id).classList.add('active');
@@ -431,6 +432,11 @@
     document.getElementById('cartContinuar').addEventListener('click',proceedToCheckout);
     document.getElementById('btnVolver').addEventListener('click',()=>show('viewCatalog'));
     init();
+    // 👇 Nuevo: recalcular carrito y resumen al cambiar el tipo de identificación
+    document.getElementById('tipoIdent').addEventListener('change', ()=>{
+        renderCart();        // refresca el carrito con IVA si aplica
+        proceedToCheckout(); // si ya estás en formulario, actualiza resumenProducto
+    });
   </script>
 </body>
 </html>
