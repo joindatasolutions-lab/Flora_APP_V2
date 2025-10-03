@@ -88,7 +88,9 @@
       <input type="hidden" id="cantidad" name="cantidad">
       <input type="hidden" id="domicilio" name="domicilio">
       <input type="hidden" id="iva" name="iva">
-      <input type="hidden" id="total" name="total"> 
+      <input type="hidden" id="total" name="total">
+      <input type="hidden" id="fechaEntregaFinal" name="fechaEntregaFinal">
+      <input type="hidden" id="horaEntregaFinal" name="horaEntregaFinal">
       <div class="grid">
         <div>
           <label for="tipoIdent">Tipo de identificación</label>
@@ -396,9 +398,9 @@
       const fd=new FormData(e.target);
       const fecha = document.getElementById("fechaEntrega").value;
       const hora  = document.getElementById("horaEntrega").value;
-      if (fecha && hora) {
-        fd.set("fechaEntrega", `${fecha} ${hora}`);
-      }
+      if (fecha) fd.set("fechaEntregaFinal", fecha);  // yyyy-mm-dd
+      if (hora)  fd.set("horaEntregaFinal", hora);    // HH:mm
+
       const status=document.getElementById("status");
       const btn=document.getElementById("btnSubmit");
 
