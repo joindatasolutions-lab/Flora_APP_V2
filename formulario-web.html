@@ -338,6 +338,13 @@
       // --- Resumen de productos ---
       const resumen = state.cart.map(i => `${i.qty}× ${i.name}`).join(' | ');
 
+      // --- Ajuste automático para pedidos múltiples ---
+      let cantidadPedido = 1;
+      if (!resumen.includes("|")) {
+        // Si solo hay un producto, usar la cantidad real
+        cantidadPedido = state.cart.reduce((a,i)=>a+i.qty,0);
+      }
+
       /*// --- Guardar en campos ocultos ---
       document.getElementById('producto').value   = resumen;
       document.getElementById('precio').value     = subtotalBase;  // ya con IVA + domicilio si aplica
@@ -348,15 +355,15 @@
 
       // --- Guardar en campos ocultos correctamente ---
       document.getElementById('producto').value   = resumen;
-      document.getElementById('cantidad').value   = state.cart.reduce((a,i)=>a+i.qty,0);
+      document.getElementById('cantidad').value   = cantidadPedido;
       document.getElementById('domicilio').value  = domicilio;
       document.getElementById('iva').value        = iva;
 
       // 👇 Este campo debe reflejar el precio total *antes* de IVA y domicilio
-      document.getElementById('precio').value     = subtotalBase;
+      document.getElementById('precio').value = subtotalBase;
 
       // 👇 Este campo debe reflejar el total final con IVA + domicilio (lo que se paga)
-      document.getElementById('total').value      = total;
+      document.getElementById('total').value = total;
 
 
       // --- Mostrar resumen en formulario ---
