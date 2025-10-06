@@ -171,7 +171,45 @@
       document.getElementById('fechaEntrega').setAttribute('min', new Date().toISOString().slice(0,10));
     }
 
-    function renderCatalog(items){
+    function renderCatalog(items) {
+      const wrap = document.getElementById('catalogo');
+      wrap.innerHTML = "";
+
+      // 🔹 Filtrar productos válidos (omitimos id=0 y sin imagen)
+      const filteredItems = items.filter(prod => {
+        const id = Number(prod.id || 0);
+        const img = prod.img || prod.image || "";
+        return id !== 0 && img.trim() !== "";
+      });
+
+      // 🔹 Renderizar solo los productos válidos
+      filteredItems.forEach(prod => {
+        const imgUrl = prod.img || prod.image || "";
+        const name = prod.name || prod.producto || "Producto";
+        const price = Number(prod.price || prod.precio || 0);
+
+        const card = document.createElement('div');
+        card.className = "card";
+        card.innerHTML = `
+          <img src="${imgUrl}" alt="${name}" onerror="this.src='https://via.placeholder.com/300x300?text=Sin+imagen';">
+          <div class="body">
+            <div class="name">${name}</div>
+            <p class="price">$${fmtCOP(price)}</p>
+            <button class="btn-add">Añadir</button>
+          </div>`;
+
+        // 🔹 Evento para añadir al carrito
+        card.querySelector('.btn-add').addEventListener('click', e => {
+          e.stopPropagation();
+          addToCart({ id: prod.id || name, name, price });
+        });
+
+        wrap.appendChild(card);
+      });
+    }
+
+
+    /*function renderCatalog(items){
       const wrap = document.getElementById('catalogo');
       wrap.innerHTML = "";
       items.forEach(prod=>{
@@ -191,7 +229,8 @@
         });
         wrap.appendChild(card);
       });
-    }
+    }*/
+
 
     function addToCart(prod){
       const idx=state.cart.findIndex(i=>i.name===prod.name);
