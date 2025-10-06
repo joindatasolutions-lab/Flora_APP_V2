@@ -157,7 +157,7 @@
   </div>
 
   <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxHyLXgvmeFbpqyteGYcR7gBAdYgISgrJttnfqqnoReDRYxuyYhjMsjtIhZgIUFPJtp/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzRGjZpJVZXycGp67WK4pGQwoXJEJcdvwjlUgLj9HOnuVXkEYTvOZtBGuqeoKnQcL4B/exec";
     const state = { catalogo: [], cart: [], barrios: {} };
     const fmtCOP = v => Number(v||0).toLocaleString('es-CO');
 
@@ -338,13 +338,26 @@
       // --- Resumen de productos ---
       const resumen = state.cart.map(i => `${i.qty}× ${i.name}`).join(' | ');
 
-      // --- Guardar en campos ocultos ---
+      /*// --- Guardar en campos ocultos ---
       document.getElementById('producto').value   = resumen;
       document.getElementById('precio').value     = subtotalBase;  // ya con IVA + domicilio si aplica
       document.getElementById('cantidad').value   = state.cart.reduce((a,i)=>a+i.qty,0);
       document.getElementById('domicilio').value  = domicilio; // 👈 asegúrate de tener este input hidden en el form
       document.getElementById('iva').value        = iva;
+      document.getElementById('total').value      = total;*/
+
+      // --- Guardar en campos ocultos correctamente ---
+      document.getElementById('producto').value   = resumen;
+      document.getElementById('cantidad').value   = state.cart.reduce((a,i)=>a+i.qty,0);
+      document.getElementById('domicilio').value  = domicilio;
+      document.getElementById('iva').value        = iva;
+
+      // 👇 Este campo debe reflejar el precio total *antes* de IVA y domicilio
+      document.getElementById('precio').value     = subtotalBase;
+
+      // 👇 Este campo debe reflejar el total final con IVA + domicilio (lo que se paga)
       document.getElementById('total').value      = total;
+
 
       // --- Mostrar resumen en formulario ---
       let resumenTxt = `Carrito: ${resumen} — Subtotal: $${fmtCOP(subtotalBase)}`;
