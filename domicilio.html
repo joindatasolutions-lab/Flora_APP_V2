@@ -1,136 +1,245 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Flora - Panel de Domicilios</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-<style>
-  :root{
-    --rosa:#e6a5b6;
-    --rosa-osc:#c97b94;
-    --bg:#fdfaf7;
-    --gris:#5c5c5c;
-    --borde:#ecd6dc;
-    --verde:#1a7f37;
-    --amarillo:#a15d00;
-  }
-  body{ font-family:'Inter',sans-serif; background:var(--bg); margin:0; color:#333; }
-  header{ text-align:center; background:#fff; padding:20px; border-bottom:1px solid var(--borde); box-shadow:0 2px 6px rgba(0,0,0,.05); }
-  header img{ max-width:200px; margin-bottom:6px; }
-  h2{ margin:0; color:var(--gris); }
-  .filtros{ text-align:center; margin:16px; }
-  select, input[type=text]{
-    padding:8px 12px; border:1px solid var(--borde);
-    border-radius:8px; font-family:'Inter'; font-size:14px; margin:0 6px;
-  }
-  .grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:16px; padding:16px; max-width:1200px; margin:auto; }
-  .card{ background:white; border:1px solid var(--borde); border-radius:16px; padding:16px;
-    box-shadow:0 4px 12px rgba(0,0,0,.05); transition:transform .1s ease; }
-  .card:hover{ transform:translateY(-2px); }
-  .estado{ font-weight:700; color:var(--rosa-osc); }
-  .asignado{ color:var(--gris); font-size:.9rem; margin:4px 0; }
-  .btn{ border:none; border-radius:8px; padding:6px 12px; margin:3px; font-weight:600; cursor:pointer; }
-  .btn-tomar{ background:var(--rosa); color:#fff; }
-  .btn-ruta{ background:#fff2cc; color:var(--amarillo); }
-  .btn-entregado{ background:#d7f5dd; color:var(--verde); }
-  footer{ text-align:center; font-size:.85rem; color:var(--gris); padding:12px; border-top:1px solid var(--borde); }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flora - Panel de Domicilios</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --rosa:#e6a5b6;
+      --rosa-osc:#c97b94;
+      --bg:#fdfaf7;
+      --gris:#5c5c5c;
+      --borde:#ecd6dc;
+      --verde:#e7f8ec;
+      --azul:#e0f2ff;
+      --amarillo:#fff7e6;
+      --rojo:#ffe4e4;
+    }
+    *{box-sizing:border-box;}
+    body{
+      margin:0;
+      font-family:'Inter',sans-serif;
+      background:var(--bg);
+      color:#333;
+      display:flex;
+      flex-direction:column;
+      min-height:100vh;
+    }
+    header{
+      text-align:center;
+      background:#fff;
+      padding:20px 16px;
+      border-bottom:1px solid var(--borde);
+      box-shadow:0 2px 6px rgba(0,0,0,.05);
+    }
+    header img{
+      max-width:200px;
+      margin-bottom:8px;
+    }
+    h2{margin:0;color:var(--gris);}
+
+    .filters{
+      display:flex;
+      flex-wrap:wrap;
+      justify-content:center;
+      gap:12px;
+      background:#fff;
+      border-bottom:1px solid var(--borde);
+      padding:12px 16px;
+    }
+    .filters input, .filters select{
+      padding:8px 12px;
+      border:1px solid #ccc;
+      border-radius:10px;
+      font-size:14px;
+      min-width:180px;
+    }
+
+    .grid{
+      display:grid;
+      gap:16px;
+      padding:20px;
+      grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
+    }
+
+    .card{
+      background:#fff;
+      border:1px solid var(--borde);
+      border-radius:18px;
+      box-shadow:0 6px 16px rgba(0,0,0,.05);
+      padding:16px;
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
+      transition:transform .15s ease, box-shadow .15s ease;
+    }
+    .card:hover{
+      transform:translateY(-2px);
+      box-shadow:0 10px 22px rgba(0,0,0,.08);
+    }
+    .pedido{font-weight:700;color:var(--rosa-osc);}
+    .estado{
+      display:inline-block;
+      padding:6px 10px;
+      border-radius:999px;
+      font-size:.85rem;
+      font-weight:700;
+      margin:4px 0;
+      border:1px solid #ddd;
+    }
+    .Pendiente{background:var(--amarillo);color:#a15d00;border-color:#ffd59e;}
+    .EnRuta{background:var(--azul);color:#0369a1;border-color:#b3e0ff;}
+    .Entregado{background:var(--verde);color:#1a7f37;border-color:#bfe7c8;}
+    .Cancelado{background:var(--rojo);color:#a94442;border-color:#f0a5a5;}
+    .campo{margin:2px 0;}
+    .campo strong{color:var(--gris);}
+    button{
+      padding:10px 12px;
+      border:none;
+      border-radius:10px;
+      cursor:pointer;
+      font-weight:700;
+      margin-top:8px;
+      transition:background .2s;
+    }
+    .btn-entregar{
+      background:var(--rosa);
+      color:#fff;
+    }
+    .btn-entregar:hover{
+      background:var(--rosa-osc);
+    }
+    .btn-disabled{
+      background:#eee;
+      color:#888;
+      cursor:default;
+    }
+    .no-results{
+      text-align:center;
+      font-weight:600;
+      padding:40px;
+      color:#777;
+    }
+  </style>
 </head>
 <body>
   <header>
-    <img src="img/logo 2024 marca registrada-04.png" alt="Flora Logo"/>
+    <img src="img/logo 2024 marca registrada-04.png" alt="Flora Logo">
     <h2>Panel de Domicilios</h2>
   </header>
 
-  <div class="filtros">
-    <label>Filtrar por estado:</label>
-    <select id="filtroEstado" onchange="filtrar()">
-      <option value="">Todos</option>
+  <section class="filters">
+    <input type="text" id="searchInput" placeholder="Buscar cliente, barrio o estado...">
+    <select id="estadoFilter">
+      <option value="">Todos los estados</option>
       <option value="Pendiente">Pendiente</option>
       <option value="En ruta">En ruta</option>
       <option value="Entregado">Entregado</option>
+      <option value="Cancelado">Cancelado</option>
     </select>
-    <input type="text" id="buscar" placeholder="Buscar pedido o cliente..." oninput="filtrar()">
-  </div>
+  </section>
 
-  <div id="pedidos" class="grid">Cargando pedidos...</div>
+  <section class="grid" id="domiciliosGrid"></section>
+  <div class="no-results" id="noResults" style="display:none;">No se encontraron domicilios con ese criterio.</div>
 
-  <footer>© 2025 Flora - Tienda de Flores 🌸</footer>
+  <script>
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbygooVDtuPm2mzCYcpAH37pAXXVvQTg8OV86DUz73f4p3g1QJOhCI-u0-VkI6UsNI6jaw/exec"; // 🔹 Reemplaza por tu URL
+    let domicilios = [];
 
-<script>
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbygooVDtuPm2mzCYcpAH37pAXXVvQTg8OV86DUz73f4p3g1QJOhCI-u0-VkI6UsNI6jaw/exec"; // 👈 cambia aquí tu URL
-let pedidosGlobal = [];
+    async function init(){
+      try{
+        const res = await fetch(SCRIPT_URL);
+        const data = await res.json();
+        domicilios = data.domicilios || [];
+        renderDomicilios(domicilios);
+      }catch(err){
+        document.getElementById('domiciliosGrid').innerHTML = '<p style="color:red;text-align:center;">Error cargando datos.</p>';
+        console.error(err);
+      }
+    }
 
-async function cargarPedidos(){
-  const res = await fetch(`${SCRIPT_URL}?accion=getPedidos`);
-  pedidosGlobal = await res.json();
-  renderPedidos(pedidosGlobal);
-}
+    function renderDomicilios(list){
+      const grid = document.getElementById('domiciliosGrid');
+      grid.innerHTML = "";
+      if(list.length === 0){
+        document.getElementById('noResults').style.display = "block";
+        return;
+      }
+      document.getElementById('noResults').style.display = "none";
 
-function filtrar(){
-  const estadoSel = document.getElementById("filtroEstado").value.toLowerCase();
-  const buscar = document.getElementById("buscar").value.toLowerCase();
-  const filtrados = pedidosGlobal.filter(p => {
-    const matchEstado = estadoSel ? (String(p["Estado Domicilio"]||"").toLowerCase()===estadoSel) : true;
-    const matchTexto = buscar ? (
-      String(p.Cliente||"").toLowerCase().includes(buscar) ||
-      String(p["N°Pedido"]||"").toLowerCase().includes(buscar)
-    ) : true;
-    return matchEstado && matchTexto;
-  });
-  renderPedidos(filtrados);
-}
+      list.forEach(d => {
+        const estadoClass = d["Estado Domicilio"]?.replace(/\s+/g,'') || 'Pendiente';
+        const card = document.createElement('div');
+        card.className = "card";
+        card.innerHTML = `
+          <div>
+            <div class="pedido">Pedido #${d["N°Pedido"] || "-"}</div>
+            <div class="estado ${estadoClass}">${d["Estado Domicilio"] || "Pendiente"}</div>
+            <div class="campo"><strong>Cliente:</strong> ${d.Cliente || "-"}</div>
+            <div class="campo"><strong>Teléfono:</strong> ${d.Telefono || "-"}</div>
+            <div class="campo"><strong>Producto:</strong> ${d.Producto || "-"}</div>
+            <div class="campo"><strong>Dirección:</strong> ${d["Dirección de Entrega"] || "-"}</div>
+            <div class="campo"><strong>Barrio:</strong> ${d.Barrio || "-"}</div>
+            <div class="campo"><strong>Destinatario:</strong> ${d.Destinatario || "-"}</div>
+            <div class="campo"><strong>Tel. destino:</strong> ${d.TelefonoDestino || "-"}</div>
+            <div class="campo"><strong>Domiciliario:</strong> ${d.Domiciliario || "-"}</div>
+            <div class="campo"><strong>Fecha entrega:</strong> ${d.FechaEntrega || "-"}</div>
+            <div class="campo"><strong>Zona:</strong> ${d["Zona porlas que debe acceder"] || "-"}</div>
+            <div class="campo"><strong>Observaciones:</strong> ${d.Observaciones || "-"}</div>
+          </div>
+          ${renderButton(d)}
+        `;
+        grid.appendChild(card);
+      });
+    }
 
-function renderPedidos(pedidos){
-  const cont=document.getElementById("pedidos");
-  cont.innerHTML="";
-  if(!pedidos.length){
-    cont.innerHTML="<p style='text-align:center;color:gray'>No hay pedidos con este filtro</p>";
-    return;
-  }
-  pedidos.forEach(p=>{
-    const div=document.createElement("div");
-    div.className="card";
-    div.innerHTML=`
-      <h3>Pedido #${p["N°Pedido"]}</h3>
-      <p><b>Cliente:</b> ${p.Cliente||""}</p>
-      <p><b>Dirección:</b> ${p["Dirección de Entrega"]||""}</p>
-      <p><b>Barrio:</b> ${p.Barrio||""}</p>
-      <p><b>Teléfono:</b> ${p.TelefonoDestino||""}</p>
-      <p class="estado">Estado: ${p["Estado Domicilio"]||"Pendiente"}</p>
-      <p class="asignado">Domiciliario: ${p.Domiciliario||"Sin asignar"}</p>
-      <div>
-        <button class="btn btn-tomar" onclick="asignar('${p["N°Pedido"]}')">Tomar</button>
-        <button class="btn btn-ruta" onclick="cambiarEstado('${p["N°Pedido"]}','En ruta')">En ruta</button>
-        <button class="btn btn-entregado" onclick="cambiarEstado('${p["N°Pedido"]}','Entregado')">Entregado</button>
-      </div>`;
-    cont.appendChild(div);
-  });
-}
+    function renderButton(d){
+      const estado = (d["Estado Domicilio"] || "").toLowerCase();
+      if(estado === "pendiente" || estado === "en ruta"){
+        return `<button class="btn-entregar" onclick="marcarEntregado('${d["N°Pedido"]}')">Marcar como Entregado</button>`;
+      }else if(estado === "entregado"){
+        return `<button class="btn-disabled">Entregado ✅</button>`;
+      }else{
+        return `<button class="btn-disabled">Cancelado ❌</button>`;
+      }
+    }
 
-async function asignar(pedidoId){
-  const nombre = prompt("Ingrese su nombre:");
-  if(!nombre) return;
-  const cambios = {
-    "Domiciliario": nombre,
-    "Estado Domicilio": "En ruta",
-    "FechaAsignación": new Date().toISOString()
-  };
-  await fetch(`${SCRIPT_URL}?accion=updatePedido&id=${pedidoId}&cambios=${encodeURIComponent(JSON.stringify(cambios))}`);
-  cargarPedidos();
-}
+    async function marcarEntregado(pedido){
+      if(!confirm("¿Marcar el pedido #" + pedido + " como Entregado?")) return;
+      try{
+        const res = await fetch(SCRIPT_URL, {
+          method:"POST",
+          headers:{"Content-Type":"application/json"},
+          body:JSON.stringify({pedido, estado:"Entregado"})
+        });
+        const data = await res.json();
+        if(data.status === "success"){
+          domicilios = domicilios.map(d => d["N°Pedido"] == pedido ? {...d, "Estado Domicilio":"Entregado"} : d);
+          renderDomicilios(filtrar());
+        }else{
+          alert("No se pudo actualizar el estado.");
+        }
+      }catch(err){
+        alert("Error de red: " + err);
+      }
+    }
 
-async function cambiarEstado(pedidoId, estado){
-  const cambios = {"Estado Domicilio": estado};
-  await fetch(`${SCRIPT_URL}?accion=updatePedido&id=${pedidoId}&cambios=${encodeURIComponent(JSON.stringify(cambios))}`);
-  cargarPedidos();
-}
+    function filtrar(){
+      const texto = document.getElementById('searchInput').value.toLowerCase();
+      const estado = document.getElementById('estadoFilter').value.toLowerCase();
+      return domicilios.filter(d => {
+        const matchTexto = Object.values(d).some(v => (v+"").toLowerCase().includes(texto));
+        const matchEstado = !estado || (d["Estado Domicilio"]||"").toLowerCase() === estado;
+        return matchTexto && matchEstado;
+      });
+    }
 
-cargarPedidos();
-</script>
+    document.getElementById('searchInput').addEventListener('input',()=>renderDomicilios(filtrar()));
+    document.getElementById('estadoFilter').addEventListener('change',()=>renderDomicilios(filtrar()));
+
+    window.addEventListener('DOMContentLoaded', init);
+  </script>
 </body>
 </html>
-
-
-
