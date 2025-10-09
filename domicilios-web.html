@@ -50,7 +50,6 @@
       border-radius:18px;
       box-shadow:0 2px 6px rgba(0,0,0,.05);
       overflow:hidden;
-      position:relative;
       transition:all .2s ease;
     }
 
@@ -60,25 +59,18 @@
     }
 
     .encabezado {
-      position:absolute;
-      top:12px;
-      left:12px;
-      right:12px;
+      background:#fff7f9;
+      border-bottom:1px solid var(--borde);
+      padding:10px 18px;
       display:flex;
       justify-content:space-between;
       align-items:center;
-      z-index:10;
     }
 
     .pedido-num {
-      background:#fff;
-      color:var(--rosa-osc);
       font-weight:700;
-      padding:4px 10px;
-      border-radius:8px;
-      border:1px solid var(--borde);
-      box-shadow:0 2px 4px rgba(0,0,0,0.05);
-      font-size:0.9em;
+      font-size:1.1em;
+      color:var(--rosa-osc);
     }
 
     .estado {
@@ -104,7 +96,6 @@
 
     .detalle {
       padding:10px 18px;
-      border-top:1px solid var(--borde);
     }
 
     .detalle h3 {
@@ -204,10 +195,12 @@
 
       domicilios.forEach(dom => {
         const estadoClase = dom.estado?.toLowerCase().replace(" ", "_") || "pendiente";
+        const numeroPedido = dom.pedido || dom.Pedido || dom.numPedido || dom.numero || dom.numeroPedido || dom["N°Pedido"] || dom["Numero Pedido"] || "—";
+
         const card = `
           <div class="card">
             <div class="encabezado">
-              <div class="pedido-num">Pedido #${dom.pedido || dom.Pedido || dom.numPedido || dom.numero || dom.numeroPedido || dom["N°Pedido"] || dom["Numero Pedido"] || "—"}</div>
+              <div class="pedido-num">Pedido #${numeroPedido}</div>
               <div class="estado ${estadoClase}">${dom.estado || "Pendiente"}</div>
             </div>
             <img src="${dom.imagen}" alt="${dom.producto}" class="img-card" />
