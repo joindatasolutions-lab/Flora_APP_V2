@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Flora - Panel de Domicilios</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --rosa: #e6a5b6;
+      --rosa-osc: #c97b94;
+      --bg: #fdfaf7;
+      --gris: #5c5c5c;
+      --borde: #ecd6dc;
+      --verde: #1a7f37;
+      --amarillo: #a15d00;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      margin: 0;
+      padding: 0;
+      color: #333;
+    }
+
+    header {
+      text-align: center;
+      background: #fff;
+      padding: 15px 10px;
+      border-bottom: 1px solid var(--borde);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, .05);
+    }
+
+    header img {
+      max-width: 180px;
+      margin-bottom: 6px;
+    }
+
+    header h2 {
+      margin: 0;
+      color: var(--rosa-osc);
+    }
+
+    main {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 25px;
+      padding: 30px;
+      justify-items: center;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+      transition: all 0.25s ease;
+      width: 100%;
+      max-width: 360px;
+    }
+
+    .card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+    }
+
+    .encabezado {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #fff7f9;
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--borde);
+    }
+
+    .pedido-num {
+      font-weight: 700;
+      font-size: 1em;
+      color: var(--rosa-osc);
+    }
+
+    .estado {
+      font-weight: 600;
+      padding: 5px 12px;
+      border-radius: 12px;
+      font-size: .9em;
+      text-transform: capitalize;
+      color: #fff;
+    }
+
+    .estado.pendiente { background: var(--rosa); }
+    .estado.en_ruta { background: var(--amarillo); }
+    .estado.entregado { background: var(--verde); }
+
+    .img-card {
+      width: 100%;
+      height: 250px;
+      object-fit: cover;
+      background: #fff;
+      transition: transform 0.3s ease;
+    }
+
+    .card:hover .img-card {
+      transform: scale(1.03);
+    }
+
+    .detalle {
+      padding: 14px 20px;
+      border-top: 1px solid var(--borde);
+    }
+
+    .detalle h3 {
+      margin: 4px 0 10px;
+      font-size: 1.1em;
+      color: #222;
+    }
+
+    .detalle p {
+      margin: 4px 0;
+      font-size: .9em;
+      color: var(--gris);
+    }
+
+    .detalle strong {
+      color: #333;
+    }
+
+    .acciones {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 18px 18px;
+      gap: 8px;
+    }
+
+    select {
+      flex: 1;
+      border: 1px solid var(--borde);
+      border-radius: 8px;
+      padding: 6px 8px;
+      font-size: .9em;
+    }
+
+    button {
+      border: none;
+      padding: 7px 14px;
+      border-radius: 8px;
+      font-weight: 600;
+      color: #fff;
+      cursor: pointer;
+      transition: .2s ease;
+    }
+
+    .btn-enruta {
+      background: var(--amarillo);
+    }
+
+    .btn-entregado {
+      background: var(--verde);
+    }
+
+    .btn-enruta:hover, .btn-entregado:hover {
+      opacity: .9;
+    }
+
+    footer {
+      text-align: center;
+      color: var(--gris);
+      padding: 20px;
+      font-size: .85em;
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <img src="https://floraapp.s3.us-east-1.amazonaws.com/logo+2024+marca+registrada-04.png" alt="Flora Logo">
+    <h2>Panel de Domicilios</h2>
+  </header>
+
+  <main id="contenedor-domicilios">
+    <p style="text-align:center;width:100%;">Cargando pedidos...</p>
+  </main>
+
+  <footer>
+    <p>🌸 Flora App - Gestión de Domicilios</p>
+  </footer>
+
+  <script>
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzCq_mICiq7lXfFrpvrOQhphsJRf8-MJDBhHn72eDhvYLxPVi5Ferw2j1yxukhlX_U/exec";
+
+    async function cargarDomicilios() {
+      try {
+        const res = await fetch(`${SCRIPT_URL}?hoja=domicilios`);
+        const data = await res.json();
+        renderizarDomicilios(data);
+      } catch (err) {
+        console.error("Error cargando domicilios:", err);
+        document.getElementById("contenedor-domicilios").innerHTML =
+          `<p style="color:red;text-align:center;">❌ Error al cargar domicilios</p>`;
+      }
+    }
+
+    function renderizarDomicilios(domicilios) {
+      const contenedor = document.getElementById("contenedor-domicilios");
+      contenedor.innerHTML = "";
+
+      if (!domicilios || domicilios.length === 0) {
+        contenedor.innerHTML = `<p style="text-align:center;">No hay pedidos registrados.</p>`;
+        return;
+      }
+
+      domicilios.forEach(dom => {
+        const estadoClase = dom.estado?.toLowerCase().replace(" ", "_") || "pendiente";
+        const numeroPedido = dom.pedido || dom.Pedido || dom.numPedido || dom.numero || dom.numeroPedido || dom["N°Pedido"] || dom["Numero Pedido"] || "—";
+
+        const card = `
+          <div class="card">
+            <div class="encabezado">
+              <div class="pedido-num">Pedido #${numeroPedido}</div>
+              <div class="estado ${estadoClase}">${dom.estado || "Pendiente"}</div>
+            </div>
+            <img src="${dom.imagen}" alt="${dom.producto}" class="img-card" />
+            <div class="detalle">
+              <h3>${dom.producto}</h3>
+              <p><strong>Destinatario:</strong> ${dom.destinatario || "—"}</p>
+              <p><strong>Dirección:</strong> ${dom.direccion || "—"}</p>
+              <p><strong>Barrio:</strong> ${dom.barrio || "—"}</p>
+              <p><strong>Teléfono:</strong> ${dom.telefonoDestino || dom.telefono || "—"}</p>
+              <p><strong>Entrega:</strong> ${dom.fechaEntrega || ""}</p>
+            </div>
+            <div class="acciones">
+              <select>
+                <option value="">Asignar domiciliario</option>
+                <option ${dom.domiciliario==="Elvis"?"selected":""}>Elvis</option>
+                <option ${dom.domiciliario==="Oscar"?"selected":""}>Oscar</option>
+                <option ${dom.domiciliario==="Externo"?"selected":""}>Externo</option>
+              </select>
+              <button class="btn-enruta">En Ruta</button>
+              <button class="btn-entregado">Entregado</button>
+            </div>
+          </div>
+        `;
+        contenedor.innerHTML += card;
+      });
+    }
+
+    cargarDomicilios();
+  </script>
+</body>
+</html>
