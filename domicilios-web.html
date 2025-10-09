@@ -87,11 +87,11 @@
     .estado.entregado { background:var(--verde); }
 
     .img-card {
-      width:100%;
-      height:180px;
-      object-fit:cover;
-      background:#fafafa;
-      border-bottom:1px solid var(--borde);
+        width: 100%;
+        height: 140px;          /* antes 180px */
+        object-fit: contain;    /* antes cover */
+        background: #fff;       /* fondo blanco para que luzca la flor */
+        border-bottom: 1px solid var(--borde);
     }
 
     .detalle {
@@ -206,7 +206,7 @@
             <img src="${dom.imagen}" alt="${dom.producto}" class="img-card" />
             <div class="detalle">
               <h3>${dom.producto}</h3>
-              <p><strong>Cliente:</strong> ${dom.cliente}</p>
+              <p><strong>Destinatario:</strong> ${dom.destinatario}</p>
               <p><strong>Dirección:</strong> ${dom.direccion}</p>
               <p><strong>Barrio:</strong> ${dom.barrio}</p>
               <p><strong>Teléfono:</strong> ${dom.telefonoDestino || dom.telefono}</p>
