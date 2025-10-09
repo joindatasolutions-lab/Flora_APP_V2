@@ -2,11 +2,12 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Flora - Módulo de Domicilios</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Flora - Panel de Domicilios</title>
+
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
-    :root{
+    :root {
       --rosa:#e6a5b6;
       --rosa-osc:#c97b94;
       --bg:#fdfaf7;
@@ -15,193 +16,202 @@
       --verde:#1a7f37;
       --amarillo:#a15d00;
     }
-    *{ box-sizing:border-box; }
-    body{
+
+    body {
       font-family:'Inter',sans-serif;
       background:var(--bg);
-      color:#333;
       margin:0;
-      min-height:100vh;
-      display:flex;
-      flex-direction:column;
+      padding:0;
+      color:#333;
     }
-    header{
+
+    header {
       text-align:center;
-      padding:20px 16px;
       background:#fff;
+      padding:15px 10px;
       border-bottom:1px solid var(--borde);
       box-shadow:0 2px 6px rgba(0,0,0,.05);
     }
-    header img{ max-width:220px; height:auto; margin-bottom:6px; }
-    header h2{ margin:8px 0 0; color:var(--gris); }
 
-    .grid{
-      display:grid;
-      gap:12px;
-      grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
-      max-width:1100px;
-      margin:20px auto;
-      padding:0 12px;
+    header img {
+      max-width:180px;
     }
-    .card{
+
+    main {
+      display:grid;
+      grid-template-columns:repeat(auto-fill,minmax(350px,1fr));
+      gap:20px;
+      padding:25px;
+    }
+
+    .card {
       background:#fff;
       border:1px solid var(--borde);
       border-radius:18px;
-      box-shadow:0 6px 18px rgba(0,0,0,.06);
+      box-shadow:0 2px 6px rgba(0,0,0,.05);
       overflow:hidden;
-      display:flex;
-      flex-direction:column;
-      position:relative;
       transition:all .2s ease;
     }
-    .card:hover{ transform:translateY(-3px); box-shadow:0 10px 24px rgba(0,0,0,.1); border-color:var(--rosa); }
-    .card img{
+
+    .card:hover {
+      transform:translateY(-3px);
+      box-shadow:0 4px 10px rgba(0,0,0,.08);
+    }
+
+    .estado {
+      position:absolute;
+      background:var(--rosa);
+      color:#fff;
+      font-weight:600;
+      padding:5px 12px;
+      border-radius:12px;
+      margin:12px;
+      font-size:.9em;
+    }
+
+    .estado.en_ruta { background:var(--amarillo); }
+    .estado.entregado { background:var(--verde); }
+
+    .img-card {
       width:100%;
       height:180px;
       object-fit:cover;
-      border-bottom:1px solid var(--borde);
+      background:#fafafa;
     }
-    .body{
-      padding:12px;
-      flex-grow:1;
-    }
-    .name{ font-weight:700; font-size:1rem; margin:0 0 4px; }
-    .info{ font-size:.9rem; color:var(--gris); margin:2px 0; }
-    .actions{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      padding:10px 12px;
+
+    .detalle {
+      padding:10px 18px;
       border-top:1px solid var(--borde);
-      background:#fffafc;
     }
-    select{
+
+    .detalle h3 {
+      margin:4px 0 6px;
+      font-size:1.1em;
+      color:#222;
+    }
+
+    .detalle p {
+      margin:3px 0;
+      font-size:.9em;
+      color:var(--gris);
+    }
+
+    .acciones {
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:10px 18px 15px;
+      gap:6px;
+    }
+
+    select {
+      flex:1;
+      border:1px solid var(--borde);
+      border-radius:8px;
       padding:6px 8px;
-      border:1px solid #ddd;
-      border-radius:10px;
-      font-size:.85rem;
+      font-size:.9em;
     }
-    .btn{
+
+    button {
       border:none;
-      border-radius:10px;
-      padding:8px 12px;
-      font-weight:700;
+      padding:7px 12px;
+      border-radius:8px;
+      font-weight:600;
+      color:#fff;
       cursor:pointer;
-      color:#fff;
-      font-size:.85rem;
+      transition:.2s ease;
     }
-    .ruta{ background:var(--amarillo); }
-    .entregado{ background:var(--verde); }
-    .badge{
-      position:absolute;
-      top:10px;
-      left:10px;
-      padding:6px 10px;
-      border-radius:999px;
-      font-size:.8rem;
-      font-weight:700;
-      color:#fff;
+
+    .btn-enruta {
+      background:var(--amarillo);
     }
-    .en-ruta{ background:var(--amarillo); }
-    .entregado-badge{ background:var(--verde); }
-    .pendiente{ background:var(--rosa-osc); }
+
+    .btn-entregado {
+      background:var(--verde);
+    }
+
+    .btn-enruta:hover { opacity:.9; }
+    .btn-entregado:hover { opacity:.9; }
+
+    footer {
+      text-align:center;
+      color:var(--gris);
+      padding:15px;
+      font-size:.85em;
+    }
   </style>
 </head>
+
 <body>
   <header>
-    <img src="img/logo 2024 marca registrada-04.png" alt="FLORA Logo">
-    <h2>Gestión de Domicilios</h2>
+    <img src="https://floraapp.s3.us-east-1.amazonaws.com/logo+2024+marca+registrada-04.png" alt="Flora Logo">
+    <h2>Panel de Domicilios</h2>
   </header>
 
-  <section class="grid" id="domiciliosGrid"></section>
+  <main id="contenedor-domicilios">
+    <p style="text-align:center;width:100%;">Cargando pedidos...</p>
+  </main>
+
+  <footer>
+    <p>🌸 Flora App - Gestión de Domicilios</p>
+  </footer>
 
   <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzCq_mICiq7lXfFrpvrOQhphsJRf8-MJDBhHn72eDhvYLxPVi5Ferw2j1yxukhlX_U/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzCq_mICiq7lXfFrpvrOQhphsJRf8-MJDBhHn72eDhvYLxPVi5Ferw2j1yxukhlX_U/exec"; // Reemplaza con tu URL de Apps Script (el /exec)
 
-    // Ejemplo de datos simulados (pueden venir de Google Sheets)
-    const domicilios = [
-      {
-        id: 1,
-        producto: "Ramo Primavera",
-        cliente: "María Gómez",
-        direccion: "Cra 51 #86-30, Miramar",
-        telefono: "3001234567",
-        barrio: "Miramar",
-        estado: "Pendiente",
-        imagen: "https://via.placeholder.com/300x200?text=Ramo+Primavera"
-      },
-      {
-        id: 2,
-        producto: "Caja Floral Rosa",
-        cliente: "Juan Pérez",
-        direccion: "Calle 96 #72-10, Altos del Prado",
-        telefono: "3019876543",
-        barrio: "Altos del Prado",
-        estado: "En Ruta",
-        imagen: "https://via.placeholder.com/300x200?text=Caja+Floral+Rosa"
+    async function cargarDomicilios() {
+      try {
+        const res = await fetch(`${SCRIPT_URL}?hoja=domicilios`);
+        const data = await res.json();
+        renderizarDomicilios(data);
+      } catch (err) {
+        console.error("Error cargando domicilios:", err);
+        document.getElementById("contenedor-domicilios").innerHTML = 
+          `<p style="color:red;text-align:center;">❌ Error al cargar domicilios</p>`;
       }
-    ];
+    }
 
-    const domiciliarios = ["Elvis", "Oscar", "Externo"];
+    function renderizarDomicilios(domicilios) {
+      const contenedor = document.getElementById("contenedor-domicilios");
+      contenedor.innerHTML = "";
 
-    function renderDomicilios(){
-      const grid = document.getElementById("domiciliosGrid");
-      grid.innerHTML = "";
+      if (!domicilios || domicilios.length === 0) {
+        contenedor.innerHTML = `<p style="text-align:center;">No hay pedidos registrados.</p>`;
+        return;
+      }
+
       domicilios.forEach(dom => {
-        const card = document.createElement("div");
-        card.className = "card";
-
-        const badgeClass =
-          dom.estado === "En Ruta" ? "en-ruta" :
-          dom.estado === "Entregado" ? "entregado-badge" : "pendiente";
-
-        card.innerHTML = `
-          <span class="badge ${badgeClass}">${dom.estado}</span>
-          <img src="${dom.imagen}" alt="${dom.producto}" onerror="this.src='https://via.placeholder.com/300x200?text=Sin+imagen';">
-          <div class="body">
-            <div class="name">${dom.producto}</div>
-            <div class="info"><strong>Cliente:</strong> ${dom.cliente}</div>
-            <div class="info"><strong>Dirección:</strong> ${dom.direccion}</div>
-            <div class="info"><strong>Barrio:</strong> ${dom.barrio}</div>
-            <div class="info"><strong>Teléfono:</strong> ${dom.telefono}</div>
-          </div>
-          <div class="actions">
-            <select>
-              <option value="">Asignar domiciliario</option>
-              ${domiciliarios.map(d => `<option value="${d}">${d}</option>`).join("")}
-            </select>
-            <div>
-              <button class="btn ruta">En Ruta</button>
-              <button class="btn entregado">Entregado</button>
+        const estadoClase = dom.estado?.toLowerCase().replace(" ", "_") || "pendiente";
+        const card = `
+          <div class="card">
+            <div class="estado ${estadoClase}">${dom.estado || "Pendiente"}</div>
+            <img src="${dom.imagen}" alt="${dom.producto}" class="img-card" />
+            <div class="detalle">
+              <h3>${dom.producto}</h3>
+              <p><strong>Cliente:</strong> ${dom.cliente}</p>
+              <p><strong>Dirección:</strong> ${dom.direccion}</p>
+              <p><strong>Barrio:</strong> ${dom.barrio}</p>
+              <p><strong>Teléfono:</strong> ${dom.telefonoDestino || dom.telefono}</p>
+              <p><strong>Entrega:</strong> ${dom.fechaEntrega || ""}</p>
+            </div>
+            <div class="acciones">
+              <select>
+                <option value="">Asignar domiciliario</option>
+                <option ${dom.domiciliario==="Elvis"?"selected":""}>Elvis</option>
+                <option ${dom.domiciliario==="Oscar"?"selected":""}>Oscar</option>
+                <option ${dom.domiciliario==="Externo"?"selected":""}>Externo</option>
+              </select>
+              <button class="btn-enruta">En Ruta</button>
+              <button class="btn-entregado">Entregado</button>
             </div>
           </div>
         `;
-
-        // Eventos
-        const btnRuta = card.querySelector(".ruta");
-        const btnEntregado = card.querySelector(".entregado");
-        const badge = card.querySelector(".badge");
-
-        btnRuta.addEventListener("click", () => actualizarEstado(dom, "En Ruta", badge));
-        btnEntregado.addEventListener("click", () => actualizarEstado(dom, "Entregado", badge));
-
-        grid.appendChild(card);
+        contenedor.innerHTML += card;
       });
     }
 
-    function actualizarEstado(dom, nuevoEstado, badge){
-      dom.estado = nuevoEstado;
-      badge.textContent = nuevoEstado;
-      badge.className = `badge ${nuevoEstado === "En Ruta" ? "en-ruta" : "entregado-badge"}`;
-      // Lógica para actualizar en Google Sheets
-      fetch(SCRIPT_URL, {
-        method: "POST",
-        body: JSON.stringify({ action: "updateEstado", id: dom.id, estado: nuevoEstado }),
-        headers: { "Content-Type": "application/json" }
-      });
-    }
-
-    renderDomicilios();
+    // Cargar automáticamente al iniciar
+    cargarDomicilios();
   </script>
 </body>
 </html>
