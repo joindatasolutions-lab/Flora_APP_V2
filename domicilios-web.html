@@ -207,7 +207,7 @@
         const card = `
           <div class="card">
             <div class="encabezado">
-              <div class="pedido-num">Pedido #${dom.numeroPedido || dom["N°Pedido"] || "—"}</div>
+              <div class="pedido-num">Pedido #${dom.pedido || dom.Pedido || dom.numPedido || dom.numero || dom.numeroPedido || dom["N°Pedido"] || dom["Numero Pedido"] || "—"}</div>
               <div class="estado ${estadoClase}">${dom.estado || "Pendiente"}</div>
             </div>
             <img src="${dom.imagen}" alt="${dom.producto}" class="img-card" />
