@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Panel de Domicilios</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --rosa: #e6a5b6;
+      --rosa-osc: #c97b94;
+      --bg: #fdfaf7;
+      --gris: #5c5c5c;
+      --borde: #ecd6dc;
+      --verde: #1a7f37;
+      --amarillo: #a15d00;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: var(--bg);
+      margin: 0;
+      padding: 0;
+      color: var(--gris);
+    }
+
+    header {
+      text-align: center;
+      background: #fff;
+      padding: 20px;
+      border-bottom: 1px solid var(--borde);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 1.8rem;
+      color: var(--rosa-osc);
+    }
+
+    .container {
+      padding: 20px;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: white;
+      border: 1px solid var(--borde);
+      border-radius: 12px;
+      padding: 15px 20px;
+      margin-bottom: 15px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      transition: transform 0.15s ease;
+    }
+
+    .card:hover {
+      transform: scale(1.01);
+    }
+
+    .pedido-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .pedido-id {
+      font-weight: 600;
+      color: var(--rosa-osc);
+    }
+
+    .estado {
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 6px;
+      font-size: 0.9rem;
+    }
+
+    .estado.pendiente { background: #fff8e1; color: var(--amarillo); }
+    .estado.entregado { background: #e8f5e9; color: var(--verde); }
+    .estado.en-camino { background: #e3f2fd; color: #1565c0; }
+
+    .info {
+      margin: 6px 0;
+      font-size: 0.95rem;
+    }
+
+    .label {
+      font-weight: 600;
+      color: #444;
+    }
+
+    footer {
+      text-align: center;
+      padding: 15px;
+      font-size: 0.85rem;
+      color: #777;
+    }
+
+    .loading {
+      text-align: center;
+      margin-top: 40px;
+      font-size: 1.1rem;
+      color: var(--gris);
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <h1>📦 Panel de Domicilios</h1>
+  </header>
+
+  <div class="container" id="container">
+    <div class="loading" id="loading">Cargando pedidos...</div>
+  </div>
+
+  <footer>
+    © <span id="year"></span> Join Data Solutions | Ustariz Pizza
+  </footer>
+
+  <script>
+    const API_URL = "https://script.google.com/macros/s/AKfycbzCq_mICiq7lXfFrpvrOQhphsJRf8-MJDBhHn72eDhvYLxPVi5Ferw2j1yxukhlX_U/exec"; // ← reemplázala luego con tu URL publicada
+    document.getElementById("year").textContent = new Date().getFullYear();
+
+    async function cargarPedidos() {
+      const container = document.getElementById("container");
+      const loading = document.getElementById("loading");
+
+      try {
+        const res = await fetch(API_URL);
+        const pedidos = await res.json();
+        loading.style.display = "none";
+
+        if (!pedidos || pedidos.length === 0) {
+          container.innerHTML = "<p>No hay pedidos registrados.</p>";
+          return;
+        }
+
+        pedidos.forEach(p => {
+          const card = document.createElement("div");
+          card.className = "card";
+
+          card.innerHTML = `
+            <div class="pedido-header">
+              <div class="pedido-id">Pedido #${p["N°Pedido"] || "-"}</div>
+              <div class="estado ${p["Estado Domicilio"]?.toLowerCase().replace(/\s/g, '-') || ''}">
+                ${p["Estado Domicilio"] || "Sin estado"}
+              </div>
+            </div>
+            <div class="info"><span class="label">Cliente:</span> ${p["Cliente"] || "—"}</div>
+            <div class="info"><span class="label">Teléfono:</span> ${p["Telefono"] || "—"}</div>
+            <div class="info"><span class="label">Dirección:</span> ${p["Dirección de Entrega"] || "—"}</div>
+            <div class="info"><span class="label">Barrio:</span> ${p["Barrio"] || "—"}</div>
+            <div class="info"><span class="label">Domiciliario:</span> ${p["Domiciliario"] || "—"}</div>
+            <div class="info"><span class="label">Fecha de Entrega:</span> ${p["FechaEntrega"] || "—"}</div>
+            <div class="info"><span class="label">Observaciones:</span> ${p["Observaciones"] || ""}</div>
+          `;
+
+          container.appendChild(card);
+        });
+      } catch (error) {
+        console.error("Error cargando pedidos:", error);
+        loading.textContent = "Error al cargar los pedidos.";
+      }
+    }
+
+    cargarPedidos();
+  </script>
+</body>
+</html>
