@@ -8,148 +8,201 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --rosa:#e6a5b6;
-      --rosa-osc:#c97b94;
-      --bg:#fdfaf7;
-      --gris:#5c5c5c;
-      --borde:#ecd6dc;
-      --verde:#1a7f37;
-      --amarillo:#a15d00;
+      --rosa: #E6A5B6;
+      --rosa-osc: #C97B94;
+      --verde: #4C7C62;
+      --beige: #FAF6F3;
+      --gris: #5C5C5C;
+      --borde: #EBD8DB;
+      --hover: #B5647B;
     }
 
     body {
-      font-family:'Inter',sans-serif;
-      background:var(--bg);
-      margin:0;
-      padding:0;
-      color:#333;
+      font-family: 'Inter', sans-serif;
+      background: var(--beige);
+      margin: 0;
+      color: #333;
     }
 
     header {
-      text-align:center;
-      background:#fff;
-      padding:15px 10px;
-      border-bottom:1px solid var(--borde);
-      box-shadow:0 2px 6px rgba(0,0,0,.05);
+      text-align: center;
+      background: #fff;
+      padding: 20px;
+      border-bottom: 1px solid var(--borde);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, .05);
     }
 
     header img {
-      max-width:180px;
+      max-width: 180px;
+      margin-bottom: 8px;
+    }
+
+    header h2 {
+      color: var(--rosa-osc);
+      font-weight: 700;
+      margin: 0;
     }
 
     main {
-      display:grid;
-      grid-template-columns:repeat(auto-fill,minmax(350px,1fr));
-      gap:20px;
-      padding:25px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 25px;
+      padding: 25px;
+      justify-items: center;
     }
 
     .card {
-      background:#fff;
-      border:1px solid var(--borde);
-      border-radius:18px;
-      box-shadow:0 2px 6px rgba(0,0,0,.05);
-      overflow:hidden;
-      transition:all .2s ease;
+      background: #fff;
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+      transition: all 0.25s ease;
+      width: 100%;
+      max-width: 380px;
+      display: flex;
+      flex-direction: column;
     }
 
     .card:hover {
-      transform:translateY(-3px);
-      box-shadow:0 4px 10px rgba(0,0,0,.08);
+      transform: translateY(-3px);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
     }
 
     .encabezado {
-      background:#fff7f9;
-      border-bottom:1px solid var(--borde);
-      padding:10px 18px;
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #FFF8FA;
+      padding: 10px 18px;
+      border-bottom: 1px solid var(--borde);
     }
 
     .pedido-num {
-      font-weight:700;
-      font-size:1.1em;
-      color:var(--rosa-osc);
+      font-weight: 700;
+      font-size: 1em;
+      color: var(--rosa-osc);
     }
 
     .estado {
-      background:var(--rosa);
-      color:#fff;
-      font-weight:600;
-      padding:5px 12px;
-      border-radius:12px;
-      font-size:.9em;
-      text-transform:capitalize;
+      font-weight: 600;
+      padding: 5px 12px;
+      border-radius: 12px;
+      font-size: .9em;
+      color: #fff;
+      text-transform: capitalize;
     }
 
-    .estado.en_ruta { background:var(--amarillo); }
-    .estado.entregado { background:var(--verde); }
+    .pendiente { background: var(--rosa); }
+    .en_ruta { background: var(--rosa-osc); }
+    .entregado { background: var(--verde); }
 
     .img-card {
-        width: 100%;
-        height: 200px;
-        object-fit: cover;
-        border-bottom: 1px solid var(--borde);
-    }       
+      width: 100%;
+      height: 240px;
+      object-fit: cover;
+      transition: transform .3s;
+      background: #fff;
+    }
+
+    .card:hover .img-card {
+      transform: scale(1.03);
+    }
 
     .detalle {
-      padding:10px 18px;
+      padding: 14px 20px;
+      flex: 1;
     }
 
     .detalle h3 {
-      margin:4px 0 6px;
-      font-size:1.1em;
-      color:#222;
+      margin: 4px 0 10px;
+      font-size: 1.1em;
+      color: var(--rosa-osc);
     }
 
     .detalle p {
-      margin:3px 0;
-      font-size:.9em;
-      color:var(--gris);
+      margin: 4px 0;
+      font-size: .9em;
+      color: var(--gris);
+    }
+
+    .detalle strong {
+      color: #222;
     }
 
     .acciones {
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      padding:10px 18px 15px;
-      gap:6px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 18px 18px;
     }
 
     select {
-      flex:1;
-      border:1px solid var(--borde);
-      border-radius:8px;
-      padding:6px 8px;
-      font-size:.9em;
+      flex: 1;
+      border: 1px solid var(--borde);
+      border-radius: 8px;
+      padding: 8px 10px;
+      font-size: .9em;
+      background: #fff;
     }
 
-    button {
-      border:none;
-      padding:7px 12px;
-      border-radius:8px;
-      font-weight:600;
-      color:#fff;
-      cursor:pointer;
-      transition:.2s ease;
+    .btn-estado {
+      border: none;
+      padding: 10px 22px;
+      border-radius: 10px;
+      font-weight: 600;
+      color: #fff;
+      cursor: pointer;
+      transition: .2s;
+      background: var(--rosa-osc);
+      font-size: .95em;
     }
 
-    .btn-enruta {
-      background:var(--amarillo);
+    .btn-estado:hover {
+      background: var(--hover);
     }
 
-    .btn-entregado {
-      background:var(--verde);
+    .btn-estado.entregado {
+      background: var(--verde);
     }
 
-    .btn-enruta:hover, .btn-entregado:hover { opacity:.9; }
+    .btn-estado.entregado:hover {
+      background: #3A614E;
+    }
 
     footer {
-      text-align:center;
-      color:var(--gris);
-      padding:15px;
-      font-size:.85em;
+      text-align: center;
+      color: var(--gris);
+      padding: 18px;
+      font-size: .85em;
+    }
+
+    /* 📱 Responsive Design */
+    @media (max-width: 768px) {
+      main {
+        grid-template-columns: 1fr;
+        padding: 12px;
+      }
+
+      .card {
+        max-width: 100%;
+      }
+
+      .img-card {
+        height: 210px;
+      }
+
+      .acciones {
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .btn-estado {
+        width: 100%;
+      }
+
+      select {
+        width: 100%;
+      }
     }
   </style>
 </head>
@@ -161,12 +214,10 @@
   </header>
 
   <main id="contenedor-domicilios">
-    <p style="text-align:center;width:100%;">Cargando pedidos...</p>
+    <p style="text-align:center;">Cargando pedidos...</p>
   </main>
 
-  <footer>
-    <p>🌸 Flora App - Gestión de Domicilios</p>
-  </footer>
+  <footer>🌸 Flora App - Gestión de Domicilios</footer>
 
   <script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzCq_mICiq7lXfFrpvrOQhphsJRf8-MJDBhHn72eDhvYLxPVi5Ferw2j1yxukhlX_U/exec";
@@ -178,8 +229,46 @@
         renderizarDomicilios(data);
       } catch (err) {
         console.error("Error cargando domicilios:", err);
-        document.getElementById("contenedor-domicilios").innerHTML = 
+        document.getElementById("contenedor-domicilios").innerHTML =
           `<p style="color:red;text-align:center;">❌ Error al cargar domicilios</p>`;
+      }
+    }
+
+    async function actualizarEstado(pedido, nuevoEstado, boton, badge) {
+      boton.disabled = true;
+      boton.textContent = "Actualizando...";
+      try {
+        const res = await fetch(SCRIPT_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            accion: "actualizarEstado",
+            hoja: "Domicilios",
+            pedido: pedido,
+            estado: nuevoEstado
+          })
+        });
+
+        const data = await res.json();
+        if (data.result === "ok") {
+          if (nuevoEstado === "En Ruta") {
+            boton.textContent = "Entregado";
+            boton.classList.add("entregado");
+            badge.textContent = "En Ruta";
+            badge.className = "estado en_ruta";
+          } else {
+            boton.textContent = "Entregado ✅";
+            badge.textContent = "Entregado";
+            badge.className = "estado entregado";
+          }
+        } else {
+          boton.textContent = "Error";
+        }
+      } catch (e) {
+        console.error("Error actualizando:", e);
+        boton.textContent = "Error";
+      } finally {
+        boton.disabled = false;
       }
     }
 
@@ -187,43 +276,57 @@
       const contenedor = document.getElementById("contenedor-domicilios");
       contenedor.innerHTML = "";
 
-      if (!domicilios || domicilios.length === 0) {
+      if (!domicilios?.length) {
         contenedor.innerHTML = `<p style="text-align:center;">No hay pedidos registrados.</p>`;
         return;
       }
 
       domicilios.forEach(dom => {
-        const estadoClase = dom.estado?.toLowerCase().replace(" ", "_") || "pendiente";
-        const numeroPedido = dom.pedido || dom.Pedido || dom.numPedido || dom.numero || dom.numeroPedido || dom["N°Pedido"] || dom["Numero Pedido"] || "—";
+        const numeroPedido = dom["N°Pedido"] || dom.pedido || dom.numero || "—";
+        const estado = dom.estado || "Pendiente";
+        const estadoClase = estado.toLowerCase().replace(" ", "_");
+        const textoBoton = estado === "Pendiente" ? "En Ruta" :
+                           estado === "En Ruta" ? "Entregado" : "Entregado ✅";
+        const claseBoton = estado === "Entregado" ? "btn-estado entregado" : "btn-estado";
 
-        const card = `
-          <div class="card">
-            <div class="encabezado">
-              <div class="pedido-num">Pedido #${numeroPedido}</div>
-              <div class="estado ${estadoClase}">${dom.estado || "Pendiente"}</div>
-            </div>
-            <img src="${dom.imagen}" alt="${dom.producto}" class="img-card" />
-            <div class="detalle">
-              <h3>${dom.producto}</h3>
-              <p><strong>Destinatario:</strong> ${dom.destinatario}</p>
-              <p><strong>Dirección:</strong> ${dom.direccion}</p>
-              <p><strong>Barrio:</strong> ${dom.barrio}</p>
-              <p><strong>Teléfono:</strong> ${dom.telefonoDestino || dom.telefono}</p>
-              <p><strong>Entrega:</strong> ${dom.fechaEntrega || ""}</p>
-            </div>
-            <div class="acciones">
-              <select>
-                <option value="">Asignar domiciliario</option>
-                <option ${dom.domiciliario==="Elvis"?"selected":""}>Elvis</option>
-                <option ${dom.domiciliario==="Oscar"?"selected":""}>Oscar</option>
-                <option ${dom.domiciliario==="Externo"?"selected":""}>Externo</option>
-              </select>
-              <button class="btn-enruta">En Ruta</button>
-              <button class="btn-entregado">Entregado</button>
-            </div>
+        const card = document.createElement("div");
+        card.className = "card";
+
+        card.innerHTML = `
+          <div class="encabezado">
+            <div class="pedido-num">Pedido #${numeroPedido}</div>
+            <div class="estado ${estadoClase}">${estado}</div>
+          </div>
+          <img src="${dom.imagen}" alt="${dom.producto}" class="img-card" />
+          <div class="detalle">
+            <h3>${dom.producto}</h3>
+            <p><strong>Destinatario:</strong> ${dom.destinatario || "—"}</p>
+            <p><strong>Dirección:</strong> ${dom.direccion || "—"}</p>
+            <p><strong>Barrio:</strong> ${dom.barrio || "—"}</p>
+            <p><strong>Teléfono:</strong> ${dom.telefonoDestino || dom.telefono || "—"}</p>
+            <p><strong>Entrega:</strong> ${dom.fechaEntrega || ""}</p>
+          </div>
+          <div class="acciones">
+            <select>
+              <option value="">Asignar domiciliario</option>
+              <option ${dom.domiciliario==="Elvis"?"selected":""}>Elvis</option>
+              <option ${dom.domiciliario==="Oscar"?"selected":""}>Oscar</option>
+              <option ${dom.domiciliario==="Externo"?"selected":""}>Externo</option>
+            </select>
+            <button class="${claseBoton}">${textoBoton}</button>
           </div>
         `;
-        contenedor.innerHTML += card;
+
+        const boton = card.querySelector("button");
+        const badge = card.querySelector(".estado");
+
+        boton.addEventListener("click", () => {
+          const nuevoEstado = badge.textContent === "Pendiente" ? "En Ruta" :
+                              badge.textContent === "En Ruta" ? "Entregado" : "Entregado";
+          actualizarEstado(numeroPedido, nuevoEstado, boton, badge);
+        });
+
+        contenedor.appendChild(card);
       });
     }
 
