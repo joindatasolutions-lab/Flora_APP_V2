@@ -234,32 +234,43 @@
 
     async function cargarDomicilios() {
       try {
-        const res = await fetch(`${SCRIPT_URL}?hoja=domicilios`);
+        const res = await fetch(`${SCRIPT_URL}?hoja=domicilios`, {
+          method: 'GET',         // ✅ sin headers
+          cache: 'no-store'
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
-        renderizarDomicilios(data);
+        // renderiza data ...
       } catch (err) {
-        console.error("Error cargando domicilios:", err);
-        document.getElementById("contenedor-domicilios").innerHTML =
-          `<p style="color:red;text-align:center;">❌ Error al cargar domicilios</p>`;
+        console.error('Error cargando domicilios:', err);
+        // muestra error en UI
       }
     }
 
     async function actualizarEstado(pedido, nuevoEstado, boton, badge) {
       boton.disabled = true;
       boton.textContent = "Actualizando...";
+
       try {
-        const res = await fetch(SCRIPT_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            accion: "actualizarEstado",
-            hoja: "Domicilios",
-            pedido: pedido,
-            estado: nuevoEstado
-          })
+        // 🟢 Prepara el cuerpo del POST (evita CORS complejo)
+        const body = new URLSearchParams({
+          accion: 'actualizarEstado',
+          hoja: 'Domicilios',
+          pedido: String(pedido),
+          estado: nuevoEstado
         });
 
+        // 🟢 Petición simple sin headers personalizados (no dispara preflight)
+        const res = await fetch(SCRIPT_URL, {
+          method: 'POST',
+          body,
+          cache: 'no-store'
+        });
+
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
+
+        // 🟢 Validamos resultado
         if (data.result === "ok") {
           if (nuevoEstado === "En Ruta") {
             boton.textContent = "Entregado";
@@ -275,12 +286,13 @@
           }
         } else {
           boton.textContent = "Error";
-          mostrarToast("⚠️ No se pudo actualizar");
+          mostrarToast("⚠️ No se pudo actualizar el estado");
         }
+
       } catch (e) {
-        console.error("Error actualizando:", e);
+        console.error("❌ Error actualizando:", e);
         boton.textContent = "Error";
-        mostrarToast("❌ Error de conexión");
+        mostrarToast("❌ Error de conexión con el servidor");
       } finally {
         boton.disabled = false;
       }
