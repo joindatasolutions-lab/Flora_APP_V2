@@ -251,7 +251,6 @@
       boton.textContent = "Actualizando...";
 
       try {
-        // 🟢 Prepara el cuerpo del POST (evita CORS complejo)
         const body = new URLSearchParams({
           accion: 'actualizarEstado',
           hoja: 'Domicilios',
@@ -259,7 +258,6 @@
           estado: nuevoEstado
         });
 
-        // 🟢 Petición simple sin headers personalizados (no dispara preflight)
         const res = await fetch(SCRIPT_URL, {
           method: 'POST',
           body,
@@ -267,10 +265,18 @@
         });
 
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data = await res.json();
 
-        // 🟢 Validamos resultado
-        if (data.result === "ok") {
+        // 🟢 Verificamos que la respuesta sea JSON válida
+        const text = await res.text();
+        let data = {};
+        try {
+          data = JSON.parse(text);
+        } catch {
+          throw new Error("Respuesta no es JSON válida: " + text);
+        }
+
+        // 🟢 Validamos la respuesta
+        if (data.result === "ok" || data.status === "success") {
           if (nuevoEstado === "En Ruta") {
             boton.textContent = "Entregado";
             boton.classList.add("entregado");
@@ -284,6 +290,7 @@
             mostrarToast("✅ Pedido entregado");
           }
         } else {
+          console.warn("⚠️ Respuesta inesperada:", data);
           boton.textContent = "Error";
           mostrarToast("⚠️ No se pudo actualizar el estado");
         }
