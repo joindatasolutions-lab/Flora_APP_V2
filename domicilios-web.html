@@ -234,16 +234,15 @@
 
     async function cargarDomicilios() {
       try {
-        const res = await fetch(`${SCRIPT_URL}?hoja=domicilios`, {
-          method: 'GET',         // ✅ sin headers
+        const res = await fetch(`${SCRIPT_URL}?hoja=Domicilios`, {
+          method: 'GET',
           cache: 'no-store'
         });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
-        // renderiza data ...
+        renderizarDomicilios(data);  // 🟢 <--- agrega esta línea
       } catch (err) {
         console.error('Error cargando domicilios:', err);
-        // muestra error en UI
       }
     }
 
