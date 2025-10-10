@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Flora - Panel de Domicilios</title>
-
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -176,33 +175,35 @@
       font-size: .85em;
     }
 
-    /* 📱 Responsive Design */
+    /* 🌸 Toast de notificación */
+    #toast {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--rosa-osc);
+      color: white;
+      padding: 12px 24px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      font-weight: 600;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s ease, transform 0.4s ease;
+      z-index: 1000;
+    }
+    #toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* 📱 Responsive */
     @media (max-width: 768px) {
-      main {
-        grid-template-columns: 1fr;
-        padding: 12px;
-      }
-
-      .card {
-        max-width: 100%;
-      }
-
-      .img-card {
-        height: 210px;
-      }
-
-      .acciones {
-        flex-direction: column;
-        gap: 10px;
-      }
-
-      .btn-estado {
-        width: 100%;
-      }
-
-      select {
-        width: 100%;
-      }
+      main { grid-template-columns: 1fr; padding: 12px; }
+      .card { max-width: 100%; }
+      .img-card { height: 210px; }
+      .acciones { flex-direction: column; gap: 10px; }
+      .btn-estado, select { width: 100%; }
     }
   </style>
 </head>
@@ -219,8 +220,17 @@
 
   <footer>🌸 Flora App - Gestión de Domicilios</footer>
 
+  <div id="toast">✅ Estado actualizado correctamente</div>
+
   <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxC8eXg-uKYOAeLIjSuy5LEcgT4pHL1CJlOfPciMVz8v3EzB-dgltSUO3SgUvBi2Yb1/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzCq_mICiq7lXfFrpvrOQhphsJRf8-MJDBhHn72eDhvYLxPVi5Ferw2j1yxukhlX_U/exec";
+
+    function mostrarToast(msg = "✅ Estado actualizado correctamente") {
+      const toast = document.getElementById("toast");
+      toast.textContent = msg;
+      toast.classList.add("show");
+      setTimeout(() => toast.classList.remove("show"), 3000);
+    }
 
     async function cargarDomicilios() {
       try {
@@ -256,17 +266,21 @@
             boton.classList.add("entregado");
             badge.textContent = "En Ruta";
             badge.className = "estado en_ruta";
+            mostrarToast("🚚 Pedido en ruta");
           } else {
             boton.textContent = "Entregado ✅";
             badge.textContent = "Entregado";
             badge.className = "estado entregado";
+            mostrarToast("✅ Pedido entregado");
           }
         } else {
           boton.textContent = "Error";
+          mostrarToast("⚠️ No se pudo actualizar");
         }
       } catch (e) {
         console.error("Error actualizando:", e);
         boton.textContent = "Error";
+        mostrarToast("❌ Error de conexión");
       } finally {
         boton.disabled = false;
       }
