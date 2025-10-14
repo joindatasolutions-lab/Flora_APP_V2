@@ -4,246 +4,148 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Flora - Panel de Domicilios</title>
-
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --rosa: #e6a5b6;
-      --rosa-osc: #c97b94;
-      --bg: #fdfaf7;
-      --gris: #5c5c5c;
-      --borde: #ecd6dc;
-      --verde: #1a7f37;
-      --amarillo: #a15d00;
+      --rosa: #E6A5B6;
+      --rosa-osc: #C97B94;
+      --verde: #4C7C62;
+      --beige: #FAF6F3;
+      --gris: #5C5C5C;
+      --borde: #EBD8DB;
+      --hover: #B5647B;
     }
 
-    body {
-      font-family: 'Inter', sans-serif;
-      background: var(--bg);
-      margin: 0;
-      padding: 0;
-      color: #333;
-    }
-
-    header {
-      text-align: center;
-      background: #fff;
-      padding: 15px 10px;
-      border-bottom: 1px solid var(--borde);
-      box-shadow: 0 2px 6px rgba(0, 0, 0, .05);
-    }
-
-    header img {
-      max-width: 180px;
-      margin-bottom: 6px;
-    }
-
-    header h2 {
-      margin: 0;
-      color: var(--rosa-osc);
-    }
-
-    main {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-      gap: 25px;
-      padding: 30px;
-      justify-items: center;
-    }
-
-    .card {
-      background: #fff;
-      border-radius: 18px;
-      overflow: hidden;
-      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
-      transition: all 0.25s ease;
-      width: 100%;
-      max-width: 360px;
-    }
-
-    .card:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
-    }
-
-    .encabezado {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: #fff7f9;
-      padding: 10px 16px;
-      border-bottom: 1px solid var(--borde);
-    }
-
-    .pedido-num {
-      font-weight: 700;
-      font-size: 1em;
-      color: var(--rosa-osc);
-    }
-
-    .estado {
-      font-weight: 600;
-      padding: 5px 12px;
-      border-radius: 12px;
-      font-size: .9em;
-      text-transform: capitalize;
-      color: #fff;
-    }
-
-    .estado.pendiente { background: var(--rosa); }
-    .estado.en_ruta { background: var(--amarillo); }
-    .estado.entregado { background: var(--verde); }
-
-    .img-card {
-      width: 100%;
-      height: 250px;
-      object-fit: cover;
-      background: #fff;
-      transition: transform 0.3s ease;
-    }
-
-    .card:hover .img-card {
-      transform: scale(1.03);
-    }
-
-    .detalle {
-      padding: 14px 20px;
-      border-top: 1px solid var(--borde);
-    }
-
-    .detalle h3 {
-      margin: 4px 0 10px;
-      font-size: 1.1em;
-      color: #222;
-    }
-
-    .detalle p {
-      margin: 4px 0;
-      font-size: .9em;
-      color: var(--gris);
-    }
-
-    .detalle strong {
-      color: #333;
-    }
-
-    .acciones {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 12px 18px 18px;
-      gap: 8px;
-    }
-
-    select {
-      flex: 1;
-      border: 1px solid var(--borde);
-      border-radius: 8px;
-      padding: 6px 8px;
-      font-size: .9em;
-    }
-
-    button {
-      border: none;
-      padding: 7px 14px;
-      border-radius: 8px;
-      font-weight: 600;
-      color: #fff;
-      cursor: pointer;
-      transition: .2s ease;
-    }
-
-    .btn-enruta {
-      background: var(--amarillo);
-    }
-
-    .btn-entregado {
-      background: var(--verde);
-    }
-
-    .btn-enruta:hover, .btn-entregado:hover {
-      opacity: .9;
-    }
-
-    footer {
-      text-align: center;
-      color: var(--gris);
-      padding: 20px;
-      font-size: .85em;
-    }
+    body {font-family: 'Inter', sans-serif; background: var(--beige); margin: 0; color: #333;}
+    header {text-align: center; background: #fff; padding: 20px; border-bottom: 1px solid var(--borde); box-shadow: 0 2px 6px rgba(0,0,0,.05);}
+    header img {max-width: 180px; margin-bottom: 8px;}
+    header h2 {color: var(--rosa-osc); font-weight: 700; margin: 0;}
+    main {display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 25px; padding: 25px; justify-items: center;}
+    .card {background: #fff; border-radius: 18px; overflow: hidden; box-shadow: 0 3px 10px rgba(0,0,0,0.08); transition: all 0.25s ease; width: 100%; max-width: 380px; display: flex; flex-direction: column;}
+    .card:hover {transform: translateY(-3px); box-shadow: 0 6px 16px rgba(0,0,0,0.12);}
+    .encabezado {display: flex; justify-content: space-between; align-items: center; background: #FFF8FA; padding: 10px 18px; border-bottom: 1px solid var(--borde);}
+    .pedido-num {font-weight: 700; color: var(--rosa-osc);}
+    .estado {font-weight: 600; padding: 5px 12px; border-radius: 12px; font-size: .9em; color: #fff; text-transform: capitalize;}
+    .pendiente {background: var(--rosa);} .en_ruta {background: var(--rosa-osc);} .entregado {background: var(--verde);}
+    .img-card {width: 100%; height: 240px; object-fit: cover; background: #fff;}
+    .detalle {padding: 14px 20px; flex: 1;}
+    .detalle h3 {margin: 4px 0 10px; font-size: 1.1em; color: var(--rosa-osc);}
+    .detalle p {margin: 4px 0; font-size: .9em; color: var(--gris);}
+    .detalle strong {color: #222;}
+    .acciones {display: flex; align-items: center; gap: 10px; padding: 12px 18px 18px;}
+    select {flex: 1; border: 1px solid var(--borde); border-radius: 8px; padding: 8px 10px; font-size: .9em; background: #fff;}
+    .btn-estado {border: none; padding: 10px 22px; border-radius: 10px; font-weight: 600; color: #fff; cursor: pointer; background: var(--rosa-osc); font-size: .95em;}
+    .btn-estado:hover {background: var(--hover);} .btn-estado.entregado {background: var(--verde);} .btn-estado.entregado:hover {background: #3A614E;}
+    footer {text-align: center; color: var(--gris); padding: 18px; font-size: .85em;}
+    #toast {position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: var(--rosa-osc); color: white; padding: 12px 24px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); font-weight: 600; opacity: 0; pointer-events: none; transition: opacity .4s ease; z-index: 1000;}
+    #toast.show {opacity: 1;}
+    .modal {display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 2000;}
+    .modal-content {background: white; padding: 20px; border-radius: 10px; text-align: center; width: 90%; max-width: 400px;}
+    .modal-content input {width: 100%; margin: 8px 0; padding: 8px; border: 1px solid var(--borde); border-radius: 6px;}
+    .modal-content button {margin: 6px; padding: 8px 16px; border: none; border-radius: 8px; cursor: pointer;}
+    .guardar {background: var(--verde); color: #fff;} .cancelar {background: var(--rosa-osc); color: #fff;}
   </style>
 </head>
-
 <body>
   <header>
     <img src="https://floraapp.s3.us-east-1.amazonaws.com/logo+2024+marca+registrada-04.png" alt="Flora Logo">
     <h2>Panel de Domicilios</h2>
   </header>
+  <main id="contenedor-domicilios"><p style="text-align:center;">Cargando pedidos...</p></main>
+  <footer>🌸 Flora App - Gestión de Domicilios</footer>
+  <div id="toast"></div>
 
-  <main id="contenedor-domicilios">
-    <p style="text-align:center;width:100%;">Cargando pedidos...</p>
-  </main>
-
-  <footer>
-    <p>🌸 Flora App - Gestión de Domicilios</p>
-  </footer>
+  <!-- Modal para registrar externo -->
+  <div id="modalExterno" class="modal">
+    <div class="modal-content">
+      <h3>Registrar domiciliario externo</h3>
+      <input id="nombreExterno" placeholder="Nombre completo">
+      <input id="telefonoExterno" placeholder="Teléfono">
+      <div>
+        <button id="btnRegistrarExterno" class="guardar">Guardar</button>
+        <button id="btnCancelarExterno" class="cancelar">Cancelar</button>
+      </div>
+    </div>
+  </div>
 
   <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwWLKFN_VWGANgKif0HKzTO180xjYmt-MO1gnFPPMP6sR7dxf9Qr37G1tQ5pDRrsZhf/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyONk7UnkMjLVYAL3iBQJ6JnNQVOZu_b3ukIkK4qrlPSqIS2delgITjGp2uVNkkpnn0/exec";
 
-    async function cargarDomicilios() {
+    const mostrarToast = msg => {
+      const t = document.getElementById('toast');
+      t.textContent = msg; t.classList.add('show');
+      setTimeout(()=>t.classList.remove('show'),3000);
+    };
+
+    async function cargarDomicilios(){
       try {
-        const res = await fetch(`${SCRIPT_URL}?hoja=domicilios`);
+        const res = await fetch(`${SCRIPT_URL}?hoja=Domicilios`);
         const data = await res.json();
         renderizarDomicilios(data);
-      } catch (err) {
-        console.error("Error cargando domicilios:", err);
-        document.getElementById("contenedor-domicilios").innerHTML =
-          `<p style="color:red;text-align:center;">❌ Error al cargar domicilios</p>`;
-      }
+      } catch(e){console.error(e); mostrarToast('Error cargando pedidos');}
     }
 
-    function renderizarDomicilios(domicilios) {
-      const contenedor = document.getElementById("contenedor-domicilios");
-      contenedor.innerHTML = "";
+    async function asignarDomiciliario(pedido, domiciliario){
+      if(!domiciliario) return;
+      const body = new URLSearchParams({accion:'asignarDomiciliario', hoja:'Domicilios', pedido:String(pedido), domiciliario});
+      const res = await fetch(SCRIPT_URL,{method:'POST',body});
+      const data = await res.json();
+      if(data.status==='ok') mostrarToast('Domiciliario asignado');
+    }
 
-      if (!domicilios || domicilios.length === 0) {
-        contenedor.innerHTML = `<p style="text-align:center;">No hay pedidos registrados.</p>`;
-        return;
-      }
+    function abrirModalExterno(pedido){
+      const m=document.getElementById('modalExterno'); m.style.display='flex';
+      document.getElementById('btnRegistrarExterno').onclick=async()=>{
+        const nombre=document.getElementById('nombreExterno').value.trim();
+        const tel=document.getElementById('telefonoExterno').value.trim();
+        if(!nombre||!tel){mostrarToast('Completa todos los campos');return;}
+        const body=new URLSearchParams({accion:'registrarExterno',Nombre:nombre,Telefono:tel,Disponibilidad:'Sí'});
+        const res=await fetch(SCRIPT_URL,{method:'POST',body});
+        const data=await res.json();
+        if(data.status==='success'){await asignarDomiciliario(pedido,nombre);mostrarToast(`Externo registrado: ${nombre}`);m.style.display='none';}
+      };
+      document.getElementById('btnCancelarExterno').onclick=()=>m.style.display='none';
+    }
 
-      domicilios.forEach(dom => {
-        const estadoClase = dom.estado?.toLowerCase().replace(" ", "_") || "pendiente";
-        const numeroPedido = dom.pedido || dom.Pedido || dom.numPedido || dom.numero || dom.numeroPedido || dom["N°Pedido"] || dom["Numero Pedido"] || "—";
+    async function actualizarEstado(pedido,nuevoEstado,boton,badge,select){
+      const domi=select.value;
+      if(!domi||domi==='Asignar domiciliario'){mostrarToast('⚠️ Asigna un domiciliario antes de cambiar estado');return;}
+      boton.disabled=true; boton.textContent='Actualizando...';
+      const body=new URLSearchParams({accion:'actualizarEstado',hoja:'Domicilios',pedido:String(pedido),estado:nuevoEstado});
+      const res=await fetch(SCRIPT_URL,{method:'POST',body});
+      const data=await res.json();
+      if(data.result==='ok'||data.status==='success'){
+        if(nuevoEstado==='En Ruta'){badge.textContent='En Ruta';badge.className='estado en_ruta';boton.textContent='Entregado';mostrarToast('🚚 Pedido en ruta');}
+        else{badge.textContent='Entregado';badge.className='estado entregado';boton.textContent='Entregado ✅';mostrarToast('✅ Pedido entregado');}
+      } else mostrarToast('Error al actualizar');
+      boton.disabled=false;
+    }
 
-        const card = `
-          <div class="card">
-            <div class="encabezado">
-              <div class="pedido-num">Pedido #${numeroPedido}</div>
-              <div class="estado ${estadoClase}">${dom.estado || "Pendiente"}</div>
-            </div>
-            <img src="${dom.imagen}" alt="${dom.producto}" class="img-card" />
-            <div class="detalle">
-              <h3>${dom.producto}</h3>
-              <p><strong>Destinatario:</strong> ${dom.destinatario || "—"}</p>
-              <p><strong>Dirección:</strong> ${dom.direccion || "—"}</p>
-              <p><strong>Barrio:</strong> ${dom.barrio || "—"}</p>
-              <p><strong>Teléfono:</strong> ${dom.telefonoDestino || dom.telefono || "—"}</p>
-              <p><strong>Entrega:</strong> ${dom.fechaEntrega || ""}</p>
-            </div>
-            <div class="acciones">
-              <select>
-                <option value="">Asignar domiciliario</option>
-                <option ${dom.domiciliario==="Elvis"?"selected":""}>Elvis</option>
-                <option ${dom.domiciliario==="Oscar"?"selected":""}>Oscar</option>
-                <option ${dom.domiciliario==="Externo"?"selected":""}>Externo</option>
-              </select>
-              <button class="btn-enruta">En Ruta</button>
-              <button class="btn-entregado">Entregado</button>
-            </div>
-          </div>
-        `;
-        contenedor.innerHTML += card;
+    function renderizarDomicilios(domicilios){
+      const c=document.getElementById('contenedor-domicilios'); c.innerHTML='';
+      if(!domicilios?.length){c.innerHTML='<p style="text-align:center;">No hay pedidos.</p>';return;}
+      domicilios.forEach(dom=>{
+        const num=dom["N°Pedido"]||dom.pedido; const est=dom.estado||'Pendiente';
+        const estClase=est.toLowerCase().replace(' ','_');
+        const btnTxt=est==='Pendiente'?'En Ruta':est==='En Ruta'?'Entregado':'Entregado ✅';
+        const btnClass=est==='Entregado'?'btn-estado entregado':'btn-estado';
+        const card=document.createElement('div'); card.className='card';
+        card.innerHTML=`<div class="encabezado"><div class="pedido-num">Pedido #${num}</div><div class="estado ${estClase}">${est}</div></div>
+        <img src="${dom.imagen}" class="img-card"><div class="detalle"><h3>${dom.producto}</h3>
+        <p><strong>Destinatario:</strong> ${dom.destinatario||'—'}</p>
+        <p><strong>Dirección:</strong> ${dom.direccion||'—'}</p>
+        <p><strong>Barrio:</strong> ${dom.barrio||'—'}</p>
+        <p><strong>Teléfono:</strong> ${dom.telefonoDestino||dom.telefono||'—'}</p>
+        <p><strong>Entrega:</strong> ${dom.fechaEntrega||''}</p></div>
+        <div class="acciones"><select><option>Asignar domiciliario</option>
+        <option ${dom.domiciliario==='Elvis'?'selected':''}>Elvis</option>
+        <option ${dom.domiciliario==='Oscar'?'selected':''}>Oscar</option>
+        <option ${dom.domiciliario==='Externo'?'selected':''}>Externo</option></select>
+        <button class="${btnClass}">${btnTxt}</button></div>`;
+        const b=card.querySelector('button'); const s=card.querySelector('select'); const badge=card.querySelector('.estado');
+        s.addEventListener('change',()=>{if(s.value==='Externo')abrirModalExterno(num);else asignarDomiciliario(num,s.value);});
+        b.addEventListener('click',()=>{const nuevo=badge.textContent==='Pendiente'?'En Ruta':badge.textContent==='En Ruta'?'Entregado':'Entregado';actualizarEstado(num,nuevo,b,badge,s);});
+        c.appendChild(card);
       });
     }
 
