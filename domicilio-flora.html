@@ -93,18 +93,46 @@
       if(data.status==='ok') mostrarToast('Domiciliario asignado');
     }
 
-    function abrirModalExterno(pedido){
-      const m=document.getElementById('modalExterno'); m.style.display='flex';
-      document.getElementById('btnRegistrarExterno').onclick=async()=>{
-        const nombre=document.getElementById('nombreExterno').value.trim();
-        const tel=document.getElementById('telefonoExterno').value.trim();
-        if(!nombre||!tel){mostrarToast('Completa todos los campos');return;}
-        const body=new URLSearchParams({accion:'registrarExterno',Nombre:nombre,Telefono:tel,Disponibilidad:'Sí'});
-        const res=await fetch(SCRIPT_URL,{method:'POST',body});
-        const data=await res.json();
-        if(data.status==='success'){await asignarDomiciliario(pedido,nombre);mostrarToast(`Externo registrado: ${nombre}`);m.style.display='none';}
+    // 🔹 MODIFICADO: ahora el modal envía también el número de pedido
+    function abrirModalExterno(pedido) {
+      const m = document.getElementById('modalExterno');
+      m.style.display = 'flex';
+
+      document.getElementById('btnRegistrarExterno').onclick = async () => {
+        const nombre = document.getElementById('nombreExterno').value.trim();
+        const tel = document.getElementById('telefonoExterno').value.trim();
+
+        if (!nombre || !tel) {
+          mostrarToast('Completa todos los campos');
+          return;
+        }
+
+        const body = new URLSearchParams({
+          accion: 'registrarExterno',
+          Nombre: nombre,
+          Telefono: tel,
+          Disponibilidad: 'Sí',
+          pedido: String(pedido) // ✅ ahora se envía el pedido
+        });
+
+        try {
+          const res = await fetch(SCRIPT_URL, { method: 'POST', body });
+          const data = await res.json();
+
+          if (data.status === 'success') {
+            mostrarToast(`Externo registrado y asignado: ${nombre}`);
+            m.style.display = 'none';
+            await cargarDomicilios(); // ✅ refresca los pedidos
+          } else {
+            mostrarToast(`⚠️ ${data.message || 'No se pudo registrar el domiciliario'}`);
+          }
+        } catch (err) {
+          console.error(err);
+          mostrarToast('❌ Error al registrar el domiciliario');
+        }
       };
-      document.getElementById('btnCancelarExterno').onclick=()=>m.style.display='none';
+
+      document.getElementById('btnCancelarExterno').onclick = () => m.style.display = 'none';
     }
 
     async function actualizarEstado(pedido,nuevoEstado,boton,badge,select){
