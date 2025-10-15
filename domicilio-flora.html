@@ -112,7 +112,7 @@
           Nombre: nombre,
           Telefono: tel,
           Disponibilidad: 'Sí',
-          pedido: String(pedido) // ✅ ahora se envía el pedido
+          pedido: String(pedido)
         });
 
         try {
@@ -122,7 +122,17 @@
           if (data.status === 'success') {
             mostrarToast(`Externo registrado y asignado: ${nombre}`);
             m.style.display = 'none';
-            await cargarDomicilios(); // ✅ refresca los pedidos
+
+            // 🔹 Refrescar los pedidos
+            await cargarDomicilios();
+
+            // 🔹 Mantener “Externo” seleccionado después de cerrar el modal
+            const card = [...document.querySelectorAll('.card')]
+              .find(c => c.querySelector('.pedido-num')?.textContent.includes(pedido));
+            if (card) {
+              const select = card.querySelector('select');
+              if (select) select.value = 'Externo';
+            }
           } else {
             mostrarToast(`⚠️ ${data.message || 'No se pudo registrar el domiciliario'}`);
           }
@@ -134,6 +144,7 @@
 
       document.getElementById('btnCancelarExterno').onclick = () => m.style.display = 'none';
     }
+
 
     async function actualizarEstado(pedido,nuevoEstado,boton,badge,select){
       const domi=select.value;
