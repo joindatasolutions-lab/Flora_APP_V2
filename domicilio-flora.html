@@ -160,30 +160,74 @@
       boton.disabled=false;
     }
 
-    function renderizarDomicilios(domicilios){
-      const c=document.getElementById('contenedor-domicilios'); c.innerHTML='';
-      if(!domicilios?.length){c.innerHTML='<p style="text-align:center;">No hay pedidos.</p>';return;}
-      domicilios.forEach(dom=>{
-        const num=dom["N°Pedido"]||dom.pedido; const est=dom.estado||'Pendiente';
-        const estClase=est.toLowerCase().replace(' ','_');
-        const btnTxt=est==='Pendiente'?'En Ruta':est==='En Ruta'?'Entregado':'Entregado ✅';
-        const btnClass=est==='Entregado'?'btn-estado entregado':'btn-estado';
-        const card=document.createElement('div'); card.className='card';
-        card.innerHTML=`<div class="encabezado"><div class="pedido-num">Pedido #${num}</div><div class="estado ${estClase}">${est}</div></div>
-        <img src="${dom.imagen}" class="img-card"><div class="detalle"><h3>${dom.producto}</h3>
-        <p><strong>Destinatario:</strong> ${dom.destinatario||'—'}</p>
-        <p><strong>Dirección:</strong> ${dom.direccion||'—'}</p>
-        <p><strong>Barrio:</strong> ${dom.barrio||'—'}</p>
-        <p><strong>Teléfono:</strong> ${dom.telefonoDestino||dom.telefono||'—'}</p>
-        <p><strong>Entrega:</strong> ${dom.fechaEntrega||''}</p></div>
-        <div class="acciones"><select><option>Asignar domiciliario</option>
-        <option ${dom.domiciliario==='Elvis'?'selected':''}>Elvis</option>
-        <option ${dom.domiciliario==='Oscar'?'selected':''}>Oscar</option>
-        <option ${dom.domiciliario==='Externo'?'selected':''}>Externo</option></select>
-        <button class="${btnClass}">${btnTxt}</button></div>`;
-        const b=card.querySelector('button'); const s=card.querySelector('select'); const badge=card.querySelector('.estado');
-        s.addEventListener('change',()=>{if(s.value==='Externo')abrirModalExterno(num);else asignarDomiciliario(num,s.value);});
-        b.addEventListener('click',()=>{const nuevo=badge.textContent==='Pendiente'?'En Ruta':badge.textContent==='En Ruta'?'Entregado':'Entregado';actualizarEstado(num,nuevo,b,badge,s);});
+    function renderizarDomicilios(domicilios) {
+      const c = document.getElementById('contenedor-domicilios');
+      c.innerHTML = '';
+      if (!domicilios?.length) {
+        c.innerHTML = '<p style="text-align:center;">No hay pedidos.</p>';
+        return;
+      }
+
+      domicilios.forEach(dom => {
+        const num = dom["N°Pedido"] || dom.pedido;
+        const est = dom.estado || 'Pendiente';
+        const estClase = est.toLowerCase().replace(' ', '_');
+        const btnTxt = est === 'Pendiente' ? 'En Ruta' : est === 'En Ruta' ? 'Entregado' : 'Entregado ✅';
+        const btnClass = est === 'Entregado' ? 'btn-estado entregado' : 'btn-estado';
+
+        // 🟢 Normalizar valores
+        const domiciliario = (dom.domiciliario || '').trim();
+        const esExterno = String(dom.externo || '').toLowerCase() === 'si' || String(dom.externo || '').toLowerCase() === 'true';
+
+        // 🟢 Determinar valor mostrado
+        const valorActual = esExterno ? 'Externo' : (domiciliario || 'Asignar domiciliario');
+
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = `
+          <div class="encabezado">
+            <div class="pedido-num">Pedido #${num}</div>
+            <div class="estado ${estClase}">${est}</div>
+          </div>
+          <img src="${dom.imagen}" class="img-card">
+          <div class="detalle">
+            <h3>${dom.producto}</h3>
+            <p><strong>Destinatario:</strong> ${dom.destinatario || '—'}</p>
+            <p><strong>Dirección:</strong> ${dom.direccion || '—'}</p>
+            <p><strong>Barrio:</strong> ${dom.barrio || '—'}</p>
+            <p><strong>Teléfono:</strong> ${dom.telefonoDestino || dom.telefono || '—'}</p>
+            <p><strong>Entrega:</strong> ${dom.fechaEntrega || ''}</p>
+          </div>
+          <div class="acciones">
+            <select>
+              <option ${valorActual === 'Asignar domiciliario' ? 'selected' : ''}>Asignar domiciliario</option>
+              <option ${valorActual === 'Elvis' ? 'selected' : ''}>Elvis</option>
+              <option ${valorActual === 'Oscar' ? 'selected' : ''}>Oscar</option>
+              <option ${valorActual === 'Externo' ? 'selected' : ''}>Externo</option>
+            </select>
+            <button class="${btnClass}">${btnTxt}</button>
+          </div>
+        `;
+
+        const boton = card.querySelector('button');
+        const select = card.querySelector('select');
+        const badge = card.querySelector('.estado');
+
+        // 🔸 Permitir cambio de domiciliario libremente
+        select.addEventListener('change', () => {
+          if (select.value === 'Externo') abrirModalExterno(num);
+          else asignarDomiciliario(num, select.value);
+        });
+
+        boton.addEventListener('click', () => {
+          const nuevo = badge.textContent === 'Pendiente'
+            ? 'En Ruta'
+            : badge.textContent === 'En Ruta'
+            ? 'Entregado'
+            : 'Entregado';
+          actualizarEstado(num, nuevo, boton, badge, select);
+        });
+
         c.appendChild(card);
       });
     }
