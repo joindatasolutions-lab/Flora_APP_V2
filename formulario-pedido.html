@@ -1,401 +1,336 @@
 <!DOCTYPE html>
 <html lang="es">
->
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Flora - Catálogo y Pedido</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Flora | Pedido Catálogo</title>
+  <link rel="icon" href="https://i.imgur.com/AFaP0EJ.png">
   <style>
-    :root {
-      --rosa: #e6a5b6;
-      --rosa-osc: #c97b94;
-      --borde: #ecd6dc;
-      --bg: #fdfaf7;
-    }
-
     body {
-      font-family: 'Inter', sans-serif;
-      background: var(--bg);
+      font-family: "Poppins", sans-serif;
+      background-color: #fff7fa;
       margin: 0;
       padding: 0;
-      color: #333;
     }
 
     header {
       text-align: center;
-      padding: 24px 10px;
+      background-color: #ffedf3;
+      padding: 1rem;
     }
 
     header img {
-      max-width: 240px;
-      margin: 0 auto 8px;
-      display: block;
+      height: 70px;
     }
 
-    h2 {
-      color: var(--rosa-osc);
-      font-weight: 700;
+    h1 {
+      color: #c2185b;
+      font-weight: 600;
     }
 
-    /* === Catálogo === */
     .catalogo {
       display: grid;
-      gap: 18px;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      max-width: 1100px;
-      margin: 0 auto;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
       padding: 20px;
     }
 
-    .card {
+    .producto {
       background: #fff;
-      border: 1px solid var(--borde);
-      border-radius: 18px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
       overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      text-align: center;
+      transition: transform 0.2s;
     }
 
-    .card:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.12);
+    .producto:hover {
+      transform: scale(1.03);
     }
 
-    .card img {
+    .producto img {
       width: 100%;
-      height: 240px;
+      height: 180px;
       object-fit: cover;
     }
 
-    .card .body {
-      padding: 14px;
-      text-align: center;
+    .producto h3 {
+      margin: 10px 0 5px;
+      color: #c2185b;
+      font-size: 1.1rem;
     }
 
-    .card h4 {
-      margin: 6px 0;
-      color: var(--rosa-osc);
-      font-weight: 700;
-    }
-
-    .price {
+    .producto p {
+      margin: 0;
       color: #555;
-      font-weight: 600;
-      margin-bottom: 10px;
     }
 
-    .btn-add {
-      background: var(--rosa);
+    .producto button {
+      background-color: #c2185b;
       color: white;
-      font-weight: 700;
       border: none;
-      border-radius: 10px;
-      padding: 10px 14px;
+      padding: 8px 14px;
+      border-radius: 8px;
+      margin: 10px 0 15px;
       cursor: pointer;
+      transition: background 0.3s;
     }
 
-    .btn-add:hover {
-      background: var(--rosa-osc);
+    .producto button:hover {
+      background-color: #a5124e;
     }
 
-    /* === Drawer Carrito === */
-    #drawerCart {
+    /* 🛒 Botón flotante del carrito */
+    .carrito-btn {
+      position: fixed;
+      bottom: 25px;
+      right: 25px;
+      background: white;
+      border: 2px solid #c2185b;
+      color: #c2185b;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      z-index: 1001;
+    }
+
+    .carrito-btn:hover {
+      background: #c2185b;
+      color: white;
+    }
+
+    .carrito-btn span {
+      position: absolute;
+      top: 6px;
+      right: 8px;
+      background: #c2185b;
+      color: white;
+      border-radius: 50%;
+      font-size: 0.7rem;
+      padding: 3px 6px;
+    }
+
+    /* 🛍 Panel lateral del carrito */
+    .drawer {
       position: fixed;
       top: 0;
-      right: -100%;
-      width: 370px;
-      max-width: 90%;
-      height: 100vh;
-      background: #fff;
-      box-shadow: -4px 0 12px rgba(0, 0, 0, 0.15);
-      transition: right 0.3s ease;
+      right: -400px;
+      width: 350px;
+      height: 100%;
+      background: white;
+      box-shadow: -2px 0 8px rgba(0, 0, 0, 0.2);
+      transition: right 0.4s ease;
+      z-index: 1000;
       display: flex;
       flex-direction: column;
-      z-index: 999;
     }
 
-    #drawerCart.active {
+    .drawer.open {
       right: 0;
     }
 
-    #drawerCart header {
-      background: var(--rosa);
-      color: #fff;
-      padding: 18px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-weight: 700;
+    .drawer-header {
+      background-color: #c2185b;
+      color: white;
+      padding: 15px;
+      text-align: center;
+      font-weight: bold;
     }
 
-    #cartList {
-      flex: 1;
+    .drawer-content {
+      flex-grow: 1;
       overflow-y: auto;
-      padding: 14px;
+      padding: 15px;
     }
 
-    .cart-item {
+    .drawer-content .item {
       display: flex;
       align-items: center;
       justify-content: space-between;
       border-bottom: 1px solid #eee;
-      padding: 8px 0;
+      padding: 10px 0;
     }
 
-    .cart-item button {
-      background: none;
-      border: none;
-      color: var(--rosa-osc);
-      font-size: 1.1rem;
-      cursor: pointer;
+    .drawer-content .item img {
+      width: 60px;
+      height: 60px;
+      border-radius: 8px;
+      object-fit: cover;
     }
 
-    #cartSummary {
-      padding: 10px 16px;
+    .drawer-footer {
       border-top: 1px solid #eee;
+      padding: 15px;
+    }
+
+    .drawer-footer button {
+      background-color: #c2185b;
+      color: white;
+      border: none;
+      padding: 10px;
+      width: 100%;
+      border-radius: 8px;
       font-weight: 600;
-    }
-
-    #btnConfirmar {
-      margin: 16px;
-      padding: 12px;
-      background: var(--rosa);
-      color: #fff;
-      border: none;
-      border-radius: 10px;
-      font-weight: 700;
       cursor: pointer;
     }
 
-    #btnConfirmar:hover {
-      background: var(--rosa-osc);
+    .drawer-footer button:hover {
+      background-color: #a5124e;
     }
 
-    /* === Botón flotante carrito === */
-    #btnCarrito {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      background: var(--rosa);
-      border: none;
-      border-radius: 50%;
-      width: 56px;
-      height: 56px;
-      color: #fff;
-      font-size: 1.4rem;
-      cursor: pointer;
-      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
-      z-index: 900;
+    .totales {
+      font-size: 0.9rem;
+      color: #444;
+      margin-bottom: 10px;
     }
 
-    #cartCount {
-      position: absolute;
-      top: -4px;
-      right: -4px;
-      background: #fff;
-      color: var(--rosa-osc);
-      font-weight: 700;
-      border-radius: 50%;
-      width: 22px;
-      height: 22px;
-      font-size: 0.8rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
+    .totales strong {
+      color: #c2185b;
     }
 
-    form {
-      background: #fff;
-      border: 1px solid var(--borde);
-      border-radius: 20px;
-      max-width: 800px;
-      margin: 30px auto;
-      padding: 28px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-    }
-
-    .grid {
-      display: grid;
-      gap: 16px;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-    }
-
-    textarea {
-      min-height: 90px;
-      resize: vertical;
-    }
-
-    .firma-box {
-      margin-top: 20px;
-      padding: 14px;
-      border: 1px dashed var(--rosa);
-      border-radius: 12px;
-      background: #fff9fa;
-    }
-
-    .actions {
-      display: flex;
-      justify-content: end;
-      margin-top: 20px;
-    }
-
-    .btn-primary {
-      background: var(--rosa);
-      color: #fff;
-      border: none;
-      border-radius: 10px;
-      padding: 12px 22px;
-      font-weight: 800;
-      cursor: pointer;
+    /* Responsive */
+    @media (max-width: 600px) {
+      .drawer {
+        width: 90%;
+      }
     }
   </style>
 </head>
-
 <body>
   <header>
-    <img src="img/logo 2024 marca registrada-04.png" alt="Flora Logo">
-    <h2>Catálogo de Arreglos Florales</h2>
+    <img src="https://i.imgur.com/AFaP0EJ.png" alt="Flora Logo" />
+    <h1>Catálogo de Productos</h1>
   </header>
 
-  <section id="catalogo" class="catalogo"></section>
+  <section class="catalogo" id="catalogo"></section>
 
-  <!-- Drawer -->
-  <div id="drawerCart">
-    <header>
-      <span>🛒 Carrito</span>
-      <button id="closeDrawer"
-        style="background:none;border:none;color:#fff;font-size:1.4rem;cursor:pointer;">✕</button>
-    </header>
-    <div id="cartList"></div>
-    <div id="cartSummary">
-      <p>Subtotal: $<span id="subTotal">0</span></p>
-      <p>IVA: $<span id="ivaTotal">0</span></p>
-      <p>Domicilio: $<span id="domicilioTotal">0</span></p>
-      <p><strong>Total: $<span id="totalFinal">0</span></strong></p>
-    </div>
-    <button id="btnConfirmar">Proceder al pedido</button>
+  <!-- 🛒 Botón flotante -->
+  <div class="carrito-btn" id="carritoBtn">
+    🛒
+    <span id="contadorCarrito">0</span>
   </div>
 
-  <button id="btnCarrito">
-    🛒
-    <span id="cartCount" style="display:none;">0</span>
-  </button>
-
-  <!-- === FORMULARIO === -->
-  <!-- Tu formulario original se mantiene intacto -->
-  <!-- ... (el formulario existente de tu archivo actual) ... -->
+  <!-- 🛍 Drawer lateral -->
+  <div class="drawer" id="drawer">
+    <div class="drawer-header">🛍 Tu Carrito</div>
+    <div class="drawer-content" id="drawerItems"></div>
+    <div class="drawer-footer">
+      <div class="totales" id="totales"></div>
+      <button id="continuarPedido">Continuar con el pedido</button>
+    </div>
+  </div>
 
   <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwol802NzgXkLtWVJiDLX_MnOXlyyWxL0AnVVef1GO8L7TVYAI5uH_6jkJomakcWlih/exec";
-    const state = { catalogo: [], barrios: {}, cart: [] };
-    const fmt = v => Number(v || 0).toLocaleString('es-CO');
+    const SCRIPT_URL = "TU_URL_DEL_SCRIPT_AQUI"; // reemplázala por la tuya
 
-    async function init() {
-      const res = await fetch(SCRIPT_URL);
-      const data = await res.json();
-      state.catalogo = data.catalogo || [];
-      state.barrios = data.barrios || {};
-      renderCatalog();
-    }
+    let catalogo = [];
+    let carrito = [];
 
-    function renderCatalog() {
-      const cont = document.getElementById("catalogo");
-      cont.innerHTML = "";
-      state.catalogo.forEach(p => {
-        const card = document.createElement("div");
-        card.className = "card";
-        card.innerHTML = `
-          <img src="${p.img || ''}" alt="${p.name}">
-          <div class="body">
-            <h4>${p.name}</h4>
-            <div class="price">$${fmt(p.price)}</div>
-            <button class="btn-add">Agregar al carrito</button>
-          </div>`;
-        card.querySelector(".btn-add").addEventListener("click", () => addToCart(p));
-        cont.appendChild(card);
-      });
-    }
-
-    function addToCart(p) {
-      const item = state.cart.find(x => x.id === p.id);
-      if (item) item.qty++;
-      else state.cart.push({ ...p, qty: 1 });
-      renderCart();
-      openDrawer();
-    }
-
-    function removeFromCart(id) {
-      state.cart = state.cart.filter(p => p.id !== id);
-      renderCart();
-    }
-
-    function changeQty(id, delta) {
-      const it = state.cart.find(p => p.id === id);
-      if (!it) return;
-      it.qty = Math.max(1, it.qty + delta);
-      renderCart();
-    }
-
-    function renderCart() {
-      const list = document.getElementById("cartList");
-      list.innerHTML = "";
-      let subtotal = 0;
-      let count = 0;
-      state.cart.forEach(p => {
-        const sub = p.price * p.qty;
-        subtotal += sub;
-        count += p.qty;
-        list.innerHTML += `
-          <div class="cart-item">
-            <span>${p.name}</span>
-            <div>
-              <button onclick="changeQty('${p.id}',-1)">−</button>
-              <span>${p.qty}</span>
-              <button onclick="changeQty('${p.id}',1)">+</button>
-            </div>
-            <span>$${fmt(sub)}</span>
-            <button onclick="removeFromCart('${p.id}')">🗑</button>
-          </div>`;
-      });
-      const tipo = "CEDULA";
-      const iva = (tipo === "NIT") ? Math.round(subtotal * 0.19) : 0;
-      const dom = 0;
-      const total = subtotal + iva + dom;
-
-      document.getElementById("subTotal").textContent = fmt(subtotal);
-      document.getElementById("ivaTotal").textContent = fmt(iva);
-      document.getElementById("domicilioTotal").textContent = fmt(dom);
-      document.getElementById("totalFinal").textContent = fmt(total);
-
-      const badge = document.getElementById("cartCount");
-      if (count > 0) {
-        badge.style.display = "flex";
-        badge.textContent = count;
-      } else {
-        badge.style.display = "none";
+    // 🟢 Cargar catálogo
+    async function cargarCatalogo() {
+      try {
+        const res = await fetch(SCRIPT_URL);
+        const data = await res.json();
+        catalogo = data.catalogo || [];
+        mostrarCatalogo();
+      } catch (err) {
+        console.error("Error al cargar catálogo:", err);
       }
     }
 
-    function openDrawer() {
-      document.getElementById("drawerCart").classList.add("active");
+    // 🟢 Renderizar catálogo
+    function mostrarCatalogo() {
+      const contenedor = document.getElementById("catalogo");
+      contenedor.innerHTML = "";
+      catalogo.forEach(prod => {
+        const card = document.createElement("div");
+        card.className = "producto";
+        card.innerHTML = `
+          <img src="${prod.img}" alt="${prod.name}">
+          <h3>${prod.name}</h3>
+          <p>$${prod.price.toLocaleString("es-CO")}</p>
+          <button onclick="agregarAlCarrito('${prod.id}')">Agregar</button>
+        `;
+        contenedor.appendChild(card);
+      });
     }
 
-    function closeDrawer() {
-      document.getElementById("drawerCart").classList.remove("active");
+    // 🟢 Agregar producto al carrito
+    function agregarAlCarrito(id) {
+      const producto = catalogo.find(p => p.id == id);
+      if (!producto) return;
+      const existente = carrito.find(item => item.id == id);
+      if (existente) {
+        existente.cantidad++;
+      } else {
+        carrito.push({ ...producto, cantidad: 1 });
+      }
+      actualizarCarrito();
     }
 
-    document.getElementById("btnCarrito").onclick = openDrawer;
-    document.getElementById("closeDrawer").onclick = closeDrawer;
-    document.getElementById("btnConfirmar").onclick = closeDrawer;
+    // 🟢 Actualizar panel lateral y contador
+    function actualizarCarrito() {
+      const drawerItems = document.getElementById("drawerItems");
+      const contador = document.getElementById("contadorCarrito");
+      const totalesDiv = document.getElementById("totales");
 
-    init();
+      drawerItems.innerHTML = "";
+      let total = 0;
+
+      carrito.forEach(item => {
+        total += item.price * item.cantidad;
+        const div = document.createElement("div");
+        div.className = "item";
+        div.innerHTML = `
+          <img src="${item.img}">
+          <div style="flex:1; padding:0 8px;">
+            <strong>${item.name}</strong><br>
+            $${item.price.toLocaleString("es-CO")}
+          </div>
+          <div>
+            <button onclick="cambiarCantidad('${item.id}', -1)">-</button>
+            <span>${item.cantidad}</span>
+            <button onclick="cambiarCantidad('${item.id}', 1)">+</button>
+          </div>
+        `;
+        drawerItems.appendChild(div);
+      });
+
+      contador.textContent = carrito.reduce((acc, i) => acc + i.cantidad, 0);
+
+      totalesDiv.innerHTML = `
+        Subtotal: <strong>$${total.toLocaleString("es-CO")}</strong><br>
+        Domicilio: <strong>$0</strong><br>
+        Total: <strong>$${total.toLocaleString("es-CO")}</strong>
+      `;
+    }
+
+    // 🟢 Cambiar cantidad
+    function cambiarCantidad(id, delta) {
+      const item = carrito.find(i => i.id == id);
+      if (!item) return;
+      item.cantidad += delta;
+      if (item.cantidad <= 0) carrito = carrito.filter(i => i.id != id);
+      actualizarCarrito();
+    }
+
+    // 🟢 Abrir/cerrar panel lateral
+    const drawer = document.getElementById("drawer");
+    document.getElementById("carritoBtn").onclick = () => drawer.classList.toggle("open");
+
+    // 🟢 Continuar pedido
+    document.getElementById("continuarPedido").onclick = () => {
+      drawer.classList.remove("open");
+      alert("Aquí se integrará tu formulario de pedido actual 🌸");
+    };
+
+    cargarCatalogo();
   </script>
 </body>
 </html>
-
