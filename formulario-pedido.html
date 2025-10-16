@@ -82,21 +82,6 @@
     }
     .btn-add:hover{background:var(--rosa-osc);}
 
-    /* === CARRITO === */
-    .cart-container {
-      max-width:800px;margin:20px auto;
-      background:#fff;padding:24px;border-radius:16px;
-      box-shadow:0 8px 24px rgba(0,0,0,0.08);
-    }
-    .cart-container h2{text-align:center;color:var(--rosa-osc);}
-    #cartItems{border-top:1px solid #eee;border-bottom:1px solid #eee;padding:10px 0;}
-    .cart-item{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #f3f3f3;}
-    .cart-item:last-child{border-bottom:none;}
-    .cart-item span{flex:1;}
-    .cart-item button{background:none;border:none;color:#e64b4b;cursor:pointer;font-size:1.2rem;}
-    .cart-summary p{margin:8px 0;text-align:right;}
-    .cart-actions{display:flex;justify-content:space-between;margin-top:20px;gap:10px;}
-
     /* === FORMULARIO === */
     form {
       background:#fff;border:1px solid var(--borde);
@@ -127,9 +112,6 @@
     .btn-outline{background:#fff;border:2px solid var(--rosa);color:var(--rosa);border-radius:10px;padding:12px 22px;font-weight:700;cursor:pointer;}
     .btn-outline:hover{background:var(--rosa);color:#fff;}
     .firma-box{margin-top:20px;padding:14px 16px;border:1px dashed var(--rosa);border-radius:12px;background:#fff9fa;}
-    .badge{display:inline-block;font-size:0.85rem;border-radius:999px;padding:4px 10px;margin-left:8px;vertical-align:middle;}
-    .badge.ok{background:#e7f8ec;color:#137333;border:1px solid #b7e3c2;}
-    .badge.warn{background:#fff7e6;color:#a15d00;border:1px solid #ffd59e;}
 
     /* === BOTÓN FLOTANTE CARRITO === */
     #btnVerCarrito {
@@ -141,30 +123,59 @@
       z-index:1000;
     }
 
-    /* === PANEL LATERAL === */
-    .cart-sidebar {
-      position: fixed;
-      top: 0;
-      right: -420px;
-      width: 360px;
-      height: 100%;
-      background: #fff;
-      box-shadow: -4px 0 20px rgba(0,0,0,0.1);
-      border-left: 1px solid var(--borde);
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      transition: right 0.35s ease;
-      z-index: 999;
+    /* === PANEL LATERAL MEJORADO === */
+    .overlay {
+      position:fixed;inset:0;
+      background:rgba(0,0,0,.35);
+      opacity:0;pointer-events:none;
+      transition:opacity .3s ease;
+      z-index:998;
     }
-    .cart-sidebar.open { right: 0; }
-    .cart-header {display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid var(--borde);margin-bottom:12px;}
-    .cart-header h3{color:var(--rosa-osc);margin:0;}
-    .cart-header button{background:none;border:none;font-size:1.3rem;cursor:pointer;}
+    .overlay.active {opacity:1;pointer-events:all;}
+
+    .cart-sidebar {
+      position:fixed;top:0;right:-420px;
+      width:380px;height:100%;
+      background:#fff;
+      box-shadow:-6px 0 25px rgba(0,0,0,.15);
+      border-left:3px solid #f2d3dc;
+      display:flex;flex-direction:column;
+      padding:20px;
+      transition:right .4s ease;
+      z-index:999;
+    }
+    .cart-sidebar.open {right:0;}
+    .cart-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+    .cart-header h3{color:#c97b94;font-weight:700;margin:0;}
+    .cart-header button{background:none;border:none;font-size:1.3rem;cursor:pointer;color:#c97b94;}
+
     .sidebar-items{flex:1;overflow-y:auto;margin-bottom:16px;}
-    .sidebar-item{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #f2f2f2;padding:8px 0;}
-    .sidebar-item span{flex:1;}
+    .sidebar-item{display:flex;align-items:center;border-bottom:1px solid #f2f2f2;padding:10px 0;}
+    .sidebar-thumb{width:48px;height:48px;border-radius:8px;object-fit:cover;margin-right:10px;}
+    .sidebar-item-info{flex:1;}
+    .sidebar-item-name{font-weight:600;color:#444;}
+    .sidebar-item-price{color:#777;font-size:.9rem;}
+    .qty-control{display:flex;align-items:center;gap:6px;background:#fafafa;border-radius:6px;padding:4px 6px;}
+    .qty-btn{background:#e6a5b6;border:none;color:#fff;width:22px;height:22px;border-radius:5px;cursor:pointer;font-weight:bold;line-height:1;}
+    .qty-btn:hover{background:#c97b94;}
+
+    .sidebar-summary{
+      border-top:2px solid #f2d3dc;
+      padding-top:10px;
+      background:linear-gradient(180deg,#fff,#fff8fa);
+      border-radius:12px;
+      box-shadow:0 -2px 10px rgba(0,0,0,.05);
+    }
     .sidebar-summary p{margin:6px 0;text-align:right;}
+    .sidebar-summary p.total{font-size:1.05rem;color:#c97b94;font-weight:700;}
+    .full-btn{
+      margin-top:10px;width:100%;
+      background:#e6a5b6;color:#fff;
+      border:none;border-radius:10px;
+      padding:12px;font-weight:700;
+      cursor:pointer;transition:background .2s ease;
+    }
+    .full-btn:hover{background:#c97b94;}
   </style>
 </head>
 
@@ -178,120 +189,75 @@
     <div id="catalogo" class="catalogo"></div>
   </section>
 
-  <section id="viewCart" class="view">
-    <div class="cart-container">
-      <h2>🛍️ Carrito de Compras</h2>
-      <div id="cartItems"></div>
-      <div id="cartSummary" class="cart-summary">
-        <p><strong>Subtotal:</strong> $<span id="subtotal">0</span></p>
-        <p><strong>Domicilio:</strong> $<span id="domicilio">0</span></p>
-        <p><strong>Total:</strong> $<span id="total">0</span></p>
-      </div>
-      <div class="cart-actions">
-        <button id="btnSeguirComprando" class="btn-outline">Seguir comprando</button>
-        <button id="btnProcederPedido" class="btn-primary">Proceder al pedido</button>
-      </div>
-    </div>
-  </section>
-
   <section id="viewForm" class="view">
     <form id="pedidoForm">
       <div class="pedido-summary" id="resumenProducto">🛍 Tu pedido</div>
 
-      <h3>Datos del Cliente <span id="badgeCliente" class="badge warn">Nuevo cliente</span></h3>
+      <h3>Datos del Cliente</h3>
       <div class="grid">
-        <div><label>Tipo de identificación</label>
-          <select id="tipoIdent" name="tipoIdent" required>
-            <option value="CEDULA" selected>Cédula</option>
-            <option value="NIT">NIT</option>
-          </select>
-        </div>
         <div><label>Identificación</label><input id="identificacion" name="identificacion" required></div>
         <div><label>Teléfono</label><input id="telefono" name="telefono" required></div>
         <div><label>Nombre</label><input id="primerNombre" name="primerNombre" required></div>
-        <div><label>Apellido(s)</label><input id="primerApellido" name="primerApellido"></div>
-        <div><label>Email (opcional)</label><input type="email" id="email" name="email"></div>
       </div>
 
       <h3>Entrega</h3>
       <div class="grid">
         <div><label>Destinatario</label><input id="destinatario" name="destinatario" required></div>
-        <div><label>Teléfono destino</label><input id="telefonoDestino" name="telefonoDestino" required></div>
-        <div><label>Dirección</label><input id="direccion" name="direccion" required></div>
         <div><label>Barrio</label><select id="barrio" name="barrio"></select></div>
-        <div><label>Fecha de entrega</label><input id="fechaEntrega" type="date" name="fechaEntrega" required></div>
-        <div><label>Hora de entrega</label><input id="horaEntrega" type="time" name="horaEntrega" required></div>
+        <div><label>Dirección</label><input id="direccion" name="direccion" required></div>
       </div>
 
-      <h3>Medio de Pago y Mensaje</h3>
+      <h3>Pago y Mensaje</h3>
       <div class="grid">
-        <div>
-          <label>Medio de pago</label>
+        <div><label>Medio de pago</label>
           <select id="formaPago" name="formaPago" required>
-            <option value="">Selecciona una opción...</option>
-            <option value="TRANSFERENCIA">Transferencia bancaria</option>
+            <option value="TRANSFERENCIA">Transferencia</option>
             <option value="EFECTIVO">Efectivo</option>
-            <option value="CONTRAENTREGA">Pago contra entrega</option>
-            <option value="LINK">Link de pago (enviar por WhatsApp)</option>
           </select>
         </div>
-        <div class="grid-1">
-          <label>Mensaje</label>
-          <textarea id="mensaje" name="mensaje" placeholder="Escribe un mensaje opcional para acompañar el arreglo"></textarea>
-        </div>
-      </div>
-
-      <div class="firma-box">
-        <label>¿Deseas que el mensaje vaya firmado o anónimo?</label>
-        <select id="firmaMensaje" name="firmaMensaje" required>
-          <option value="Firmado" selected>Firmado</option>
-          <option value="Anónimo">Anónimo</option>
-        </select>
-        <div id="campoFirmaWrapper" style="margin-top:10px;">
-          <label for="nombreFirma">Nombre para la firma</label>
-          <input type="text" id="nombreFirma" name="nombreFirma" placeholder="Ej: Con cariño, Laura y Carlos">
-        </div>
+        <div><label>Mensaje</label><textarea id="mensaje" name="mensaje"></textarea></div>
       </div>
 
       <input type="hidden" id="producto" name="producto">
       <input type="hidden" id="precio" name="precio">
-      <input type="hidden" id="cantidad" name="cantidad">
 
       <div class="actions">
         <button type="button" class="btn-outline" id="btnVolver">Regresar</button>
-        <button type="submit" class="btn-primary" id="btnSubmit">Confirmar pedido</button>
+        <button type="submit" class="btn-primary">Confirmar pedido</button>
       </div>
     </form>
   </section>
 
   <button id="btnVerCarrito">🛒</button>
 
+  <!-- === PANEL LATERAL MEJORADO === -->
+  <div id="overlay" class="overlay"></div>
   <div id="cartSidebar" class="cart-sidebar">
     <div class="cart-header">
-      <h3>🛒 Tu carrito</h3>
+      <h3>🛍️ Tu carrito</h3>
       <button id="btnCerrarSidebar">✖️</button>
     </div>
     <div id="sidebarItems" class="sidebar-items"></div>
+
     <div class="sidebar-summary">
       <p><strong>Subtotal:</strong> $<span id="sidebarSubtotal">0</span></p>
       <p><strong>Domicilio:</strong> $<span id="sidebarDomicilio">0</span></p>
-      <p><strong>Total:</strong> $<span id="sidebarTotal">0</span></p>
-      <button id="btnIrAlPedido" class="btn-primary" style="width:100%;">Proceder al pedido</button>
+      <p class="total"><strong>Total:</strong> $<span id="sidebarTotal">0</span></p>
+      <button id="btnIrAlPedido" class="full-btn">Proceder al pedido</button>
     </div>
   </div>
 
   <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwol802NzgXkLtWVJiDLX_MnOXlyyWxL0AnVVef1GO8L7TVYAI5uH_6jkJomakcWlih/exec";
-    const state = { catalogo: [], barrios: {}, cart: [], domicilio: 0 };
-    const fmtCOP = v => Number(v || 0).toLocaleString('es-CO');
+    const SCRIPT_URL="https://script.google.com/macros/s/AKfycbwol802NzgXkLtWVJiDLX_MnOXlyyWxL0AnVVef1GO8L7TVYAI5uH_6jkJomakcWlih/exec";
+    const state={catalogo:[],barrios:{},cart:[],domicilio:0};
+    const fmtCOP=v=>Number(v||0).toLocaleString('es-CO');
 
     async function init(){
-      const res = await fetch(SCRIPT_URL);
-      const data = await res.json();
-      state.catalogo = data.catalogo || [];
-      state.barrios = data.barrios || {};
-      renderCatalog();
-      fillBarrios();
+      const res=await fetch(SCRIPT_URL);
+      const data=await res.json();
+      state.catalogo=data.catalogo||[];
+      state.barrios=data.barrios||{};
+      renderCatalog();fillBarrios();
     }
 
     function fillBarrios(){
@@ -299,60 +265,64 @@
       sel.innerHTML='<option value="">Selecciona…</option>';
       Object.keys(state.barrios).forEach(b=>{
         const opt=document.createElement("option");
-        opt.value=b;
-        opt.textContent=`${b} ($${fmtCOP(state.barrios[b])})`;
+        opt.value=b;opt.textContent=`${b} ($${fmtCOP(state.barrios[b])})`;
         sel.appendChild(opt);
       });
       sel.addEventListener("change",()=>{
         const val=sel.value;
         state.domicilio=state.barrios[val]||0;
-        renderCart();
         renderSidebarCart();
-        Swal.fire({title:"Domicilio actualizado",text:`Valor del domicilio: $${fmtCOP(state.domicilio)}`,icon:"info",timer:1500,showConfirmButton:false});
+        Swal.fire({title:"Domicilio actualizado",text:`$${fmtCOP(state.domicilio)}`,icon:"info",timer:1200,showConfirmButton:false});
       });
     }
 
     function addToCart(prod){
-      const existing = state.cart.find(p=>p.name===prod.name);
-      if(existing){ existing.qty+=1; } 
-      else { state.cart.push({...prod, qty:1}); }
-      Swal.fire({title:'Producto agregado',text:`${prod.name} se añadió al carrito`,icon:'success',timer:1200,showConfirmButton:false});
+      const existing=state.cart.find(p=>p.name===prod.name);
+      if(existing)existing.qty++; else state.cart.push({...prod,qty:1});
+      Swal.fire({title:'Agregado',text:`${prod.name} añadido al carrito`,icon:'success',timer:1000,showConfirmButton:false});
       renderSidebarCart();
     }
 
-    function removeFromCart(name){
-      state.cart = state.cart.filter(p=>p.name!==name);
-      renderCart();renderSidebarCart();
+    function changeQty(name,delta){
+      const item=state.cart.find(p=>p.name===name);
+      if(!item)return;
+      item.qty+=delta;
+      if(item.qty<=0)state.cart=state.cart.filter(p=>p.name!==name);
+      renderSidebarCart();
     }
 
-    function renderCart(){
-      const cont=document.getElementById("cartItems");
-      cont.innerHTML="";
-      let subtotal=0;
-      state.cart.forEach(p=>subtotal+=p.price*p.qty);
-      if(state.cart.length===0){cont.innerHTML=`<p style="text-align:center;color:#666;">Tu carrito está vacío 🛒</p>`;}
-      else{
-        state.cart.forEach(p=>{
-          const sub=p.price*p.qty;
-          cont.innerHTML+=`<div class="cart-item"><span>${p.name}</span><span>x${p.qty}</span><span>$${fmtCOP(sub)}</span><button onclick="removeFromCart('${p.name}')">🗑️</button></div>`;
-        });
-      }
-      const total=subtotal+state.domicilio;
-      document.getElementById("subtotal").textContent=fmtCOP(subtotal);
-      document.getElementById("domicilio").textContent=fmtCOP(state.domicilio);
-      document.getElementById("total").textContent=fmtCOP(total);
+    function renderCatalog(){
+      const cont=document.getElementById("catalogo");cont.innerHTML="";
+      state.catalogo.forEach(prod=>{
+        if(!prod.img)return;
+        const card=document.createElement("div");
+        card.className="card";
+        card.innerHTML=`<img src="${prod.img}" alt="${prod.name}">
+          <div class="body"><div class="name">${prod.name}</div>
+          <div class="price">$${fmtCOP(prod.price)}</div>
+          <button class="btn-add">Agregar al carrito</button></div>`;
+        card.querySelector(".btn-add").addEventListener("click",()=>addToCart(prod));
+        cont.appendChild(card);
+      });
     }
 
     function renderSidebarCart(){
-      const cont=document.getElementById("sidebarItems");
-      cont.innerHTML="";
+      const cont=document.getElementById("sidebarItems");cont.innerHTML="";
       let subtotal=0;
-      state.cart.forEach(p=>subtotal+=p.price*p.qty);
-      if(state.cart.length===0){cont.innerHTML=`<p style="text-align:center;color:#777;">Tu carrito está vacío 🛒</p>`;}
+      if(state.cart.length===0){cont.innerHTML='<p style="text-align:center;color:#777;">Tu carrito está vacío 🛒</p>';}
       else{
         state.cart.forEach(p=>{
-          const sub=p.price*p.qty;
-          cont.innerHTML+=`<div class="sidebar-item"><span>${p.name}</span><span>x${p.qty}</span><span>$${fmtCOP(sub)}</span><button onclick="removeFromCart('${p.name}');renderSidebarCart();">🗑️</button></div>`;
+          subtotal+=p.price*p.qty;
+          cont.innerHTML+=`
+          <div class="sidebar-item">
+            <img src="${p.img}" class="sidebar-thumb">
+            <div class="sidebar-item-info"><div class="sidebar-item-name">${p.name}</div><div class="sidebar-item-price">$${fmtCOP(p.price)}</div></div>
+            <div class="qty-control">
+              <button class="qty-btn" onclick="changeQty('${p.name}',-1)">-</button>
+              <span>${p.qty}</span>
+              <button class="qty-btn" onclick="changeQty('${p.name}',1)">+</button>
+            </div>
+          </div>`;
         });
       }
       const total=subtotal+state.domicilio;
@@ -361,36 +331,21 @@
       document.getElementById("sidebarTotal").textContent=fmtCOP(total);
     }
 
-    function openSidebar(){document.getElementById("cartSidebar").classList.add("open");renderSidebarCart();}
-    function closeSidebar(){document.getElementById("cartSidebar").classList.remove("open");}
-
+    function openSidebar(){
+      document.getElementById("overlay").classList.add("active");
+      document.getElementById("cartSidebar").classList.add("open");
+      renderSidebarCart();
+    }
+    function closeSidebar(){
+      document.getElementById("overlay").classList.remove("active");
+      document.getElementById("cartSidebar").classList.remove("open");
+    }
+    document.getElementById("overlay").addEventListener("click",closeSidebar);
     document.getElementById("btnVerCarrito").addEventListener("click",openSidebar);
     document.getElementById("btnCerrarSidebar").addEventListener("click",closeSidebar);
-    document.getElementById("btnIrAlPedido").addEventListener("click",()=>{closeSidebar();renderCart();show("viewCart");});
-    document.getElementById("btnSeguirComprando").addEventListener("click",()=>show("viewCatalog"));
-    document.getElementById("btnProcederPedido").addEventListener("click",()=>{
-      const resumen = state.cart.map(p=>`${p.qty}x ${p.name}`).join(" | ");
-      const subtotal = state.cart.reduce((a,b)=>a+b.price*b.qty,0);
-      document.getElementById("producto").value=resumen;
-      document.getElementById("precio").value=subtotal;
-      document.getElementById("cantidad").value=state.cart.length;
-      document.getElementById("resumenProducto").textContent=`🛍 ${resumen} — Subtotal: $${fmtCOP(subtotal)} + Domicilio: $${fmtCOP(state.domicilio)}`;
-      show("viewForm");
-    });
+    document.getElementById("btnIrAlPedido").addEventListener("click",()=>{closeSidebar();Swal.fire('Ir al pedido','Completa tus datos para finalizar.','info');});
 
-    document.getElementById("btnVolver").addEventListener("click",()=>show("viewCart"));
-    document.getElementById("pedidoForm").addEventListener("submit", async e=>{
-      e.preventDefault();
-      const formData=new FormData(e.target);
-      await fetch(SCRIPT_URL,{method:"POST",body:formData});
-      Swal.fire({title:"Pedido enviado",text:"Tu pedido fue registrado correctamente 🌸",icon:"success"});
-      state.cart=[];show("viewCatalog");
-    });
-
-    function show(id){document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));document.getElementById(id).classList.add("active");}
-    async function renderCatalog(){const cont=document.getElementById("catalogo");cont.innerHTML="";state.catalogo.forEach(prod=>{if(!prod.img)return;const card=document.createElement("div");card.className="card";card.innerHTML=`<img src="${prod.img}" alt="${prod.name}"><div class="body"><div class="name">${prod.name}</div><div class="price">$${fmtCOP(prod.price)}</div><button class="btn-add">Agregar al carrito</button></div>`;card.querySelector(".btn-add").addEventListener("click",()=>addToCart(prod));cont.appendChild(card);});}
     init();
   </script>
 </body>
 </html>
-
