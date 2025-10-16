@@ -140,9 +140,14 @@
       <div class="firma-box">
         <label>¿Deseas que el mensaje vaya firmado o anónimo?</label>
         <select id="firmaMensaje" name="firmaMensaje" required>
-          <option value="Firmado" selected>Firmado (aparece tu nombre en la tarjeta)</option>
-          <option value="Anónimo">Anónimo (no se muestra el remitente)</option>
+          <option value="Firmado" selected>Firmado</option>
+          <option value="Anónimo">Anónimo</option>
         </select>
+
+        <div id="campoFirmaWrapper" style="margin-top:10px;">
+          <label for="nombreFirma">Nombre para la firma</label>
+          <input type="text" id="nombreFirma" name="nombreFirma" placeholder="Ej: Con cariño, Laura y Carlos">
+        </div>
       </div>
 
       <input type="hidden" id="producto" name="producto">
@@ -205,6 +210,19 @@
         sel.appendChild(opt);
       });
     }
+
+    // Mostrar / ocultar campo de firma
+    document.getElementById("firmaMensaje").addEventListener("change", e=>{
+      const campo = document.getElementById("campoFirmaWrapper");
+      if(e.target.value === "Firmado"){
+        campo.style.display = "block";
+        document.getElementById("nombreFirma").required = true;
+      }else{
+        campo.style.display = "none";
+        document.getElementById("nombreFirma").required = false;
+        document.getElementById("nombreFirma").value = "";
+      }
+    });
 
     document.getElementById("pedidoForm").addEventListener("submit", async e=>{
       e.preventDefault();
