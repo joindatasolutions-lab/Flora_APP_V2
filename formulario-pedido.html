@@ -8,358 +8,461 @@
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <style>
     :root {
-      --rosa:#e6a5b6;
-      --rosa-osc:#c97b94;
-      --borde:#ecd6dc;
-      --bg:#fdfaf7;
-      --gris:#5c5c5c;
+      --rosa: #e6a5b6;
+      --rosa-osc: #c97b94;
+      --borde: #ecd6dc;
+      --bg: #fdfaf7;
     }
-    *{box-sizing:border-box;}
+
     body {
-      font-family:'Inter',sans-serif;
-      background:var(--bg);
-      margin:0;
-      color:#333;
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      margin: 0;
+      padding: 0;
+      color: #333;
     }
-    header{text-align:center;padding:24px 10px;}
-    header img{max-width:240px;margin:0 auto 8px;display:block;}
-    header h2{color:var(--rosa-osc);font-weight:700;}
+
+    header {
+      text-align: center;
+      padding: 24px 10px;
+    }
+
+    header img {
+      max-width: 240px;
+      margin: 0 auto 8px;
+      display: block;
+    }
+
+    h2 {
+      color: var(--rosa-osc);
+      font-weight: 700;
+    }
+
+    /* === Catálogo === */
     .catalogo {
-      display:grid;
-      gap:16px;
-      grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
-      max-width:1100px;
-      margin:0 auto;
-      padding:10px 20px 60px;
+      display: grid;
+      gap: 18px;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 20px;
     }
+
     .card {
-      background:#fff;
-      border:1px solid var(--borde);
-      border-radius:18px;
-      box-shadow:0 6px 18px rgba(0,0,0,.06);
-      overflow:hidden;
-      display:flex;
-      flex-direction:column;
-      transition:transform .15s ease, box-shadow .15s ease;
+      background: #fff;
+      border: 1px solid var(--borde);
+      border-radius: 18px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
-    .card:hover{transform:translateY(-3px);box-shadow:0 10px 24px rgba(0,0,0,.1);}
-    .card img{width:100%;height:240px;object-fit:cover;}
-    .card .body{padding:14px 10px;text-align:center;}
-    .name{font-weight:700;min-height:40px;}
-    .price{color:var(--gris);margin:8px 0 14px;font-weight:600;}
-    .btn-add{
-      background:var(--rosa);
-      color:#fff;
-      font-weight:700;
-      border:none;
-      border-radius:10px;
-      padding:10px;
-      cursor:pointer;
+
+    .card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 18px rgba(0,0,0,0.12);
     }
-    .btn-add:hover{background:var(--rosa-osc);}
-    /* === Drawer === */
+
+    .card img {
+      width: 100%;
+      height: 240px;
+      object-fit: cover;
+    }
+
+    .card .body {
+      padding: 14px;
+      text-align: center;
+    }
+
+    .card h4 {
+      margin: 6px 0;
+      color: var(--rosa-osc);
+      font-weight: 700;
+    }
+
+    .price {
+      color: #555;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+
+    .btn-add {
+      background: var(--rosa);
+      color: white;
+      font-weight: 700;
+      border: none;
+      border-radius: 10px;
+      padding: 10px 14px;
+      cursor: pointer;
+    }
+
+    .btn-add:hover {
+      background: var(--rosa-osc);
+    }
+
+    /* === Drawer Carrito === */
     #drawerCart {
-      position:fixed;top:0;right:-100%;
-      width:370px;max-width:90%;
-      height:100vh;
-      background:#fff;
-      box-shadow:-4px 0 12px rgba(0,0,0,0.15);
-      transition:right .3s ease;
-      display:flex;
-      flex-direction:column;
-      z-index:999;
+      position: fixed;
+      top: 0;
+      right: -100%;
+      width: 370px;
+      max-width: 90%;
+      height: 100vh;
+      background: #fff;
+      box-shadow: -4px 0 12px rgba(0,0,0,0.15);
+      transition: right .3s ease;
+      display: flex;
+      flex-direction: column;
+      z-index: 999;
     }
-    #drawerCart.active{right:0;}
-    #drawerCart header{
-      background:var(--rosa);
-      color:#fff;
-      padding:18px;
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      font-weight:700;
+
+    #drawerCart.active { right: 0; }
+
+    #drawerCart header {
+      background: var(--rosa);
+      color: #fff;
+      padding: 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 700;
     }
-    #cartList{flex:1;overflow-y:auto;padding:14px;}
-    .cart-item{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #eee;padding:8px 0;}
-    .cart-item button{background:none;border:none;color:var(--rosa-osc);font-size:1.1rem;cursor:pointer;}
-    #cartSummary{padding:10px 16px;border-top:1px solid #eee;font-weight:600;}
-    #btnConfirmar{
-      margin:16px;
-      padding:12px;
-      background:var(--rosa);
-      color:#fff;
-      border:none;
-      border-radius:10px;
-      font-weight:700;
-      cursor:pointer;
+
+    #cartList {
+      flex: 1;
+      overflow-y: auto;
+      padding: 14px;
     }
-    #btnConfirmar:hover{background:var(--rosa-osc);}
+
+    .cart-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #eee;
+      padding: 8px 0;
+    }
+
+    .cart-item button {
+      background: none;
+      border: none;
+      color: var(--rosa-osc);
+      font-size: 1.1rem;
+      cursor: pointer;
+    }
+
+    #cartSummary {
+      padding: 10px 16px;
+      border-top: 1px solid #eee;
+      font-weight: 600;
+    }
+
+    #btnConfirmar {
+      margin: 16px;
+      padding: 12px;
+      background: var(--rosa);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    #btnConfirmar:hover { background: var(--rosa-osc); }
+
     #btnCarrito {
-      position:fixed;
-      bottom:20px;
-      right:20px;
-      background:var(--rosa);
-      border:none;
-      border-radius:50%;
-      width:56px;
-      height:56px;
-      color:#fff;
-      font-size:1.4rem;
-      cursor:pointer;
-      box-shadow:0 6px 16px rgba(0,0,0,.2);
-      z-index:900;
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: var(--rosa);
+      border: none;
+      border-radius: 50%;
+      width: 56px;
+      height: 56px;
+      color: #fff;
+      font-size: 1.4rem;
+      cursor: pointer;
+      box-shadow: 0 6px 16px rgba(0,0,0,.2);
+      z-index: 900;
     }
+
     form {
-      background:#fff;
-      border:1px solid var(--borde);
-      border-radius:20px;
-      max-width:800px;
-      margin:20px auto 80px;
-      padding:28px;
-      box-shadow:0 8px 24px rgba(0,0,0,.08);
+      background: #fff;
+      border: 1px solid var(--borde);
+      border-radius: 20px;
+      max-width: 800px;
+      margin: 30px auto;
+      padding: 28px;
+      box-shadow: 0 8px 24px rgba(0,0,0,.08);
     }
-    h3 {
-      border-bottom:2px solid var(--rosa);
-      padding-bottom:6px;margin:20px 0 16px;
-      color:var(--rosa-osc);
+
+    .grid {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
     }
-    label{font-weight:600;}
-    input,select,textarea {
-      width:100%;padding:10px 14px;border:1px solid #d9d9d9;
-      border-radius:10px;font-size:.95rem;background:#fff;
+
+    textarea { min-height: 90px; resize: vertical; }
+
+    .firma-box {
+      margin-top: 20px;
+      padding: 14px;
+      border: 1px dashed var(--rosa);
+      border-radius: 12px;
+      background: #fff9fa;
     }
-    .grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));}
-    textarea{min-height:90px;resize:vertical;}
-    .firma-box{margin-top:20px;padding:14px;border:1px dashed var(--rosa);border-radius:12px;background:#fff9fa;}
-    .actions{display:flex;justify-content:end;margin-top:20px;}
-    .btn-primary{background:var(--rosa);color:#fff;border:none;border-radius:10px;padding:12px 22px;font-weight:800;cursor:pointer;}
+
+    .actions {
+      display: flex;
+      justify-content: end;
+      margin-top: 20px;
+    }
+
+    .btn-primary {
+      background: var(--rosa);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 12px 22px;
+      font-weight: 800;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
-<header>
-  <img src="img/logo 2024 marca registrada-04.png" alt="Flora Logo">
-  <h2>Catálogo de Arreglos Florales</h2>
-</header>
-
-<section id="catalogo" class="catalogo"></section>
-
-<!-- Drawer -->
-<div id="drawerCart">
   <header>
-    <span>🛒 Carrito</span>
-    <button id="closeDrawer" style="background:none;border:none;color:#fff;font-size:1.4rem;cursor:pointer;">✕</button>
+    <img src="img/logo 2024 marca registrada-04.png" alt="Flora Logo">
+    <h2>Catálogo de Arreglos Florales</h2>
   </header>
-  <div id="cartList"></div>
-  <div id="cartSummary">
-    <p>Subtotal: $<span id="subTotal">0</span></p>
-    <p>IVA: $<span id="ivaTotal">0</span></p>
-    <p>Domicilio: $<span id="domicilioTotal">0</span></p>
-    <p><strong>Total: $<span id="totalFinal">0</span></strong></p>
+
+  <section id="catalogo" class="catalogo"></section>
+
+  <!-- Drawer -->
+  <div id="drawerCart">
+    <header>
+      <span>🛒 Carrito</span>
+      <button id="closeDrawer" style="background:none;border:none;color:#fff;font-size:1.4rem;cursor:pointer;">✕</button>
+    </header>
+    <div id="cartList"></div>
+    <div id="cartSummary">
+      <p>Subtotal: $<span id="subTotal">0</span></p>
+      <p>IVA: $<span id="ivaTotal">0</span></p>
+      <p>Domicilio: $<span id="domicilioTotal">0</span></p>
+      <p><strong>Total: $<span id="totalFinal">0</span></strong></p>
+    </div>
+    <button id="btnConfirmar">Proceder al pedido</button>
   </div>
-  <button id="btnConfirmar">Proceder al pedido</button>
-</div>
 
-<button id="btnCarrito">🛒</button>
+  <button id="btnCarrito">🛒</button>
 
-<form id="pedidoForm">
-  <h3>Datos del Cliente <span id="clienteEstado" style="font-size:0.9rem;color:var(--rosa-osc);">Nuevo cliente</span></h3>
-  <div class="grid">
-    <div><label>Tipo de identificación</label>
-      <select id="tipoIdent" name="tipoIdent" required>
-        <option value="CEDULA" selected>Cédula</option>
-        <option value="NIT">NIT</option>
+  <!-- === FORMULARIO === -->
+  <form id="pedidoForm">
+    <h3>Datos del Cliente <span id="clienteEstado" style="font-size:0.9rem;color:var(--rosa-osc);">Nuevo cliente</span></h3>
+    <div class="grid">
+      <div><label>Tipo de identificación</label>
+        <select id="tipoIdent" name="tipoIdent" required>
+          <option value="CEDULA" selected>Cédula</option>
+          <option value="NIT">NIT</option>
+        </select>
+      </div>
+      <div><label>Identificación</label><input id="identificacion" name="identificacion" required></div>
+      <div><label>Teléfono</label><input id="telefono" name="telefono" required></div>
+      <div><label>Nombre</label><input id="primerNombre" name="primerNombre" required></div>
+      <div><label>Apellido(s)</label><input id="primerApellido" name="primerApellido"></div>
+      <div><label>Email (opcional)</label><input type="email" id="email" name="email"></div>
+    </div>
+
+    <h3>Entrega</h3>
+    <div class="grid">
+      <div><label>Destinatario</label><input id="destinatario" name="destinatario" required></div>
+      <div><label>Teléfono destino</label><input id="telefonoDestino" name="telefonoDestino" required></div>
+      <div><label>Dirección</label><input id="direccion" name="direccion" required></div>
+      <div><label>Barrio</label><select id="barrio" name="barrio" required></select></div>
+      <div><label>Fecha de entrega</label><input id="fechaEntrega" type="date" name="fechaEntrega" required></div>
+      <div><label>Hora de entrega</label><input id="horaEntrega" type="time" name="horaEntrega" required></div>
+    </div>
+
+    <h3>Medio de Pago y Mensaje</h3>
+    <div class="grid">
+      <div>
+        <label>Medio de pago</label>
+        <select id="formaPago" name="formaPago" required>
+          <option value="">Selecciona una opción...</option>
+          <option value="TRANSFERENCIA">Transferencia bancaria</option>
+          <option value="EFECTIVO">Efectivo</option>
+          <option value="CONTRAENTREGA">Pago contra entrega</option>
+          <option value="LINK">Link de pago (enviar por WhatsApp)</option>
+        </select>
+      </div>
+      <div>
+        <label>Mensaje</label>
+        <textarea id="mensaje" name="mensaje" placeholder="Escribe un mensaje opcional..."></textarea>
+      </div>
+    </div>
+
+    <div class="firma-box">
+      <label>¿Deseas que el mensaje vaya firmado o anónimo?</label>
+      <select id="firmaMensaje" name="firmaMensaje" required>
+        <option value="Firmado" selected>Firmado</option>
+        <option value="Anónimo">Anónimo</option>
       </select>
+      <div id="campoFirma" style="margin-top:10px;">
+        <label>Nombre para la firma</label>
+        <input id="nombreFirma" name="nombreFirma" placeholder="Ej: Con cariño, Laura y Carlos">
+      </div>
     </div>
-    <div><label>Identificación</label><input id="identificacion" name="identificacion" required></div>
-    <div><label>Teléfono</label><input id="telefono" name="telefono" required></div>
-    <div><label>Nombre</label><input id="primerNombre" name="primerNombre" required></div>
-    <div><label>Apellido(s)</label><input id="primerApellido" name="primerApellido"></div>
-    <div><label>Email (opcional)</label><input type="email" id="email" name="email"></div>
-  </div>
 
-  <h3>Entrega</h3>
-  <div class="grid">
-    <div><label>Destinatario</label><input id="destinatario" name="destinatario" required></div>
-    <div><label>Teléfono destino</label><input id="telefonoDestino" name="telefonoDestino" required></div>
-    <div><label>Dirección</label><input id="direccion" name="direccion" required></div>
-    <div><label>Barrio</label><select id="barrio" name="barrio" required></select></div>
-    <div><label>Fecha de entrega</label><input id="fechaEntrega" type="date" name="fechaEntrega" required></div>
-    <div><label>Hora de entrega</label><input id="horaEntrega" type="time" name="horaEntrega" required></div>
-  </div>
-
-  <h3>Medio de Pago y Mensaje</h3>
-  <div class="grid">
-    <div>
-      <label>Medio de pago</label>
-      <select id="formaPago" name="formaPago" required>
-        <option value="">Selecciona una opción...</option>
-        <option value="TRANSFERENCIA">Transferencia bancaria</option>
-        <option value="EFECTIVO">Efectivo</option>
-        <option value="CONTRAENTREGA">Pago contra entrega</option>
-        <option value="LINK">Link de pago (enviar por WhatsApp)</option>
-      </select>
+    <div class="actions">
+      <button type="submit" class="btn-primary">Enviar pedido</button>
     </div>
-    <div>
-      <label>Mensaje</label>
-      <textarea id="mensaje" name="mensaje" placeholder="Escribe un mensaje opcional..."></textarea>
-    </div>
-  </div>
+  </form>
 
-  <div class="firma-box">
-    <label>¿Deseas que el mensaje vaya firmado o anónimo?</label>
-    <select id="firmaMensaje" name="firmaMensaje" required>
-      <option value="Firmado" selected>Firmado</option>
-      <option value="Anónimo">Anónimo</option>
-    </select>
-    <div id="campoFirma" style="margin-top:10px;">
-      <label>Nombre para la firma</label>
-      <input id="nombreFirma" name="nombreFirma" placeholder="Ej: Con cariño, Laura y Carlos">
-    </div>
-  </div>
-  <div class="actions">
-    <button type="submit" class="btn-primary">Enviar pedido</button>
-  </div>
-</form>
+  <script>
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwol802NzgXkLtWVJiDLX_MnOXlyyWxL0AnVVef1GO8L7TVYAI5uH_6jkJomakcWlih/exec";
+    const state = { catalogo: [], barrios: {}, cart: [] };
+    const fmt = v => Number(v || 0).toLocaleString('es-CO');
 
-<script>
-const SCRIPT_URL="https://script.google.com/macros/s/AKfycbwol802NzgXkLtWVJiDLX_MnOXlyyWxL0AnVVef1GO8L7TVYAI5uH_6jkJomakcWlih/exec";
-const state={catalogo:[],barrios:{},cart:[]};
-const fmt=v=>Number(v||0).toLocaleString('es-CO');
+    async function init() {
+      const res = await fetch(SCRIPT_URL);
+      const data = await res.json();
+      state.catalogo = data.catalogo || [];
+      state.barrios = data.barrios || {};
+      renderCatalog();
+      fillBarrios();
+    }
 
-async function init(){
-  const res=await fetch(SCRIPT_URL);
-  const data=await res.json();
-  state.catalogo=data.catalogo||[];
-  state.barrios=data.barrios||{};
-  renderCatalog();
-  fillBarrios();
-}
-function renderCatalog(){
-  const cont=document.getElementById("catalogo");
-  cont.innerHTML="";
-  state.catalogo.forEach(p=>{
-    const card=document.createElement("div");
-    card.className="card";
-    card.innerHTML=`
-      <img src="${p.img||''}" alt="${p.name}">
-      <div class="body">
-        <div class="name">${p.name}</div>
-        <div class="price">$${fmt(p.price)}</div>
-        <button class="btn-add">Agregar</button>
-      </div>`;
-    card.querySelector(".btn-add").addEventListener("click",()=>addToCart(p));
-    cont.appendChild(card);
-  });
-}
-function fillBarrios(){
-  const sel=document.getElementById("barrio");
-  sel.innerHTML='<option value="">Selecciona…</option>';
-  Object.keys(state.barrios).forEach(b=>{
-    const o=document.createElement("option");
-    o.value=b;o.textContent=b;sel.appendChild(o);
-  });
-}
-function addToCart(p){
-  const item=state.cart.find(x=>x.id===p.id);
-  if(item)item.qty++;
-  else state.cart.push({...p,qty:1});
-  renderCart();
-  openDrawer();
-}
-function removeFromCart(id){
-  state.cart=state.cart.filter(p=>p.id!==id);
-  renderCart();
-}
-function changeQty(id,delta){
-  const it=state.cart.find(p=>p.id===id);
-  if(!it)return;
-  it.qty=Math.max(1,it.qty+delta);
-  renderCart();
-}
-function renderCart(){
-  const list=document.getElementById("cartList");
-  list.innerHTML="";
-  let subtotal=0;
-  state.cart.forEach(p=>{
-    const sub=p.price*p.qty;subtotal+=sub;
-    list.innerHTML+=`
-      <div class="cart-item">
-        <span>${p.name}</span>
-        <div>
-          <button onclick="changeQty('${p.id}',-1)">−</button>
-          <span>${p.qty}</span>
-          <button onclick="changeQty('${p.id}',1)">+</button>
-        </div>
-        <span>$${fmt(sub)}</span>
-        <button onclick="removeFromCart('${p.id}')">🗑</button>
-      </div>`;
-  });
-  const tipo=document.getElementById("tipoIdent").value;
-  const iva=(tipo==="NIT")?Math.round(subtotal*0.19):0;
-  const barrioSel=document.getElementById("barrio").value;
-  const dom=state.barrios[barrioSel]?Number(state.barrios[barrioSel]):0;
-  const total=subtotal+iva+dom;
-  document.getElementById("subTotal").textContent=fmt(subtotal);
-  document.getElementById("ivaTotal").textContent=fmt(iva);
-  document.getElementById("domicilioTotal").textContent=fmt(dom);
-  document.getElementById("totalFinal").textContent=fmt(total);
-}
-function openDrawer(){document.getElementById("drawerCart").classList.add("active");}
-function closeDrawer(){document.getElementById("drawerCart").classList.remove("active");}
-document.getElementById("btnCarrito").onclick=openDrawer;
-document.getElementById("closeDrawer").onclick=closeDrawer;
-document.getElementById("btnConfirmar").onclick=()=>{closeDrawer();};
+    function renderCatalog() {
+      const cont = document.getElementById("catalogo");
+      cont.innerHTML = "";
+      state.catalogo.forEach(p => {
+        const card = document.createElement("div");
+        card.className = "card";
+        card.innerHTML = `
+          <img src="${p.img || ''}" alt="${p.name}">
+          <div class="body">
+            <h4>${p.name}</h4>
+            <div class="price">$${fmt(p.price)}</div>
+            <button class="btn-add">Agregar al carrito</button>
+          </div>`;
+        card.querySelector(".btn-add").addEventListener("click", () => addToCart(p));
+        cont.appendChild(card);
+      });
+    }
 
-document.getElementById("firmaMensaje").addEventListener("change",e=>{
-  const campo=document.getElementById("campoFirma");
-  campo.style.display=(e.target.value==="Firmado")?"block":"none";
-});
+    function fillBarrios() {
+      const sel = document.getElementById("barrio");
+      sel.innerHTML = '<option value="">Selecciona…</option>';
+      Object.keys(state.barrios).forEach(b => {
+        const o = document.createElement("option");
+        o.value = b; o.textContent = b; sel.appendChild(o);
+      });
+    }
 
-document.getElementById("identificacion").addEventListener("blur",async e=>{
-  const id=e.target.value.trim();
-  if(!id)return;
-  const res=await fetch(`${SCRIPT_URL}?cliente=${encodeURIComponent(id)}`);
-  const data=await res.json();
-  const badge=document.getElementById("clienteEstado");
-  if(data.cliente){
-    badge.textContent="Cliente existente";
-    badge.style.color="green";
-    document.getElementById("telefono").value=data.cliente.Telefono||"";
-    document.getElementById("primerNombre").value=data.cliente.PrimerNombre||"";
-    document.getElementById("primerApellido").value=data.cliente.PrimerApellido||"";
-    document.getElementById("email").value=data.cliente.Email||"";
-  }else{
-    badge.textContent="Nuevo cliente";
-    badge.style.color="var(--rosa-osc)";
-  }
-});
+    function addToCart(p) {
+      const item = state.cart.find(x => x.id === p.id);
+      if (item) item.qty++;
+      else state.cart.push({ ...p, qty: 1 });
+      renderCart();
+      openDrawer();
+    }
 
-document.getElementById("pedidoForm").addEventListener("submit",async e=>{
-  e.preventDefault();
-  if(state.cart.length===0){
-    Swal.fire("Tu carrito está vacío","Agrega al menos un producto","warning");
-    return;
-  }
-  const form=new FormData(e.target);
-  const productos=state.cart.map(p=>`${p.qty}x ${p.name}`).join(" | ");
-  const subtotal=state.cart.reduce((a,b)=>a+b.price*b.qty,0);
-  const tipo=document.getElementById("tipoIdent").value;
-  const iva=(tipo==="NIT")?Math.round(subtotal*0.19):0;
-  const barrioSel=document.getElementById("barrio").value;
-  const dom=state.barrios[barrioSel]?Number(state.barrios[barrioSel]):0;
-  const total=subtotal+iva+dom;
-  form.append("producto",productos);
-  form.append("precio",subtotal);
-  form.append("cantidad",state.cart.length);
-  form.append("iva",iva);
-  form.append("domicilio",dom);
-  form.append("total",total);
-  const res=await fetch(SCRIPT_URL,{method:"POST",body:form});
-  Swal.fire("Pedido enviado","Tu pedido fue registrado correctamente 🌸","success");
-  state.cart=[];
-  renderCart();
-});
-init();
-</script>
+    function removeFromCart(id) {
+      state.cart = state.cart.filter(p => p.id !== id);
+      renderCart();
+    }
+
+    function changeQty(id, delta) {
+      const it = state.cart.find(p => p.id === id);
+      if (!it) return;
+      it.qty = Math.max(1, it.qty + delta);
+      renderCart();
+    }
+
+    function renderCart() {
+      const list = document.getElementById("cartList");
+      list.innerHTML = "";
+      let subtotal = 0;
+      state.cart.forEach(p => {
+        const sub = p.price * p.qty; subtotal += sub;
+        list.innerHTML += `
+          <div class="cart-item">
+            <span>${p.name}</span>
+            <div>
+              <button onclick="changeQty('${p.id}',-1)">−</button>
+              <span>${p.qty}</span>
+              <button onclick="changeQty('${p.id}',1)">+</button>
+            </div>
+            <span>$${fmt(sub)}</span>
+            <button onclick="removeFromCart('${p.id}')">🗑</button>
+          </div>`;
+      });
+      const tipo = document.getElementById("tipoIdent").value;
+      const iva = (tipo === "NIT") ? Math.round(subtotal * 0.19) : 0;
+      const barrioSel = document.getElementById("barrio").value;
+      const dom = state.barrios[barrioSel] ? Number(state.barrios[barrioSel]) : 0;
+      const total = subtotal + iva + dom;
+      document.getElementById("subTotal").textContent = fmt(subtotal);
+      document.getElementById("ivaTotal").textContent = fmt(iva);
+      document.getElementById("domicilioTotal").textContent = fmt(dom);
+      document.getElementById("totalFinal").textContent = fmt(total);
+    }
+
+    function openDrawer() { document.getElementById("drawerCart").classList.add("active"); }
+    function closeDrawer() { document.getElementById("drawerCart").classList.remove("active"); }
+
+    document.getElementById("btnCarrito").onclick = openDrawer;
+    document.getElementById("closeDrawer").onclick = closeDrawer;
+    document.getElementById("btnConfirmar").onclick = closeDrawer;
+
+    document.getElementById("firmaMensaje").addEventListener("change", e => {
+      const campo = document.getElementById("campoFirma");
+      campo.style.display = (e.target.value === "Firmado") ? "block" : "none";
+    });
+
+    document.getElementById("identificacion").addEventListener("blur", async e => {
+      const id = e.target.value.trim();
+      if (!id) return;
+      const res = await fetch(`${SCRIPT_URL}?cliente=${encodeURIComponent(id)}`);
+      const data = await res.json();
+      const badge = document.getElementById("clienteEstado");
+      if (data.cliente) {
+        badge.textContent = "Cliente existente"; badge.style.color = "green";
+        document.getElementById("telefono").value = data.cliente.Telefono || "";
+        document.getElementById("primerNombre").value = data.cliente.PrimerNombre || "";
+        document.getElementById("primerApellido").value = data.cliente.PrimerApellido || "";
+        document.getElementById("email").value = data.cliente.Email || "";
+      } else {
+        badge.textContent = "Nuevo cliente"; badge.style.color = "var(--rosa-osc)";
+      }
+    });
+
+    document.getElementById("pedidoForm").addEventListener("submit", async e => {
+      e.preventDefault();
+      if (state.cart.length === 0) {
+        Swal.fire("Tu carrito está vacío", "Agrega al menos un producto", "warning");
+        return;
+      }
+      const form = new FormData(e.target);
+      const productos = state.cart.map(p => `${p.qty}x ${p.name}`).join(" | ");
+      const subtotal = state.cart.reduce((a, b) => a + b.price * b.qty, 0);
+      const tipo = document.getElementById("tipoIdent").value;
+      const iva = (tipo === "NIT") ? Math.round(subtotal * 0.19) : 0;
+      const barrioSel = document.getElementById("barrio").value;
+      const dom = state.barrios[barrioSel] ? Number(state.barrios[barrioSel]) : 0;
+      const total = subtotal + iva + dom;
+      form.append("producto", productos);
+      form.append("precio", subtotal);
+      form.append("cantidad", state.cart.length);
+      form.append("iva", iva);
+      form.append("domicilio", dom);
+      form.append("total", total);
+      await fetch(SCRIPT_URL, { method: "POST", body: form });
+      Swal.fire("Pedido enviado", "Tu pedido fue registrado correctamente 🌸", "success");
+      state.cart = [];
+      renderCart();
+    });
+
+    init();
+  </script>
 </body>
 </html>
