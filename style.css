@@ -71,10 +71,11 @@ header h2 {
 }
 .card img {
   width:100%;
-  height:auto;
-  object-fit:contain;
+  height:260px;
+  object-fit:cover;
+  object-position:center;
+  background:#fff8f9;
   border-bottom:1px solid var(--borde);
-  filter:saturate(1.02);
 }
 .card .body {
   text-align:center;
