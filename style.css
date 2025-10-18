@@ -380,8 +380,14 @@ textarea {
 }
 
 #barrio {
-  max-height: 220px;
-  overflow-y: auto;
+  background:#fff;
+  border:1px solid #ddd;
+  border-radius:10px;
+  padding:10px 14px;
+  font-size:.95rem;
+  color:#333;
+  max-height:220px;
+  overflow-y:auto;
 }
 
 /* === RESPONSIVE === */
