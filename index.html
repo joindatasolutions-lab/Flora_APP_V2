@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Flora - Catálogo de Arreglos</title>
+  <title>Flora - Catálogo de Arreglos Florales</title>
 
   <!-- Fuentes y librerías -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
@@ -14,6 +14,7 @@
 </head>
 
 <body>
+  <!-- === ENCABEZADO === -->
   <header>
     <img src="img/logo 2024 marca registrada-04.png" alt="Flora Logo">
     <h2>Catálogo de Arreglos Florales</h2>
@@ -25,33 +26,45 @@
   </section>
 
   <!-- === DRAWER CARRITO === -->
-  <div id="drawerCarrito" class="drawer">
+  <aside id="drawerCarrito" class="drawer">
     <div class="drawer-header">
-      <h2>🛍️ Tu carrito</h2>
-      <button id="cerrarDrawer" class="close-btn">×</button>
+      <strong>🛍️ Tu carrito</strong>
+      <button id="cerrarDrawer" class="icon-btn">✕</button>
     </div>
-    <div id="cartItemsDrawer" class="drawer-items"></div>
-    <div class="drawer-footer">
-      <div class="totales">
-        <p><strong>Subtotal:</strong> $<span id="subtotalDrawer">0</span></p>
-        <p><strong>Domicilio:</strong> $<span id="domicilioDrawer">0</span></p>
-        <h3><strong>Total:</strong> $<span id="totalDrawer">0</span></h3>
+    <div class="drawer-body">
+      <ul id="cartItemsDrawer" class="cart-list"></ul>
+      <div class="drawer-footer">
+        <div class="subtotal">
+          <p><strong>Subtotal:</strong> $<span id="subtotalDrawer">0</span></p>
+          <p><strong>IVA:</strong> $<span id="ivaDrawer">0</span></p>
+          <p><strong>Domicilio:</strong> $<span id="domicilioDrawer">0</span></p>
+          <h3><strong>Total:</strong> $<span id="totalDrawer">0</span></h3>
+        </div>
+        <div class="drawer-actions">
+          <button id="vaciarCarrito" class="btn-outline">Vaciar</button>
+          <button id="btnPedidoDrawer" class="btn-primary">Proceder</button>
+        </div>
       </div>
-      <button id="btnPedidoDrawer" class="btn-primary">Proceder al pedido</button>
     </div>
-  </div>
+  </aside>
 
-  <!-- Botón flotante -->
-  <button id="btnDrawer" class="floating-btn">🛒</button>
+  <!-- === BOTÓN FLOTANTE CARRITO === -->
+  <button id="btnDrawer" class="cart-fab">
+    🛒 <span id="cartCount">0</span>
+  </button>
 
-  <!-- === FORMULARIO === -->
+  <!-- === FORMULARIO DE PEDIDO === -->
   <section id="viewForm" class="view">
     <form id="pedidoForm">
       <div class="pedido-summary" id="resumenProducto">🛍 Tu pedido</div>
 
-      <h3>Datos del Cliente <span id="badgeCliente" class="badge warn">Nuevo cliente</span></h3>
+      <h3>Datos del Cliente 
+        <span id="badgeCliente" class="badge warn">Nuevo cliente</span>
+      </h3>
+
       <div class="grid">
-        <div><label>Tipo de identificación</label>
+        <div>
+          <label>Tipo de identificación</label>
           <select id="tipoIdent" required>
             <option value="CEDULA" selected>Cédula</option>
             <option value="NIT">NIT</option>
@@ -69,7 +82,10 @@
         <div><label>Destinatario</label><input id="destinatario" required></div>
         <div><label>Teléfono destino</label><input id="telefonoDestino" required></div>
         <div><label>Dirección</label><input id="direccion" required></div>
-        <div><label>Barrio</label><select id="barrio"></select></div>
+        <div>
+          <label>Barrio</label>
+          <select id="barrio" onchange="actualizarDomicilio()" required></select>
+        </div>
         <div><label>Fecha de entrega</label><input id="fechaEntrega" type="date" required></div>
         <div><label>Hora de entrega</label><input id="horaEntrega" type="time" required></div>
       </div>
@@ -104,6 +120,11 @@
         </div>
       </div>
 
+      <!-- Campos ocultos -->
+      <input type="hidden" id="domicilio" name="domicilio">
+      <input type="hidden" id="iva" name="iva">
+      <input type="hidden" id="total" name="total">
+
       <div class="actions">
         <button type="button" class="btn-outline" id="btnVolver">Regresar</button>
         <button type="submit" class="btn-primary" id="btnSubmit">Confirmar pedido</button>
@@ -111,7 +132,7 @@
     </form>
   </section>
 
-  <!-- Script principal -->
+  <!-- === SCRIPT PRINCIPAL === -->
   <script src="script.js"></script>
 </body>
 </html>
