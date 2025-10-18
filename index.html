@@ -1,467 +1,117 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-<title>Flora - Tienda de Flores</title>
-<style>
-  :root{ --rosa:#e6a5b6; --rosa-osc:#c97b94; --bg:#fdfaf7; --gris:#5c5c5c; --borde:#ecd6dc; }
-  *{ box-sizing:border-box }
-  body{ margin:0; font-family:'Inter', sans-serif; background:var(--bg); color:#333; display:flex; min-height:100vh; flex-direction:column }
-  header{ text-align:center; padding:20px 16px }
-  header img{ max-width:220px; height:auto; display:block; margin:0 auto 8px }
-  header h2{ margin:8px 0 0; color:var(--gris) }
-  .view{ display:none; padding:16px; animation:fade .25s ease }
-  .view.active{ display:block }
-  @keyframes fade{ from{ opacity:.35; transform:translateY(4px) } to{ opacity:1; transform:none } }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Flora - Catálogo de Arreglos</title>
 
-  /* Catálogo */
-  .catalogo{ display:grid; gap:18px; grid-template-columns:repeat(auto-fill, minmax(220px,1fr)); max-width:1100px; margin:0 auto }
-  .card{
-    background:#fff; border:1px solid var(--borde); border-radius:18px;
-    box-shadow:0 6px 18px rgba(0,0,0,.06);
-    overflow:hidden; transition:transform .15s ease, box-shadow .15s ease, border-color .2s; cursor:pointer;
-  }
-  .card:hover{ transform:translateY(-2px); box-shadow:0 10px 24px rgba(0,0,0,.09); border-color:var(--rosa) }
-  .card.selected{ outline:3px solid var(--rosa) }
-  .card img{ width:100%; height:170px; object-fit:cover; border-bottom:1px solid var(--borde); filter:saturate(1.02) }
-  .card .body{ padding:12px 14px 16px; text-align:center }
-  .name{ font-weight:700; margin:6px 0 2px }
-  .price{ color:var(--gris); margin:0 }
+  <!-- Fuentes y librerías -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-  /* Botones */
-  .actions{ max-width:1100px; margin:18px auto 8px; display:flex; justify-content:center; gap:12px }
-  .btn{
-    appearance:none; border:none; border-radius:10px; padding:12px 18px; font-weight:700; cursor:pointer;
-    background:var(--rosa); color:#fff; box-shadow:0 6px 14px rgba(230,165,182,.35); transition:background .2s ease, transform .05s ease;
-  }
-  .btn:active{ transform:translateY(1px) }
-  .btn[disabled]{ filter:grayscale(.5); opacity:.6; cursor:not-allowed }
-
-  /* Formulario */
-  form{ background:#fff; border:1px solid var(--borde); border-radius:16px; max-width:780px; margin:0 auto; padding:18px; box-shadow:0 6px 18px rgba(0,0,0,.06) }
-  form h3{ margin:0 0 14px; color:var(--gris) }
-  .grid{ display:grid; gap:12px; grid-template-columns:repeat(2,1fr) }
-  .grid-1{ grid-template-columns:1fr }
-  label{ font-size:.92rem; color:#444 }
-  input, select, textarea{ width:100%; padding:10px 12px; border:1px solid #d9d9d9; border-radius:10px; font-size:14px; background:#fff }
-  input:focus, select:focus, textarea:focus{ outline:2px solid var(--rosa); border-color:var(--rosa) }
-  textarea{ min-height:80px; resize:vertical }
-  .muted{ color:#777; font-size:.9rem }
-  .pill{ display:inline-block; padding:8px 12px; border-radius:999px; background:#fff3f6; border:1px solid var(--rosa); margin:0 0 10px; color:#b35a74; font-weight:700 }
-  .badge{ display:inline-block; padding:6px 10px; border-radius:999px; font-size:.85rem; margin-left:8px }
-  .ok{ background:#e7f8ec; color:#1a7f37; border:1px solid #bfe7c8 }
-  .warn{ background:#fff7e6; color:#a15d00; border:1px solid #ffd59e }
-  #status{ text-align:center; margin-top:10px; font-weight:700 }
-  .err{ color:#b00020 } .good{ color:green }
-  .hidden{ display:none !important }
-
-  .card img {
-  width: 100%;
-  height: 170px;
-  object-fit: cover;
-  border-bottom: 1px solid var(--borde);
-  filter: saturate(1.02);
-  transition: transform 0.3s ease; /* animación suave */
-  }
-
-  .card:hover img {
-  transform: scale(1.1); /* zoom al hover */
-  }
-
-  .modal {
-    display: none;
-    position: fixed;
-    z-index: 1000;
-    left: 0; top: 0;
-    width: 100%; height: 100%;
-    background-color: rgba(0,0,0,0.45); /* fondo oscuro */
-    justify-content: center; align-items: center;
-  }
-
-  .modal-content {
-    background: #fff;
-    padding: 25px;
-    border-radius: 16px;
-    text-align: center;
-    width: 340px;
-    box-shadow: 0 6px 20px rgba(0,0,0,0.25);
-    border: 2px solid var(--rosa);
-  }
-
-  .modal-content h2 {
-    color: var(--rosa-osc);
-    margin-bottom: 12px;
-  }
-
-  .modal-content p {
-    margin-bottom: 18px;
-    color: var(--gris);
-    font-weight: 600;
-  }
-
-  .modal-content button {
-    margin: 6px;
-    padding: 10px 18px;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-    font-weight: 700;
-    transition: background 0.3s ease;
-  }
-
-  /* Botón hacer otro pedido */
-  .btn-pedido {
-    background: var(--rosa);
-    color: #000;
-    box-shadow: 0 4px 10px rgba(230,165,182,.4);
-  }
-  .btn-pedido:hover {
-    background: var(--rosa-osc);
-    color: #000;  
-  }
-
-  /* Botón salir */
-  .btn-salir {
-    background: #5c5c5c;  /* gris oscuro */
-    color: #fff;
-    box-shadow: 0 4px 10px rgba(0,0,0,.25);
-  }
-  .btn-salir:hover {
-    background: #333;
-  }
-
-</style>
+  <!-- Estilos -->
+  <link rel="stylesheet" href="style.css" />
 </head>
+
 <body>
-<header>
-  <img src="img/logo 2024 marca registrada-04.png" alt="FLORA Logo"/>
-  <h2>Catálogo de Arreglos Florales</h2>
-</header>
+  <header>
+    <img src="img/logo 2024 marca registrada-04.png" alt="Flora Logo">
+    <h2>Catálogo de Arreglos Florales</h2>
+  </header>
 
-<!-- VISTA 1: Catálogo -->
-<section id="viewCatalog" class="view active">
-  <div id="catalogo" class="catalogo"></div>
-  <div class="actions">
-    <button id="btnContinuar" class="btn" disabled>Continuar</button>
-  </div>
-</section>
+  <!-- === CATÁLOGO === -->
+  <section id="viewCatalog" class="view active">
+    <div id="catalogo" class="catalogo"></div>
+  </section>
 
-<!-- VISTA 2: Formulario -->
-<section id="viewForm" class="view">
-  <form id="pedidoForm" novalidate>
-    <span class="pill" id="resumenProducto">Producto: —</span>
-    <span id="badgeCliente" class="badge warn hidden">Nuevo cliente</span>
-    <h3>Datos del Pedido</h3>
-
-    <!-- Ocultos para enviar y validar en servidor -->
-    <input type="hidden" name="producto" id="producto">
-    <input type="hidden" name="precio"   id="precio">
-    <input type="hidden" name="domicilio" id="domicilio">
-    <input type="hidden" name="total"    id="total">
-    <input type="hidden" name="cantidad" value="1">
-
-    <div class="grid">
-      <div>
-        <label>Identificación</label>
-        <input name="identificacion" id="identificacion" required />
-      </div>
-      <div>
-        <label>Teléfono</label>
-        <input name="telefono" id="telefono" type="tel" pattern="[0-9+\-\s]{7,}" required />
-      </div>
-
-      <div><label>Nombre</label><input name="primerNombre" id="primerNombre" required /></div>
-      <div><label>Apellidos</label><input name="primerApellido" id="primerApellido" required /></div>
-      
-      <div>
-        <label>Forma de Pago</label>
-        <select name="formaPago" required>
-          <option value="">Selecciona…</option>
-          <option>Efectivo</option>
-          <option>Transferencia</option>
-          <option>Tarjeta</option>
-          <option>Link</option>
-          <option>Cuentas Por Cobrar</option>
-          <option>Contraentrega</option>
-        </select>
-      </div>
-      <div>
-        <label>Fecha de Entrega</label>
-        <input name="fechaEntrega" id="fechaEntrega" type="date" required />
-      </div>
-
-      <div>
-        <label>Hora de Entrega</label>
-        <input name="horaEntrega" id="horaEntrega" type="time" required />
-      </div>
-
-      <div><label>Destinatario</label><input name="destinatario" id="destinatario" required /></div>
-      <div><label>Teléfono destino</label><input name="telefonoDestino" id="telefonoDestino" type="tel" pattern="[0-9+\-\s]{7,}" required /></div>
-
-      <div>
-        <label>Barrio</label>
-        <select name="barrio" id="barrio" required>
-          <option value="">Selecciona…</option>
-        </select>
-      </div>
-      <div class="grid-1">
-        <label>Dirección</label>
-        <input name="direccion" id="direccion" required />
-      </div>
-
-      <div class="grid-1">
-        <label>Total a pagar (incluye domicilio)</label>
-        <div id="labelTotal" class="pill">—</div>
-      </div>
-
-      <div class="grid-1">
-        <label>Mensaje para la tarjeta <span class="muted">(opcional)</span></label>
-        <textarea name="mensaje" id="mensaje" placeholder="Escribe aquí tu dedicatoria…"></textarea>
-      </div>
+  <!-- === DRAWER CARRITO === -->
+  <div id="drawerCarrito" class="drawer">
+    <div class="drawer-header">
+      <h2>🛍️ Tu carrito</h2>
+      <button id="cerrarDrawer" class="close-btn">×</button>
     </div>
-
-    <div class="actions" style="margin-top:14px">
-      <button type="button" class="btn" id="btnVolver">← Catálogo</button>
-      <button type="submit" class="btn">Confirmar pedido</button>
+    <div id="cartItemsDrawer" class="drawer-items"></div>
+    <div class="drawer-footer">
+      <div class="totales">
+        <p><strong>Subtotal:</strong> $<span id="subtotalDrawer">0</span></p>
+        <p><strong>Domicilio:</strong> $<span id="domicilioDrawer">0</span></p>
+        <h3><strong>Total:</strong> $<span id="totalDrawer">0</span></h3>
+      </div>
+      <button id="btnPedidoDrawer" class="btn-primary">Proceder al pedido</button>
     </div>
-    <div id="status"></div>
-  </form>
-</section>
-
-<!-- Modal de confirmación -->
-<div id="modalExito" class="modal">
-  <div class="modal-content">
-    <h2>✅ Pedido registrado con éxito</h2>
-    <p>¿Desea hacer otro pedido o salir?</p>
-    <button class="btn" onclick="nuevoPedido()">🛒 Hacer otro pedido</button>
-    <button class="btn btn-salir" onclick="salir()">🚪 Salir</button>
   </div>
-</div>
 
+  <!-- Botón flotante -->
+  <button id="btnDrawer" class="floating-btn">🛒</button>
 
+  <!-- === FORMULARIO === -->
+  <section id="viewForm" class="view">
+    <form id="pedidoForm">
+      <div class="pedido-summary" id="resumenProducto">🛍 Tu pedido</div>
 
-<script>
-  // 1) Pega aquí la URL del WebApp de Apps Script (debe terminar en /exec)
-  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwW2TpbWuBO0kpE1wYnz9Eizyeus3KcMwVeO0fgp6EdBFZvo9JYsH0J9IZL_zRGlBQ/exec";
-  
-  const state = { selected: null, barrios: {} };
-  const fmtCOP = v => Number(v || 0).toLocaleString('es-CO');
-
-  // --------- Inicialización: catálogo + barrios ----------
-  async function init() {
-    try {
-      const res = await fetch(SCRIPT_URL);
-      const { catalogo, barrios } = await res.json();
-      state.barrios = barrios || {};
-      renderCatalog(catalogo || []);
-      fillBarrios(barrios || {});
-      // fecha mínima = hoy
-      const hoy = new Date().toISOString().slice(0,10);
-      document.getElementById('fechaEntrega').setAttribute('min', hoy);
-    } catch (e) {
-      document.getElementById('catalogo').innerHTML = "<p>Error cargando datos. Revisa la URL del WebApp.</p>";
-    }
-  }
-
-  function renderCatalog(items) {
-    const wrap = document.getElementById('catalogo');
-    wrap.innerHTML = "";
-    items.forEach(prod => {
-      const card = document.createElement('div');
-      card.className = 'card';
-      card.innerHTML = `
-        <img src="${prod.img}" alt="${prod.name}">
-        <div class="body">
-          <div class="name">${prod.name}</div>
-          <p class="price">$${fmtCOP(prod.price)}</p>
+      <h3>Datos del Cliente <span id="badgeCliente" class="badge warn">Nuevo cliente</span></h3>
+      <div class="grid">
+        <div><label>Tipo de identificación</label>
+          <select id="tipoIdent" required>
+            <option value="CEDULA" selected>Cédula</option>
+            <option value="NIT">NIT</option>
+          </select>
         </div>
-      `;
-      card.addEventListener('click', () => selectProduct(card, prod));
-      wrap.appendChild(card);
-    });
-  }
+        <div><label>Identificación</label><input id="identificacion" required></div>
+        <div><label>Teléfono</label><input id="telefono" required></div>
+        <div><label>Nombre</label><input id="primerNombre" required></div>
+        <div><label>Apellido(s)</label><input id="primerApellido"></div>
+        <div><label>Email (opcional)</label><input type="email" id="email"></div>
+      </div>
 
-  function selectProduct(card, prod) {
-    document.querySelectorAll('.card').forEach(c => c.classList.remove('selected'));
-    card.classList.add('selected');
-    state.selected = prod;
-    document.getElementById('btnContinuar').disabled = false;
-  }
+      <h3>Entrega</h3>
+      <div class="grid">
+        <div><label>Destinatario</label><input id="destinatario" required></div>
+        <div><label>Teléfono destino</label><input id="telefonoDestino" required></div>
+        <div><label>Dirección</label><input id="direccion" required></div>
+        <div><label>Barrio</label><select id="barrio"></select></div>
+        <div><label>Fecha de entrega</label><input id="fechaEntrega" type="date" required></div>
+        <div><label>Hora de entrega</label><input id="horaEntrega" type="time" required></div>
+      </div>
 
-  function fillBarrios(dict) {
-    const sel = document.getElementById('barrio');
-    sel.innerHTML = '<option value="">Selecciona…</option>';
-    Object.keys(dict).forEach(nombre => {
-      const opt = document.createElement('option');
-      opt.value = nombre;
-      opt.textContent = nombre;
-      sel.appendChild(opt);
-    });
-  }
+      <h3>Medio de Pago y Mensaje</h3>
+      <div class="grid">
+        <div>
+          <label>Medio de pago</label>
+          <select id="formaPago" required>
+            <option value="">Selecciona una opción...</option>
+            <option value="TRANSFERENCIA">Transferencia bancaria</option>
+            <option value="EFECTIVO">Efectivo</option>
+            <option value="CONTRAENTREGA">Pago contra entrega</option>
+            <option value="LINK">Link de pago (enviar por WhatsApp)</option>
+          </select>
+        </div>
+        <div class="grid-1">
+          <label>Mensaje</label>
+          <textarea id="mensaje" placeholder="Escribe un mensaje opcional"></textarea>
+        </div>
+      </div>
 
-  // --------- Navegación ----------
-  function show(id) {
-    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-    document.getElementById(id).classList.add('active');
-    window.scrollTo({ top:0, behavior:'smooth' });
-  }
+      <div class="firma-box">
+        <label>¿Deseas que el mensaje vaya firmado o anónimo?</label>
+        <select id="firmaMensaje" required>
+          <option value="Firmado" selected>Firmado</option>
+          <option value="Anónimo">Anónimo</option>
+        </select>
+        <div id="campoFirmaWrapper" style="margin-top:10px;">
+          <label for="nombreFirma">Nombre para la firma</label>
+          <input type="text" id="nombreFirma" placeholder="Ej: Con cariño, Laura y Carlos">
+        </div>
+      </div>
 
-  document.getElementById('btnContinuar').addEventListener('click', () => {
-    if (!state.selected) return;
-    document.getElementById('producto').value = state.selected.name;
-    document.getElementById('precio').value   = Number(state.selected.price || 0);
-    document.getElementById('resumenProducto').textContent =
-      `Producto: ${state.selected.name} — $${fmtCOP(state.selected.price)}`;
-    document.getElementById('labelTotal').textContent = "—";
-    document.getElementById('domicilio').value = 0;
-    document.getElementById('total').value     = 0;
-    show('viewForm');
-  });
+      <div class="actions">
+        <button type="button" class="btn-outline" id="btnVolver">Regresar</button>
+        <button type="submit" class="btn-primary" id="btnSubmit">Confirmar pedido</button>
+      </div>
+    </form>
+  </section>
 
-  document.getElementById('btnVolver').addEventListener('click', () => show('viewCatalog'));
-
-  // --------- Autorrelleno de cliente por identificación (con debounce) ----------
-  let lookupTimer = null;
-  document.getElementById('identificacion').addEventListener('input', (e) => {
-    clearTimeout(lookupTimer);
-    const val = e.target.value.trim();
-    if (!val) {
-      setClienteBadge(null); // resetea
-      return;
-    }
-    lookupTimer = setTimeout(() => buscarCliente(val), 400);
-  });
-
-  async function buscarCliente(ident) {
-    try {
-      const res = await fetch(`${SCRIPT_URL}?cliente=${encodeURIComponent(ident)}`);
-      const data = await res.json();
-      if (data && data.cliente) {
-        setClienteBadge(true);
-        autofillCliente(data.cliente);
-      } else {
-        setClienteBadge(false);
-        limpiarCliente(false);
-      }
-    } catch (e) {
-      setClienteBadge(null);
-    }
-  }
-
-  function setClienteBadge(encontrado) {
-    const b = document.getElementById('badgeCliente');
-    b.classList.remove('hidden', 'ok', 'warn');
-    if (encontrado === true) { b.textContent = "Cliente encontrado"; b.classList.add('ok'); }
-    else if (encontrado === false) { b.textContent = "Nuevo cliente"; b.classList.add('warn'); }
-    else { b.classList.add('hidden'); }
-  }
-
-  function autofillCliente(c) {
-    // c tiene solo: Identificacion, PrimerNombre, SegundoNombre, PrimerApellido, SegundoApellido, Telefono
-    document.getElementById('primerNombre').value    = c.PrimerNombre || "";
-    document.getElementById('segundoNombre').value   = c.SegundoNombre || "";
-    document.getElementById('primerApellido').value  = c.PrimerApellido || "";
-    document.getElementById('segundoApellido').value = c.SegundoApellido || "";
-    document.getElementById('telefono').value        = c.Telefono || "";
-    // Barrio y Dirección NO vienen de Clientes -> los deja vacíos para que el cliente los ingrese
-  }
-
-  function limpiarCliente(clearId) {
-    if (clearId) document.getElementById('identificacion').value = "";
-    document.getElementById('primerNombre').value    = "";
-    document.getElementById('segundoNombre').value   = "";
-    document.getElementById('primerApellido').value  = "";
-    document.getElementById('segundoApellido').value = "";
-    document.getElementById('telefono').value        = "";
-    // El usuario seguirá eligiendo Barrio y escribiendo Dirección manualmente
-    document.getElementById('barrio').value          = "";
-    document.getElementById('direccion').value       = "";
-    document.getElementById('labelTotal').textContent = "—";
-    document.getElementById('domicilio').value = 0;
-    document.getElementById('total').value     = 0;
-  }
-
-
-  // --------- Cálculo del total (precio + domicilio) ----------
-  document.getElementById('barrio').addEventListener('change', calcularTotal);
-  function calcularTotal() {
-    const precio = Number(document.getElementById('precio').value || 0);
-    const barrio = document.getElementById('barrio').value;
-    const dom    = Number(state.barrios[barrio] || 0);
-    const total  = precio + dom;
-
-    document.getElementById('domicilio').value = dom;
-    document.getElementById('total').value     = total;
-
-    document.getElementById('labelTotal').textContent =
-      barrio ? `Total a pagar: $${fmtCOP(total)} (incluye domicilio)` : "—";
-  }
-
-  // --------- Envío ----------
-  document.getElementById('pedidoForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const status = document.getElementById('status');
-
-    if (!state.selected) { show('viewCatalog'); return; }
-    if (!document.getElementById('barrio').value) {
-      status.textContent = "Selecciona el barrio para calcular el total.";
-      status.className = "err"; return;
-    }
-    if (!document.getElementById('total').value) {
-      status.textContent = "No se ha calculado el total.";
-      status.className = "err"; return;
-    }
-
-    // 🔹 Concatenar fecha + hora antes de enviar
-    const fecha = document.getElementById('fechaEntrega').value;
-    const hora  = document.getElementById('horaEntrega').value;
-    if (fecha && hora) {
-      const fechaHora = `${fecha} ${hora}:00`; 
-      // ejemplo: 2025-09-18 15:30:00
-      const hiddenInput = document.createElement('input');
-      hiddenInput.type = "hidden";
-      hiddenInput.name = "fechaEntrega";
-      hiddenInput.value = fechaHora;
-      e.target.appendChild(hiddenInput);
-    }
-
-    try {
-      const fd = new FormData(e.target);               // evita preflight
-      const resp = await fetch(SCRIPT_URL, { method: "POST", body: fd });
-      const out  = await resp.json();
-      /*if (out.status === "success") {
-        status.textContent = "✅ ¡Pedido registrado con éxito!";
-        status.className = "good";
-        e.target.reset(); setClienteBadge(null);
-      }*/
-      if (out.status === "success") {
-        document.getElementById("modalExito").style.display = "flex";
-        e.target.reset();
-        setClienteBadge(null);
-      }
-      else {
-        status.textContent = "❌ Error: " + (out.message || "No se pudo registrar.");
-        status.className = "err";
-      }
-    } catch (err) {
-      status.textContent = "❌ Error de conexión.";
-      status.className = "err";
-    }
-  });
-
-  function nuevoPedido() {
-  document.getElementById("modalExito").style.display = "none";
-  show('viewCatalog'); // vuelve al catálogo
-  }
-
-  function salir() {
-    window.location.href = "https://joindatasolutions-lab.github.io/Flora_APP_V2/"; // cambia a donde quieras
-  }
-
-  // Init
-  init();
-</script>
+  <!-- Script principal -->
+  <script src="script.js"></script>
 </body>
 </html>
