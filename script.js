@@ -47,13 +47,29 @@ function renderCatalog() {
 // === BARRIOS ===
 function fillBarrios() {
   const sel = document.getElementById("barrio");
-  sel.innerHTML = '<option value="">Selecciona…</option>';
+  sel.innerHTML = '<option value="">Selecciona un barrio...</option>';
   Object.keys(state.barrios).forEach(b => {
     const opt = document.createElement("option");
     opt.value = b;
-    opt.textContent = `${b} - $${fmtCOP(state.barrios[b])}`;
+    opt.textContent = b; // 🔹 ya no mostramos el precio
     sel.appendChild(opt);
   });
+}
+
+function filtrarBarrios() {
+  const texto = document.getElementById("buscarBarrio").value.toLowerCase();
+  const sel = document.getElementById("barrio");
+  const barrios = Object.keys(state.barrios);
+
+  sel.innerHTML = '<option value="">Selecciona un barrio...</option>';
+  barrios
+    .filter(b => b.toLowerCase().includes(texto))
+    .forEach(b => {
+      const opt = document.createElement("option");
+      opt.value = b;
+      opt.textContent = b;
+      sel.appendChild(opt);
+    });
 }
 
 function actualizarDomicilio() {
