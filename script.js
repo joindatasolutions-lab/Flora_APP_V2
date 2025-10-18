@@ -181,7 +181,7 @@ document.getElementById("btnPedidoDrawer").onclick = () => {
 
 document.getElementById("btnVolver").addEventListener("click", () => show("viewCatalog"));
 
-// === FORMULARIO ===
+// === FIRMA MENSAJE ===
 document.getElementById("firmaMensaje").addEventListener("change", e => {
   const campo = document.getElementById("campoFirmaWrapper");
   if (e.target.value === "Firmado") {
@@ -193,6 +193,65 @@ document.getElementById("firmaMensaje").addEventListener("change", e => {
     document.getElementById("nombreFirma").value = "";
   }
 });
+
+// === DETECCIÓN Y AUTOCOMPLETADO DE CLIENTE EXISTENTE ===
+let lookupTimer = null;
+
+document.getElementById("identificacion").addEventListener("input", e => {
+  clearTimeout(lookupTimer);
+  const val = e.target.value.trim();
+  if (!val) {
+    setClienteBadge(null);
+    return;
+  }
+  lookupTimer = setTimeout(() => buscarCliente(val), 300);
+});
+
+async function buscarCliente(ident) {
+  try {
+    const res = await fetch(`${SCRIPT_URL}?cliente=${encodeURIComponent(ident)}`);
+    const data = await res.json();
+    if (data && data.cliente) {
+      setClienteBadge(true);
+      autofillCliente(data.cliente);
+    } else {
+      setClienteBadge(false);
+      limpiarCliente(false);
+    }
+  } catch (err) {
+    console.error("Error al buscar cliente:", err);
+    setClienteBadge(null);
+  }
+}
+
+function setClienteBadge(encontrado) {
+  const b = document.getElementById("badgeCliente");
+  b.classList.remove("hidden", "ok", "warn");
+  if (encontrado === true) {
+    b.textContent = "Cliente encontrado";
+    b.classList.add("ok");
+  } else if (encontrado === false) {
+    b.textContent = "Nuevo cliente";
+    b.classList.add("warn");
+  } else {
+    b.classList.add("hidden");
+  }
+}
+
+function autofillCliente(c) {
+  const nombre = [c.PrimerNombre, c.SegundoNombre].filter(Boolean).join(" ").trim();
+  const apellidos = [c.PrimerApellido, c.SegundoApellido].filter(Boolean).join(" ").trim();
+  document.getElementById("primerNombre").value = nombre || "";
+  document.getElementById("primerApellido").value = apellidos || "";
+  document.getElementById("telefono").value = c.Telefono || "";
+}
+
+function limpiarCliente(clearId) {
+  if (clearId) document.getElementById("identificacion").value = "";
+  document.getElementById("primerNombre").value = "";
+  document.getElementById("primerApellido").value = "";
+  document.getElementById("telefono").value = "";
+}
 
 // === ENVÍO DEL FORMULARIO ===
 document.getElementById("pedidoForm").addEventListener("submit", async e => {
@@ -222,4 +281,3 @@ document.getElementById("tipoIdent").addEventListener("change", () => renderDraw
 
 // === CARGA INICIAL ===
 init();
-
