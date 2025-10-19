@@ -45,83 +45,79 @@ header h2 {
 /* === CATÁLOGO === */
 .catalogo {
   display: grid;
-  grid-template-columns: repeat(4, 1fr); /* 👈 4 por fila en PC */
-  gap: 24px;
+  grid-template-columns: repeat(4, 1fr); /* 4 tarjetas por fila */
+  gap: 22px;
   justify-content: center;
-  align-items: stretch;
+  align-items: start;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 30px 20px;
+  padding: 20px;
 }
 
 .card {
   background: #fff;
   border: 1px solid var(--borde);
-  border-radius: 18px;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+  border-radius: 16px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.05);
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  align-items: stretch;
   overflow: hidden;
   transition: all 0.25s ease;
   cursor: pointer;
-  height: 420px; /* 👈 altura fija y consistente */
+  height: auto; /* 👈 elimina altura forzada */
+  min-height: 360px; /* 👈 asegura uniformidad */
 }
 
 .card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.1);
+  transform: translateY(-3px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
   border-color: var(--rosa);
 }
 
 .card img {
   width: 100%;
-  height: 230px; /* 👈 todas las imágenes igual */
+  height: 210px; /* 👈 reduce altura de imagen */
   object-fit: cover;
   object-position: center;
   background: #fff8f9;
-  flex-shrink: 0;
 }
 
 .card .body {
-  padding: 14px 10px 16px;
+  padding: 12px 10px 14px;
   border-top: 1px solid var(--borde);
-  flex-grow: 1;
+  text-align: center;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  text-align: center;
+  flex-grow: 1;
 }
 
 .name {
   font-weight: 700;
-  font-size: 0.94rem;
+  font-size: 0.92rem;
   color: #333;
-  min-height: 38px;
+  line-height: 1.2;
   margin-bottom: 4px;
-  line-height: 1.2; /* 👈 reduce espacio vertical entre líneas */
-  letter-spacing: -0.2px; /* 👈 ajusta el espaciado entre letras */
+  min-height: 38px;
 }
 
 .price {
   color: var(--gris);
   font-size: 0.88rem;
-  margin: 2px 0 10px;
-  line-height: 1.1; /* 👈 texto más compacto */
+  margin-bottom: 8px;
+  line-height: 1.1;
 }
 
 .btn-add {
-  border: none;
-  border-radius: 0 0 18px 18px;
   background: var(--rosa);
   color: #fff;
   font-weight: 700;
+  border: none;
+  border-radius: 0 0 16px 16px;
   padding: 10px 0;
   cursor: pointer;
-  transition: background 0.25s ease;
   font-size: 0.9rem;
-  letter-spacing: 0;
+  transition: background 0.25s ease;
 }
 
 .btn-add:hover {
