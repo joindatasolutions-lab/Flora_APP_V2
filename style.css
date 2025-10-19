@@ -44,85 +44,57 @@ header h2 {
 
 /* === CATÁLOGO === */
 .catalogo {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr); /* 4 tarjetas por fila */
-  gap: 22px;
-  justify-content: center;
-  align-items: start;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 20px;
+  display:grid;
+  gap:16px;
+  grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+  max-width:1100px;
+  margin:0 auto;
 }
-
 .card {
-  background: #fff;
-  border: 1px solid var(--borde);
-  border-radius: 16px;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.05);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  transition: all 0.25s ease;
-  cursor: pointer;
-  height: auto; /* 👈 elimina altura forzada */
-  min-height: 360px; /* 👈 asegura uniformidad */
+  background:#fff;
+  border:1px solid var(--borde);
+  border-radius:18px;
+  box-shadow:0 6px 18px rgba(0,0,0,.06);
+  overflow:hidden;
+  cursor:pointer;
+  display:flex;
+  flex-direction:column;
+  transition:transform .15s ease, box-shadow .15s ease;
 }
-
 .card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-  border-color: var(--rosa);
+  transform:translateY(-2px);
+  box-shadow:0 10px 24px rgba(0,0,0,.09);
 }
-
 .card img {
-  width: 100%;
-  height: 210px; /* 👈 reduce altura de imagen */
-  object-fit: cover;
-  object-position: center;
-  background: #fff8f9;
+  width:100%;
+  height:260px;
+  object-fit:cover;
+  object-position:center;
+  background:#fff8f9;
 }
-
 .card .body {
-  padding: 12px 10px 14px;
-  border-top: 1px solid var(--borde);
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  flex-grow: 1;
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  text-align:center;
+  padding:12px 10px 16px;
 }
-
-.name {
-  font-weight: 700;
-  font-size: 0.92rem;
-  color: #333;
-  line-height: 1.2;
-  margin-bottom: 4px;
-  min-height: 38px;
-}
-
-.price {
-  color: var(--gris);
-  font-size: 0.88rem;
-  margin-bottom: 8px;
-  line-height: 1.1;
-}
-
+.name {font-weight:700;font-size:.95rem;min-height:40px;}
+.price {color:var(--gris);font-size:.9rem;margin:6px 0 12px;}
 .btn-add {
-  background: var(--rosa);
-  color: #fff;
-  font-weight: 700;
-  border: none;
-  border-radius: 0 0 16px 16px;
-  padding: 10px 0;
-  cursor: pointer;
-  font-size: 0.9rem;
-  transition: background 0.25s ease;
+  width:100%;
+  padding:10px;
+  border:none;
+  border-radius:10px;
+  background:var(--rosa);
+  color:#fff;
+  font-weight:700;
+  cursor:pointer;
+  transition:background .2s ease;
 }
+.btn-add:hover{background:var(--rosa-osc);}
 
-.btn-add:hover {
-  background: var(--rosa-osc);
-}
 
 /* === BOTÓN FLOTANTE (FAB) === */
 .cart-fab {
