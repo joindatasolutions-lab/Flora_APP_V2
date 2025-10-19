@@ -44,73 +44,74 @@ header h2 {
 
 /* === CATÁLOGO === */
 .catalogo {
-  display:grid;
-  gap:16px;
-  grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
-  max-width:1100px;
-  margin:0 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 20px;
+  justify-content: center;
+  align-items: start;
+  padding: 20px;
+  background: var(--bg);
 }
+
 .card {
-  background:#fff;
-  border:1px solid var(--borde);
-  border-radius:18px;
-  box-shadow:0 6px 18px rgba(0,0,0,.06);
-  overflow:hidden;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  cursor:pointer;
-  transition:transform .15s ease, box-shadow .15s ease, border-color .25s;
-  position:relative;
-  padding:10px;
+  background: #fff;
+  border-radius: 18px;
+  border: 1px solid var(--borde);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, .06);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: all 0.25s ease;
+  cursor: pointer;
 }
+
 .card:hover {
-  transform:translateY(-2px);
-  box-shadow:0 10px 24px rgba(0,0,0,.09);
-  border-color:var(--rosa);
+  transform: translateY(-4px);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.1);
+  border-color: var(--rosa);
 }
+
 .card img {
-  width:100%;
-  height:260px;
-  object-fit:cover;
-  object-position:center;
-  background:#fff8f9;
-  border-bottom:1px solid var(--borde);
+  width: 100%;
+  height: 260px;
+  object-fit: cover;
+  border-bottom: 1px solid var(--borde);
 }
+
 .card .body {
-  text-align:center;
-  padding:8px;
-  flex-grow:1;
-  padding-bottom:64px;
+  padding: 16px;
+  text-align: center;
 }
+
 .name {
-  font-weight:700;
-  font-size:.95rem;
-  min-height:40px;
-  margin:4px 0;
+  font-weight: 700;
+  font-size: 1rem;
+  color: #333;
+  min-height: 40px;
+  margin-bottom: 6px;
 }
+
 .price {
-  color:var(--gris);
-  font-size:.9rem;
-  margin:0;
+  color: var(--gris);
+  font-size: 1rem;
+  margin-bottom: 12px;
 }
+
 .btn-add {
-  position:absolute;
-  left:0;
-  bottom:0;
-  width:100%;
-  margin:0;
-  padding:12px 0;
-  font-size:.95rem;
-  border:none;
-  border-radius:0 0 18px 18px;
-  background:var(--rosa);
-  color:#fff;
-  font-weight:700;
-  cursor:pointer;
-  transition:background .25s ease;
+  background: var(--rosa);
+  color: #fff;
+  font-weight: 700;
+  border: none;
+  border-radius: 0 0 18px 18px;
+  padding: 12px;
+  cursor: pointer;
+  transition: background 0.3s ease;
 }
-.btn-add:hover { background:var(--rosa-osc); }
+
+.btn-add:hover {
+  background: var(--rosa-osc);
+}
 
 /* === BOTÓN FLOTANTE (FAB) === */
 .cart-fab {

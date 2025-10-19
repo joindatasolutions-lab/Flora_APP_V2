@@ -265,6 +265,13 @@ function limpiarCliente(clearId) {
   document.getElementById("telefono").value = "";
 }
 
+function toggleFirma() {
+  const firmado = document.getElementById("firmado").value;
+  const nombreFirma = document.getElementById("nombreFirma");
+  nombreFirma.parentElement.style.display = (firmado === "Firmado") ? "block" : "none";
+  if (firmado === "Anónimo") nombreFirma.value = "";
+}
+
 // === ENVÍO DEL FORMULARIO ===
 document.getElementById("pedidoForm").addEventListener("submit", async e => {
   e.preventDefault();
