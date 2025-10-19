@@ -275,22 +275,46 @@ function toggleFirma() {
 // === ENVÍO DEL FORMULARIO ===
 document.getElementById("pedidoForm").addEventListener("submit", async e => {
   e.preventDefault();
+
   if (state.cart.length === 0) {
     Swal.fire("Carrito vacío", "Agrega al menos un producto antes de enviar el pedido.", "warning");
     return;
   }
 
   const formData = new FormData(e.target);
-  formData.append("productos", JSON.stringify(state.cart));
+
+  // 🧩 Agregar productos al payload
+  const productos = state.cart.map(p => `${p.qty}× ${p.name}`).join(" | ");
+  const cantidad = state.cart.reduce((a, p) => a + p.qty, 0);
+  const subtotal = state.cart.reduce((a, p) => a + (p.price * p.qty), 0);
+  const iva = state.iva || 0;
+  const domicilio = state.domicilio || 0;
+  const total = subtotal + iva + domicilio;
+
+  // 🧩 Enviar campos esperados por Apps Script
+  formData.append("producto", productos);
+  formData.append("cantidad", cantidad);
+  formData.append("precio", subtotal);
+  formData.append("iva", iva);
+  formData.append("domicilio", domicilio);
+  formData.append("total", total);
+
   try {
-    await fetch(SCRIPT_URL, { method: "POST", body: formData });
-    Swal.fire("Pedido enviado", "Tu pedido fue registrado correctamente 🌸", "success");
-    state.cart = [];
-    updateCartCount();
-    renderDrawerCart();
-    show("viewCatalog");
+    const response = await fetch(SCRIPT_URL, { method: "POST", body: formData });
+    const data = await response.json();
+
+    if (data.status === "success") {
+      Swal.fire("Pedido enviado", "Tu pedido fue registrado correctamente 🌸", "success");
+      state.cart = [];
+      updateCartCount();
+      renderDrawerCart();
+      show("viewCatalog");
+      e.target.reset();
+    } else {
+      Swal.fire("Error", "No se pudo registrar el pedido correctamente.", "error");
+    }
   } catch (error) {
-    console.error(error);
+    console.error("❌ Error al enviar pedido:", error);
     Swal.fire("Error", "Hubo un problema al enviar el pedido.", "error");
   }
 });
