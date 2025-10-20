@@ -374,6 +374,34 @@ textarea {
   overflow-y:auto;
 }
 
+.radio-option {
+  display: flex;
+  align-items: center;
+  background: #fff;
+  border: 1px solid #e3b5c1;
+  border-radius: 8px;
+  padding: 6px 12px;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.radio-option:hover {
+  background-color: #fdeef1;
+  border-color: #d67a8d;
+}
+
+.radio-option input[type="radio"] {
+  accent-color: #b84c65;
+  margin-right: 6px;
+  cursor: pointer;
+}
+
+.radio-option span {
+  font-size: 14px;
+  color: #444;
+}
+
+
 /* === RESPONSIVE === */
 @media (max-width: 1199px) {
   .catalogo {
