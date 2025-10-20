@@ -87,8 +87,16 @@
           <select id="barrio" name="barrio" onchange="actualizarDomicilio()" required></select>
         </div>
         </div>
-        <div><label>Fecha de entrega</label><input id="fechaEntrega" name="fechaEntrega" type="date" required></div>
-        <div><label>Hora de entrega</label><input id="horaEntrega" name="horaEntrega" type="time" required></div>
+        <div class="entrega-fecha-hora">
+          <div>
+            <label>Fecha de entrega</label>
+            <input id="fechaEntrega" name="fechaEntrega" type="date" required>
+          </div>
+          <div>
+            <label>Hora de entrega</label>
+            <input id="horaEntrega" name="horaEntrega" type="time" required>
+          </div>
+        </div>
         <div class="form-group tipo-lugar">
         <label for="tipoLugar" class="titulo-campo">Tipo de lugar *</label>
         <div class="radio-group">

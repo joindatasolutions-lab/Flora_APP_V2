@@ -373,6 +373,33 @@ textarea {
   max-height:220px;
   overflow-y:auto;
 }
+/* === FECHA Y HORA EN UNA SOLA LÍNEA === */
+.entrega-fecha-hora {
+  display: flex;
+  gap: 16px;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+
+.entrega-fecha-hora > div {
+  flex: 1;
+}
+
+.entrega-fecha-hora input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #f2cbd4;
+  border-radius: 8px;
+  font-family: inherit;
+}
+
+/* 📱 En móvil, se apilan verticalmente */
+@media (max-width: 600px) {
+  .entrega-fecha-hora {
+    flex-direction: column;
+    gap: 10px;
+  }
+}
 
 /* --- Tipo de lugar --- */
 .tipo-lugar {
