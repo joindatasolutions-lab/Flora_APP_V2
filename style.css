@@ -374,31 +374,57 @@ textarea {
   overflow-y:auto;
 }
 
+/* --- Tipo de lugar --- */
+.tipo-lugar {
+  margin-top: 12px;
+}
+
+.titulo-campo {
+  font-weight: 600;
+  color: #b84c65;
+  display: block;
+  margin-bottom: 6px;
+}
+
+/* contenedor de opciones */
+.radio-group {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.7rem;
+}
+
 .radio-option {
+  flex: 1;
   display: flex;
   align-items: center;
+  justify-content: center;
   background: #fff;
-  border: 1px solid #e3b5c1;
-  border-radius: 8px;
-  padding: 6px 12px;
+  border: 1px solid #f2cbd4;
+  border-radius: 10px;
+  padding: 10px;
   cursor: pointer;
+  font-size: 14px;
   transition: all 0.2s ease-in-out;
+  color: #b84c65;
 }
 
 .radio-option:hover {
-  background-color: #fdeef1;
-  border-color: #d67a8d;
+  background-color: #fdeef2;
+  border-color: #e28ba3;
 }
 
+/* estilo del radio real */
 .radio-option input[type="radio"] {
-  accent-color: #b84c65;
-  margin-right: 6px;
-  cursor: pointer;
+  display: none;
 }
 
-.radio-option span {
-  font-size: 14px;
-  color: #444;
+/* cuando está seleccionado */
+.radio-option input[type="radio"]:checked + span {
+  font-weight: 600;
+  color: #fff;
+  background: #b84c65;
+  border-radius: 8px;
+  padding: 6px 10px;
 }
 
 
@@ -406,5 +432,23 @@ textarea {
 @media (max-width: 1199px) {
   .catalogo {
     grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  }
+}
+
+/* responsivo */
+@media (max-width: 600px) {
+  .radio-group {
+    flex-direction: column;
+  }
+
+  .radio-option {
+    justify-content: flex-start;
+    padding: 8px 14px;
+    font-size: 15px;
+  }
+
+  .radio-option input[type="radio"]:checked + span {
+    width: 100%;
+    text-align: center;
   }
 }
