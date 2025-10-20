@@ -283,6 +283,12 @@ document.getElementById("pedidoForm").addEventListener("submit", async e => {
 
   const formData = new FormData(e.target);
 
+   // 🏠 Concatenar tipo de lugar con la dirección
+  const direccion = document.getElementById("direccion")?.value.trim() || "";
+  const tipoLugar = document.querySelector('input[name="tipoLugar"]:checked')?.value || "";
+  const direccionFinal = tipoLugar ? `${direccion} - ${tipoLugar}` : direccion;
+  formData.set("direccion", direccionFinal);
+
   // 🧩 Agregar productos al payload
   const productos = state.cart.map(p => `${p.qty}× ${p.name}`).join(" | ");
   const cantidad = state.cart.reduce((a, p) => a + p.qty, 0);
