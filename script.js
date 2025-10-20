@@ -74,6 +74,47 @@ function actualizarDomicilio() {
   renderDrawerCart();
 }
 
+// === VALIDAR HORA DE ENTREGA ===
+const fechaEntregaInput = document.getElementById("fechaEntrega");
+const horaEntregaInput = document.getElementById("horaEntrega");
+
+function validarHoraEntrega() {
+  const fechaSeleccionada = new Date(fechaEntregaInput.value);
+  const hoy = new Date();
+
+  // Solo validar si la fecha es hoy
+  const esHoy =
+    fechaSeleccionada.getFullYear() === hoy.getFullYear() &&
+    fechaSeleccionada.getMonth() === hoy.getMonth() &&
+    fechaSeleccionada.getDate() === hoy.getDate();
+
+  if (esHoy) {
+    const [hora, minuto] = horaEntregaInput.value.split(":").map(Number);
+    const horaEntrega = new Date();
+    horaEntrega.setHours(hora, minuto, 0, 0);
+
+    const horaMinima = new Date();
+    horaMinima.setHours(hoy.getHours() + 2, hoy.getMinutes(), 0, 0); // +2 horas
+
+    if (horaEntrega < horaMinima) {
+      Swal.fire({
+        icon: "warning",
+        title: "Hora no válida ⏰",
+        text: "La hora de entrega debe ser al menos 2 horas después de la hora actual.",
+      });
+      horaEntregaInput.value = ""; // limpiar
+    }
+  }
+}
+
+// Escuchar cambios
+horaEntregaInput.addEventListener("change", validarHoraEntrega);
+fechaEntregaInput.addEventListener("change", () => {
+  // Limpiar hora si cambia la fecha
+  horaEntregaInput.value = "";
+});
+
+
 // === CARRITO ===
 function addToCart(prod) {
   const existing = state.cart.find(p => p.name === prod.name);
