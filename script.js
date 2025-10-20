@@ -223,9 +223,17 @@ async function buscarCliente(ident) {
   try {
     const res = await fetch(`${SCRIPT_URL}?cliente=${encodeURIComponent(ident)}`);
     const data = await res.json();
-    if (data && data.cliente) {
+
+    if (data && data.found) {
       setClienteBadge(true);
-      autofillCliente(data.cliente);
+
+      // autocompletar con los nombres reales que devuelve el Apps Script
+      document.getElementById("primerNombre").value = data.primerNombre || "";
+      document.getElementById("primerApellido").value = data.primerApellido || "";
+      document.getElementById("telefono").value = data.telefono || "";
+      if (document.getElementById("email")) {
+        document.getElementById("email").value = data.email || "";
+      }
     } else {
       setClienteBadge(false);
       limpiarCliente(false);
