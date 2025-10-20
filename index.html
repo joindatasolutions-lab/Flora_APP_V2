@@ -86,27 +86,26 @@
           <label>Barrio</label>
           <select id="barrio" name="barrio" onchange="actualizarDomicilio()" required></select>
         </div>
-        <div class="form-group" style="margin-top: 10px;">
-        <label for="tipoLugar" style="font-weight: 600; color: #b84c65;">Tipo de lugar *</label>
-        <div style="display: flex; gap: 1rem; margin-top: 6px;">
-          <label class="radio-option">
-            <input type="radio" name="tipoLugar" value="Casa" required checked>
-            <span>Casa</span>
-          </label>
-          <label class="radio-option">
-            <input type="radio" name="tipoLugar" value="Edificio" required>
-            <span>Edificio</span>
-          </label>
-          <label class="radio-option">
-            <input type="radio" name="tipoLugar" value="Conjunto" required>
-            <span>Conjunto</span>
-          </label>
         </div>
-      </div>
         <div><label>Fecha de entrega</label><input id="fechaEntrega" name="fechaEntrega" type="date" required></div>
         <div><label>Hora de entrega</label><input id="horaEntrega" name="horaEntrega" type="time" required></div>
-      </div>
-
+        <div class="form-group tipo-lugar">
+        <label for="tipoLugar" class="titulo-campo">Tipo de lugar *</label>
+        <div class="radio-group">
+            <label class="radio-option">
+              <input type="radio" name="tipoLugar" value="Casa" required checked>
+              <span>Casa</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="tipoLugar" value="Edificio" required>
+              <span>Edificio</span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" name="tipoLugar" value="Conjunto" required>
+              <span>Conjunto</span>
+            </label>
+          </div>
+        </div>
       <h3>Medio de Pago y Mensaje</h3>
       <div class="grid">
         <div>
