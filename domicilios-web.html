@@ -125,33 +125,62 @@
     }
 
     async function actualizarEstado(pedido,nuevoEstado,boton,badge,select){
-      const domi=select.value;
-      if(!domi||domi==='Asignar domiciliario'){mostrarToast('⚠️ Asigna un domiciliario antes');return;}
-      boton.disabled=true;boton.textContent='Actualizando...';
-      const body=new URLSearchParams({accion:'actualizarEstado',hoja:'Domicilios',pedido:String(pedido),estado:nuevoEstado});
-      const res=await fetch(SCRIPT_URL,{method:'POST',body});
-      const data=await res.json();
-      if(data.result==='ok'||data.status==='success'){
-        if(nuevoEstado==='En Ruta'){
-          badge.textContent='En Ruta';badge.className='estado en_ruta';boton.textContent='Entregado';mostrarToast('🚚 Pedido en ruta');
-        }else{
-          badge.textContent='Entregado';badge.className='estado entregado';
-          mostrarToast('✅ Pedido entregado');
-          const card=boton.closest('.card');
-          const select=card.querySelector('select');
-          if(select)select.style.display='none';
-          boton.style.display='none';
-          card.style.opacity='0.8';
-          document.getElementById('contenedor-domicilios').appendChild(card);
+      boton.disabled = true;
+      boton.textContent = "Actualizando...";
+      try {
+        const body = new URLSearchParams({
+          accion: 'actualizarEstado',
+          hoja: 'Domicilios',
+          pedido: String(pedido),
+          estado: nuevoEstado
+        });
+
+        const res = await fetch(SCRIPT_URL, { method: 'POST', body });
+        const data = await res.json();
+
+        if (data.result === "ok" || data.status === "success") {
+          if (nuevoEstado === "En Ruta") {
+            badge.textContent = "En Ruta";
+            badge.className = "estado en_ruta";
+            boton.textContent = "Entregado";
+            boton.classList.add("entregado");
+            mostrarToast("🚚 Pedido en ruta");
+          } else {
+            badge.textContent = "Entregado";
+            badge.className = "estado entregado";
+            mostrarToast("✅ Pedido entregado");
+            const card = boton.closest(".card");
+            const select = card.querySelector("select");
+            if (select) select.style.display = "none";
+            boton.style.display = "none";
+            card.style.opacity = "0.8";
+            document.getElementById("contenedor-domicilios").appendChild(card);
+          }
+        } else {
+          mostrarToast("⚠️ No se pudo actualizar el estado");
         }
-      }else mostrarToast('Error al actualizar');
-      boton.disabled=false;
+      } catch (e) {
+        console.error("❌ Error actualizando:", e);
+        mostrarToast("❌ Error de conexión con el servidor");
+      } finally {
+        boton.disabled = false;
+      }
     }
 
     function renderizarDomicilios(domicilios){
       const c=document.getElementById('contenedor-domicilios');
       c.innerHTML='';
       if(!domicilios?.length){c.innerHTML='<p style="text-align:center;">No hay pedidos.</p>';return;}
+
+      // Ordenar pendientes y en ruta arriba, entregados al final
+      domicilios.sort((a,b)=>{
+        const ea=(a.estado||'').toLowerCase();
+        const eb=(b.estado||'').toLowerCase();
+        if(ea.includes('entregado')&&!eb.includes('entregado'))return 1;
+        if(!ea.includes('entregado')&&eb.includes('entregado'))return -1;
+        return 0;
+      });
+
       domicilios.forEach(dom=>{
         const num=dom["N°Pedido"]||dom.pedido;
         const est=dom.estado||'Pendiente';
@@ -196,9 +225,12 @@
             if(select.value==='Externo')abrirModalExterno(num);
             else asignarDomiciliario(num,select.value);
           });
-          boton.addEventListener('click',()=>actualizarEstado(num,badge.textContent==='Pendiente'?'En Ruta':'Entregado',boton,badge,select));
+          boton.addEventListener('click',()=>{
+            const nuevoEstado = badge.textContent === "Pendiente" ? "En Ruta" : "Entregado";
+            actualizarEstado(num,nuevoEstado,boton,badge,select);
+          });
           card.appendChild(acciones);
-        }else card.style.opacity='0.8';
+        } else card.style.opacity='0.8';
         c.appendChild(card);
       });
     }
