@@ -51,6 +51,10 @@
     .modal-content button{margin:6px;padding:8px 16px;border:none;border-radius:8px;cursor:pointer;}
     .guardar{background:var(--verde);color:#fff;}
     .cancelar{background:var(--rosa-osc);color:#fff;}
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
   </style>
 </head>
 <body>
@@ -104,25 +108,62 @@
 
     // Modal para registrar externo
     function abrirModalExterno(pedido){
-      const m=document.getElementById('modalExterno');
-      m.style.display='flex';
-      document.getElementById('btnRegistrarExterno').onclick=async()=>{
-        const nombre=document.getElementById('nombreExterno').value.trim();
-        const tel=document.getElementById('telefonoExterno').value.trim();
-        if(!nombre||!tel){mostrarToast('Completa todos los campos');return;}
-        const body=new URLSearchParams({accion:'registrarExterno',Nombre:nombre,Telefono:tel,Disponibilidad:'Sí',pedido:String(pedido)});
-        try{
-          const res=await fetch(SCRIPT_URL,{method:'POST',body});
-          const data=await res.json();
-          if(data.status==='success'){
+      const m = document.getElementById('modalExterno');
+      m.style.display = 'flex';
+      const btnGuardar = document.getElementById('btnRegistrarExterno');
+      const btnCancelar = document.getElementById('btnCancelarExterno');
+      const nombreInput = document.getElementById('nombreExterno');
+      const telInput = document.getElementById('telefonoExterno');
+
+      // reset
+      btnGuardar.textContent = "Guardar";
+      btnGuardar.disabled = false;
+      nombreInput.value = "";
+      telInput.value = "";
+
+      btnGuardar.onclick = async () => {
+        const nombre = nombreInput.value.trim();
+        const tel = telInput.value.trim();
+        if (!nombre || !tel) {
+          mostrarToast('Completa todos los campos');
+          return;
+        }
+
+        // 🌀 Mostrar animación de carga
+        btnGuardar.disabled = true;
+        btnGuardar.innerHTML = `<span style="display:inline-block;width:14px;height:14px;border:2px solid #fff;border-top:2px solid transparent;border-radius:50%;margin-right:8px;animation:spin 1s linear infinite;"></span> Registrando...`;
+
+        const body = new URLSearchParams({
+          accion: 'registrarExterno',
+          Nombre: nombre,
+          Telefono: tel,
+          Disponibilidad: 'Sí',
+          pedido: String(pedido)
+        });
+
+        try {
+          const res = await fetch(SCRIPT_URL, { method: 'POST', body });
+          const data = await res.json();
+          if (data.status === 'success') {
             mostrarToast(`Externo registrado y asignado: ${nombre}`);
-            m.style.display='none';
+            m.style.display = 'none';
             await cargarDomicilios();
-          }else mostrarToast(`⚠️ ${data.message||'No se pudo registrar'}`);
-        }catch(err){console.error(err);mostrarToast('❌ Error al registrar externo');}
+          } else {
+            mostrarToast(`⚠️ ${data.message || 'No se pudo registrar'}`);
+            btnGuardar.textContent = "Guardar";
+            btnGuardar.disabled = false;
+          }
+        } catch (err) {
+          console.error(err);
+          mostrarToast('❌ Error al registrar externo');
+          btnGuardar.textContent = "Guardar";
+          btnGuardar.disabled = false;
+        }
       };
-      document.getElementById('btnCancelarExterno').onclick=()=>m.style.display='none';
+
+      btnCancelar.onclick = () => (m.style.display = 'none');
     }
+
 
     async function actualizarEstado(pedido,nuevoEstado,boton,badge,select){
       boton.disabled = true;
