@@ -285,10 +285,10 @@
             badge.className = "estado en_ruta";
             mostrarToast("🚚 Pedido en ruta");
           } else {
-            boton.textContent = "Entregado ✅";
+            boton.textContent = "Entregado";
             badge.textContent = "Entregado";
             badge.className = "estado entregado";
-            mostrarToast("✅ Pedido entregado");
+            mostrarToast("Pedido entregado");
           }
         } else {
           console.warn("⚠️ Respuesta inesperada:", data);
@@ -319,7 +319,7 @@
         const estado = dom.estado || "Pendiente";
         const estadoClase = estado.toLowerCase().replace(" ", "_");
         const textoBoton = estado === "Pendiente" ? "En Ruta" :
-                           estado === "En Ruta" ? "Entregado" : "Entregado ✅";
+                          estado === "En Ruta" ? "Entregado" : "Entregado";
         const claseBoton = estado === "Entregado" ? "btn-estado entregado" : "btn-estado";
 
         const card = document.createElement("div");
@@ -339,7 +339,13 @@
             <p><strong>Teléfono:</strong> ${dom.telefonoDestino || dom.telefono || "—"}</p>
             <p><strong>Entrega:</strong> ${dom.fechaEntrega || ""}</p>
           </div>
-          <div class="acciones">
+        `;
+
+        // 🔹 Solo agregamos los controles si NO está entregado
+        if (estado !== "Entregado") {
+          const acciones = document.createElement("div");
+          acciones.className = "acciones";
+          acciones.innerHTML = `
             <select>
               <option value="">Asignar domiciliario</option>
               <option ${dom.domiciliario==="Elvis"?"selected":""}>Elvis</option>
@@ -347,17 +353,19 @@
               <option ${dom.domiciliario==="Externo"?"selected":""}>Externo</option>
             </select>
             <button class="${claseBoton}">${textoBoton}</button>
-          </div>
-        `;
+          `;
 
-        const boton = card.querySelector("button");
-        const badge = card.querySelector(".estado");
+          const boton = acciones.querySelector("button");
+          const badge = card.querySelector(".estado");
 
-        boton.addEventListener("click", () => {
-          const nuevoEstado = badge.textContent === "Pendiente" ? "En Ruta" :
-                              badge.textContent === "En Ruta" ? "Entregado" : "Entregado";
-          actualizarEstado(numeroPedido, nuevoEstado, boton, badge);
-        });
+          boton.addEventListener("click", () => {
+            const nuevoEstado = badge.textContent === "Pendiente" ? "En Ruta" :
+                                badge.textContent === "En Ruta" ? "Entregado" : "Entregado";
+            actualizarEstado(numeroPedido, nuevoEstado, boton, badge);
+          });
+
+          card.appendChild(acciones);
+        }
 
         contenedor.appendChild(card);
       });
