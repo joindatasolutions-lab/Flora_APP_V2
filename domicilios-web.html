@@ -175,7 +175,6 @@
       font-size: .85em;
     }
 
-    /* 🌸 Toast de notificación */
     #toast {
       position: fixed;
       top: 20px;
@@ -197,7 +196,6 @@
       transform: translateX(-50%) translateY(0);
     }
 
-    /* 📱 Responsive */
     @media (max-width: 768px) {
       main { grid-template-columns: 1fr; padding: 12px; }
       .card { max-width: 100%; }
@@ -225,7 +223,6 @@
   <script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby_lDd_OrOcWgt5WOq56K0IyXuxlPaVL47bDvX8wUoOMpaVi9owla39dpzP90lDSpeD/exec";
     
-
     function mostrarToast(msg = "✅ Estado actualizado correctamente") {
       const toast = document.getElementById("toast");
       toast.textContent = msg;
@@ -235,13 +232,10 @@
 
     async function cargarDomicilios() {
       try {
-        const res = await fetch(`${SCRIPT_URL}?hoja=Domicilios`, {
-          method: 'GET',
-          cache: 'no-store'
-        });
+        const res = await fetch(`${SCRIPT_URL}?hoja=Domicilios`, { method: 'GET', cache: 'no-store' });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
-        renderizarDomicilios(data);  // 🟢 <--- agrega esta línea
+        renderizarDomicilios(data);
       } catch (err) {
         console.error('Error cargando domicilios:', err);
       }
@@ -259,24 +253,14 @@
           estado: nuevoEstado
         });
 
-        const res = await fetch(SCRIPT_URL, {
-          method: 'POST',
-          body,
-          cache: 'no-store'
-        });
-
+        const res = await fetch(SCRIPT_URL, { method: 'POST', body, cache: 'no-store' });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
-        // 🟢 Verificamos que la respuesta sea JSON válida
         const text = await res.text();
         let data = {};
-        try {
-          data = JSON.parse(text);
-        } catch {
-          throw new Error("Respuesta no es JSON válida: " + text);
-        }
+        try { data = JSON.parse(text); } 
+        catch { throw new Error("Respuesta no es JSON válida: " + text); }
 
-        // 🟢 Validamos la respuesta
         if (data.result === "ok" || data.status === "success") {
           if (nuevoEstado === "En Ruta") {
             boton.textContent = "Entregado";
@@ -285,17 +269,15 @@
             badge.className = "estado en_ruta";
             mostrarToast("🚚 Pedido en ruta");
           } else {
-            boton.textContent = "Entregado";
             badge.textContent = "Entregado";
             badge.className = "estado entregado";
             mostrarToast("Pedido entregado");
+            boton.style.display = "none";
           }
         } else {
-          console.warn("⚠️ Respuesta inesperada:", data);
           boton.textContent = "Error";
           mostrarToast("⚠️ No se pudo actualizar el estado");
         }
-
       } catch (e) {
         console.error("❌ Error actualizando:", e);
         boton.textContent = "Error";
@@ -316,11 +298,10 @@
 
       domicilios.forEach(dom => {
         const numeroPedido = dom["N°Pedido"] || dom.pedido || dom.numero || "—";
-        const estado = dom.estado || "Pendiente";
+        const estado = dom.estado?.trim() || "Pendiente";
         const estadoClase = estado.toLowerCase().replace(" ", "_");
-        const textoBoton = estado === "Pendiente" ? "En Ruta" :
-                          estado === "En Ruta" ? "Entregado" : "";
-        const claseBoton = estado === "Entregado" ? "btn-estado entregado" : "btn-estado";
+        const textoBoton = estado === "Pendiente" ? "En Ruta" : estado === "En Ruta" ? "Entregado" : "";
+        const claseBoton = /entregado/i.test(estado) ? "btn-estado entregado" : "btn-estado";
 
         const card = document.createElement("div");
         card.className = "card";
@@ -341,8 +322,8 @@
           </div>
         `;
 
-        // 🔹 Solo agregamos las acciones si el pedido NO está entregado
-        if (estado !== "Entregado") {
+        // Mostrar acciones solo si el pedido NO está entregado
+        if (!/entregado/i.test(estado)) {
           const acciones = document.createElement("div");
           acciones.className = "acciones";
           acciones.innerHTML = `
@@ -359,21 +340,19 @@
           const badge = card.querySelector(".estado");
 
           boton.addEventListener("click", () => {
-            const nuevoEstado = badge.textContent === "Pendiente" ? "En Ruta" :
-                                badge.textContent === "En Ruta" ? "Entregado" : "Entregado";
+            const nuevoEstado = badge.textContent === "Pendiente" ? "En Ruta" : "Entregado";
             actualizarEstado(numeroPedido, nuevoEstado, boton, badge);
           });
 
           card.appendChild(acciones);
         } else {
-          // 🔸 Visual: opacamos pedidos entregados
           card.style.opacity = "0.8";
         }
 
         contenedor.appendChild(card);
       });
     }
-    
+
     cargarDomicilios();
   </script>
 </body>
