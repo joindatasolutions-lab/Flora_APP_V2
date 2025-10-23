@@ -263,25 +263,36 @@
 
         if (data.result === "ok" || data.status === "success") {
           if (nuevoEstado === "En Ruta") {
-            boton.textContent = "Entregado";
-            boton.classList.add("entregado");
             badge.textContent = "En Ruta";
             badge.className = "estado en_ruta";
+            boton.textContent = "Entregado";
+            boton.classList.add("entregado");
             mostrarToast("🚚 Pedido en ruta");
           } else {
+            // ✅ Cambiar visualmente a entregado
             badge.textContent = "Entregado";
             badge.className = "estado entregado";
             mostrarToast("Pedido entregado");
+
+            // 🔹 Ocultar el botón y el select de inmediato
+            const card = boton.closest(".card");
+            const select = card.querySelector("select");
+            if (select) select.style.display = "none";
             boton.style.display = "none";
+            card.style.opacity = "0.8";
+
+            // 🔹 Mover el pedido al final del contenedor
+            const contenedor = document.getElementById("contenedor-domicilios");
+            contenedor.appendChild(card);
           }
         } else {
-          boton.textContent = "Error";
           mostrarToast("⚠️ No se pudo actualizar el estado");
+          boton.textContent = "Error";
         }
       } catch (e) {
         console.error("❌ Error actualizando:", e);
-        boton.textContent = "Error";
         mostrarToast("❌ Error de conexión con el servidor");
+        boton.textContent = "Error";
       } finally {
         boton.disabled = false;
       }
@@ -295,6 +306,15 @@
         contenedor.innerHTML = `<p style="text-align:center;">No hay pedidos registrados.</p>`;
         return;
       }
+
+      // 🔹 Ordenar: pendientes y en ruta arriba, entregados al final
+      domicilios.sort((a, b) => {
+        const estadoA = (a.estado || "").toLowerCase();
+        const estadoB = (b.estado || "").toLowerCase();
+        if (estadoA.includes("entregado") && !estadoB.includes("entregado")) return 1;
+        if (!estadoA.includes("entregado") && estadoB.includes("entregado")) return -1;
+        return 0;
+      });
 
       domicilios.forEach(dom => {
         const numeroPedido = dom["N°Pedido"] || dom.pedido || dom.numero || "—";
