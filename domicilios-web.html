@@ -298,9 +298,9 @@
 
       domicilios.forEach(dom => {
         const numeroPedido = dom["N°Pedido"] || dom.pedido || dom.numero || "—";
-        const estado = dom.estado?.trim() || "Pendiente";
+        const estado = (dom.estado || "Pendiente").replace(/[\s\r\n\t]+/g, "").trim();
         const estadoClase = estado.toLowerCase().replace(" ", "_");
-        const textoBoton = estado === "Pendiente" ? "En Ruta" : estado === "En Ruta" ? "Entregado" : "";
+        const textoBoton = estado === "Pendiente" ? "En Ruta" : estado === "EnRuta" ? "Entregado" : "";
         const claseBoton = /entregado/i.test(estado) ? "btn-estado entregado" : "btn-estado";
 
         const card = document.createElement("div");
