@@ -211,31 +211,46 @@
       }
     }
 
-    function renderizarDomicilios(domicilios){
-      const c=document.getElementById('contenedor-domicilios');
-      c.innerHTML='';
-      if(!domicilios?.length){c.innerHTML='<p style="text-align:center;">No hay pedidos.</p>';return;}
+    function renderizarDomicilios(domicilios) {
+      const c = document.getElementById('contenedor-domicilios');
+      c.innerHTML = '';
+      if (!domicilios?.length) {
+        c.innerHTML = '<p style="text-align:center;">No hay pedidos.</p>';
+        return;
+      }
 
-      // Ordenar pendientes y en ruta arriba, entregados al final
-      domicilios.sort((a,b)=>{
-        const ea=(a.estado||'').toLowerCase();
-        const eb=(b.estado||'').toLowerCase();
-        if(ea.includes('entregado')&&!eb.includes('entregado'))return 1;
-        if(!ea.includes('entregado')&&eb.includes('entregado'))return -1;
+      // 🧮 Ordenar: Pendientes / En ruta arriba, Entregados al final
+      domicilios.sort((a, b) => {
+        const ea = (a.estado || '').toLowerCase();
+        const eb = (b.estado || '').toLowerCase();
+        if (ea.includes('entregado') && !eb.includes('entregado')) return 1;
+        if (!ea.includes('entregado') && eb.includes('entregado')) return -1;
         return 0;
       });
 
-      domicilios.forEach(dom=>{
-        const num=dom["N°Pedido"]||dom.pedido;
-        const est=dom.estado||'Pendiente';
-        const estClase=est.toLowerCase().replace(' ','_');
-        const btnTxt=est==='Pendiente'?'En Ruta':est==='En Ruta'?'Entregado':'Entregado';
-        const btnClass=/entregado/i.test(est)?'btn-estado entregado':'btn-estado';
-        const domiciliario=(dom.domiciliario||'').trim();
-        const valorActual=domiciliario||'Asignar domiciliario';
-        const card=document.createElement('div');
-        card.className='card';
-        card.innerHTML=`
+      // 🧱 Renderizar tarjetas
+      domicilios.forEach(dom => {
+        const num = dom["N°Pedido"] || dom.pedido;
+        const est = dom.estado || 'Pendiente';
+        const estClase = est.toLowerCase().replace(' ', '_');
+        const btnTxt = est === 'Pendiente' ? 'En Ruta' : est === 'En Ruta' ? 'Entregado' : 'Entregado';
+        const btnClass = /entregado/i.test(est) ? 'btn-estado entregado' : 'btn-estado';
+
+        const domiciliario = (dom.domiciliario || '').trim();
+        let valorActual = 'Asignar domiciliario';
+
+        // 🧠 Detectar si es Externo
+        if (domiciliario) {
+          if (domiciliario.toLowerCase().includes('externo')) {
+            valorActual = 'Externo';
+          } else {
+            valorActual = domiciliario;
+          }
+        }
+
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = `
           <div class="encabezado">
             <div class="pedido-num">Pedido #${num}</div>
             <div class="estado ${estClase}">${est}</div>
@@ -243,41 +258,53 @@
           <img src="${dom.imagen}" class="img-card">
           <div class="detalle">
             <h3>${dom.producto}</h3>
-            <p><strong>Destinatario:</strong> ${dom.destinatario||'—'}</p>
-            <p><strong>Dirección:</strong> ${dom.direccion||'—'}</p>
-            <p><strong>Barrio:</strong> ${dom.barrio||'—'}</p>
-            <p><strong>Teléfono:</strong> ${dom.telefonoDestino||dom.telefono||'—'}</p>
-            <p><strong>Entrega:</strong> ${dom.fechaEntrega||''}</p>
+            <p><strong>Destinatario:</strong> ${dom.destinatario || '—'}</p>
+            <p><strong>Dirección:</strong> ${dom.direccion || '—'}</p>
+            <p><strong>Barrio:</strong> ${dom.barrio || '—'}</p>
+            <p><strong>Teléfono:</strong> ${dom.telefonoDestino || dom.telefono || '—'}</p>
+            <p><strong>Entrega:</strong> ${dom.fechaEntrega || ''}</p>
           </div>
         `;
-        if(!/entregado/i.test(est)){
-          const acciones=document.createElement('div');
-          acciones.className='acciones';
-          acciones.innerHTML=`
-            <select>
-              <option ${valorActual==='Asignar domiciliario'?'selected':''}>Asignar domiciliario</option>
-              <option ${valorActual==='Elvis'?'selected':''}>Elvis</option>
-              <option ${valorActual==='Oscar'?'selected':''}>Oscar</option>
-              <option ${valorActual==='Externo'?'selected':''}>Externo</option>
+
+        // 🧩 Acciones (solo si no está entregado)
+        if (!/entregado/i.test(est)) {
+          const acciones = document.createElement('div');
+          acciones.className = 'acciones';
+          acciones.innerHTML = `
+            <select title="${domiciliario.includes('- Externo') ? domiciliario : ''}">
+              <option ${valorActual === 'Asignar domiciliario' ? 'selected' : ''}>Asignar domiciliario</option>
+              <option ${valorActual === 'Elvis' ? 'selected' : ''}>Elvis</option>
+              <option ${valorActual === 'Oscar' ? 'selected' : ''}>Oscar</option>
+              <option ${valorActual === 'Externo' ? 'selected' : ''}>Externo</option>
             </select>
             <button class="${btnClass}">${btnTxt}</button>
           `;
-          const boton=acciones.querySelector('button');
-          const select=acciones.querySelector('select');
-          const badge=card.querySelector('.estado');
-          select.addEventListener('change',()=>{
-            if(select.value==='Externo')abrirModalExterno(num);
-            else asignarDomiciliario(num,select.value);
+
+          const boton = acciones.querySelector('button');
+          const select = acciones.querySelector('select');
+          const badge = card.querySelector('.estado');
+
+          // 🧩 Cambiar domiciliario
+          select.addEventListener('change', () => {
+            if (select.value === 'Externo') abrirModalExterno(num, select);
+            else asignarDomiciliario(num, select.value);
           });
-          boton.addEventListener('click',()=>{
-            const nuevoEstado = badge.textContent === "Pendiente" ? "En Ruta" : "Entregado";
-            actualizarEstado(num,nuevoEstado,boton,badge,select);
+
+          // 🧩 Cambiar estado
+          boton.addEventListener('click', () => {
+            const nuevoEstado = badge.textContent === 'Pendiente' ? 'En Ruta' : 'Entregado';
+            actualizarEstado(num, nuevoEstado, boton, badge, select);
           });
+
           card.appendChild(acciones);
-        } else card.style.opacity='0.8';
+        } else {
+          card.style.opacity = '0.8';
+        }
+
         c.appendChild(card);
       });
     }
+
 
     cargarDomicilios();
   </script>
