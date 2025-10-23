@@ -107,7 +107,7 @@
     }
 
     // Modal para registrar externo
-    function abrirModalExterno(pedido){
+    function abrirModalExterno(pedido, select){
       const m = document.getElementById('modalExterno');
       m.style.display = 'flex';
       const btnGuardar = document.getElementById('btnRegistrarExterno');
@@ -115,7 +115,7 @@
       const nombreInput = document.getElementById('nombreExterno');
       const telInput = document.getElementById('telefonoExterno');
 
-      // reset
+      // Reset del modal
       btnGuardar.textContent = "Guardar";
       btnGuardar.disabled = false;
       nombreInput.value = "";
@@ -144,10 +144,12 @@
         try {
           const res = await fetch(SCRIPT_URL, { method: 'POST', body });
           const data = await res.json();
+
           if (data.status === 'success') {
             mostrarToast(`Externo registrado y asignado: ${nombre}`);
             m.style.display = 'none';
-            await cargarDomicilios();
+            // ✅ Actualiza el select del pedido a "Externo"
+            if (select) select.value = "Externo";
           } else {
             mostrarToast(`⚠️ ${data.message || 'No se pudo registrar'}`);
             btnGuardar.textContent = "Guardar";
@@ -163,6 +165,7 @@
 
       btnCancelar.onclick = () => (m.style.display = 'none');
     }
+
 
 
     async function actualizarEstado(pedido,nuevoEstado,boton,badge,select){
