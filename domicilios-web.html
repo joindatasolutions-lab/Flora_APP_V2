@@ -129,29 +129,41 @@
           return;
         }
 
-        // 🌀 Mostrar animación de carga
+        // 🌀 Animación de carga
         btnGuardar.disabled = true;
         btnGuardar.innerHTML = `<span style="display:inline-block;width:14px;height:14px;border:2px solid #fff;border-top:2px solid transparent;border-radius:50%;margin-right:8px;animation:spin 1s linear infinite;"></span> Registrando...`;
 
-        const body = new URLSearchParams({
-          accion: 'registrarExterno',
-          Nombre: nombre,
-          Telefono: tel,
-          Disponibilidad: 'Sí',
-          pedido: String(pedido)
-        });
-
         try {
-          const res = await fetch(SCRIPT_URL, { method: 'POST', body });
-          const data = await res.json();
+          // 1️⃣ Registrar domiciliario externo en la hoja Domiciliarios y Domicilios
+          const body1 = new URLSearchParams({
+            accion: 'registrarExterno',
+            Nombre: nombre,
+            Telefono: tel,
+            Disponibilidad: 'Sí',
+            pedido: String(pedido)
+          });
+          const res1 = await fetch(SCRIPT_URL, { method: 'POST', body: body1 });
+          const data1 = await res1.json();
 
-          if (data.status === 'success') {
+          if (data1.status === 'success') {
+            // 2️⃣ Actualizar campo “Domiciliario” en Domicilios (para reflejar “Nombre - Externo”)
+            const body2 = new URLSearchParams({
+              accion: 'asignarDomiciliario',
+              pedido: String(pedido),
+              domiciliario: 'Externo',
+              nombreExterno: nombre // 🔹 esto activa la concatenación en tu Apps Script
+            });
+            await fetch(SCRIPT_URL, { method: 'POST', body: body2 });
+
+            // 3️⃣ Cerrar modal y actualizar interfaz
             mostrarToast(`Externo registrado y asignado: ${nombre}`);
             m.style.display = 'none';
-            // ✅ Actualiza el select del pedido a "Externo"
-            if (select) select.value = "Externo";
+            if (select) {
+              select.value = "Externo";
+              select.title = `${nombre} - Externo`;
+            }
           } else {
-            mostrarToast(`⚠️ ${data.message || 'No se pudo registrar'}`);
+            mostrarToast(`⚠️ ${data1.message || 'No se pudo registrar'}`);
             btnGuardar.textContent = "Guardar";
             btnGuardar.disabled = false;
           }
@@ -165,8 +177,6 @@
 
       btnCancelar.onclick = () => (m.style.display = 'none');
     }
-
-
 
     async function actualizarEstado(pedido,nuevoEstado,boton,badge,select){
       boton.disabled = true;
