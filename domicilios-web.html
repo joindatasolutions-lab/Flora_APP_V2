@@ -107,15 +107,16 @@
     }
 
     // Modal para registrar externo
-    function abrirModalExterno(pedido, select){
+    function abrirModalExterno(pedido, select) {
       const m = document.getElementById('modalExterno');
       m.style.display = 'flex';
+
       const btnGuardar = document.getElementById('btnRegistrarExterno');
       const btnCancelar = document.getElementById('btnCancelarExterno');
       const nombreInput = document.getElementById('nombreExterno');
       const telInput = document.getElementById('telefonoExterno');
 
-      // Reset del modal
+      // Reset
       btnGuardar.textContent = "Guardar";
       btnGuardar.disabled = false;
       nombreInput.value = "";
@@ -125,58 +126,46 @@
         const nombre = nombreInput.value.trim();
         const tel = telInput.value.trim();
         if (!nombre || !tel) {
-          mostrarToast('Completa todos los campos');
+          mostrarToast("Completa todos los campos");
           return;
         }
 
-        // 🌀 Animación de carga
         btnGuardar.disabled = true;
         btnGuardar.innerHTML = `<span style="display:inline-block;width:14px;height:14px;border:2px solid #fff;border-top:2px solid transparent;border-radius:50%;margin-right:8px;animation:spin 1s linear infinite;"></span> Registrando...`;
 
         try {
-          // 1️⃣ Registrar domiciliario externo en la hoja Domiciliarios y Domicilios
-          const body1 = new URLSearchParams({
-            accion: 'registrarExterno',
+          const body = new URLSearchParams({
+            accion: "registrarExterno",
             Nombre: nombre,
             Telefono: tel,
-            Disponibilidad: 'Sí',
             pedido: String(pedido)
           });
-          const res1 = await fetch(SCRIPT_URL, { method: 'POST', body: body1 });
-          const data1 = await res1.json();
 
-          if (data1.status === 'success') {
-            // 2️⃣ Actualizar campo “Domiciliario” en Domicilios (para reflejar “Nombre - Externo”)
-            const body2 = new URLSearchParams({
-              accion: 'asignarDomiciliario',
-              pedido: String(pedido),
-              domiciliario: 'Externo',
-              nombreExterno: nombre // 🔹 esto activa la concatenación en tu Apps Script
-            });
-            await fetch(SCRIPT_URL, { method: 'POST', body: body2 });
+          const res = await fetch(SCRIPT_URL, { method: "POST", body });
+          const data = await res.json();
 
-            // 3️⃣ Cerrar modal y actualizar interfaz
-            mostrarToast(`Externo registrado y asignado: ${nombre}`);
-            m.style.display = 'none';
+          if (data.status === "success") {
+            mostrarToast(`✅ Externo asignado: ${nombre}`);
             if (select) {
               select.value = "Externo";
-              select.title = `${nombre} - Externo`;
+              select.title = `${nombre} (${tel})`;
             }
+            m.style.display = "none";
           } else {
-            mostrarToast(`⚠️ ${data1.message || 'No se pudo registrar'}`);
-            btnGuardar.textContent = "Guardar";
-            btnGuardar.disabled = false;
+            mostrarToast(`⚠️ ${data.message || "No se pudo registrar"}`);
           }
         } catch (err) {
           console.error(err);
-          mostrarToast('❌ Error al registrar externo');
-          btnGuardar.textContent = "Guardar";
+          mostrarToast("❌ Error al registrar externo");
+        } finally {
           btnGuardar.disabled = false;
+          btnGuardar.textContent = "Guardar";
         }
       };
 
-      btnCancelar.onclick = () => (m.style.display = 'none');
+      btnCancelar.onclick = () => (m.style.display = "none");
     }
+
 
     async function actualizarEstado(pedido,nuevoEstado,boton,badge,select){
       boton.disabled = true;
