@@ -129,7 +129,7 @@ function addToCart(prod) {
     title: 'Producto agregado',
     text: `${prod.name} se añadió al carrito`,
     icon: 'success',
-    timer: 1200,
+    timer: 3000,
     showConfirmButton: false
   });
 }
