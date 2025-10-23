@@ -319,7 +319,7 @@
         const estado = dom.estado || "Pendiente";
         const estadoClase = estado.toLowerCase().replace(" ", "_");
         const textoBoton = estado === "Pendiente" ? "En Ruta" :
-                          estado === "En Ruta" ? "Entregado" : "Entregado";
+                          estado === "En Ruta" ? "Entregado" : "";
         const claseBoton = estado === "Entregado" ? "btn-estado entregado" : "btn-estado";
 
         const card = document.createElement("div");
@@ -341,7 +341,7 @@
           </div>
         `;
 
-        // 🔹 Solo agregamos los controles si NO está entregado
+        // 🔹 Solo agregamos las acciones si el pedido NO está entregado
         if (estado !== "Entregado") {
           const acciones = document.createElement("div");
           acciones.className = "acciones";
@@ -365,12 +365,15 @@
           });
 
           card.appendChild(acciones);
+        } else {
+          // 🔸 Visual: opacamos pedidos entregados
+          card.style.opacity = "0.8";
         }
 
         contenedor.appendChild(card);
       });
     }
-
+    
     cargarDomicilios();
   </script>
 </body>
