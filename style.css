@@ -66,12 +66,14 @@ header h2 {
   box-shadow:0 10px 24px rgba(0,0,0,.09);
 }
 .card img {
-  width:100%;
-  height:260px;
-  object-fit:cover;
-  object-position:center;
-  background:#fff8f9;
+  width: 100%;
+  height: auto;            /* ✅ se adapta al ancho manteniendo proporción */
+  aspect-ratio: 1 / 1;     /* ✅ asegura cuadrado, puedes ajustar (ej: 4/3 o 3/2) */
+  object-fit: cover;       /* ✅ rellena sin distorsionar */
+  object-position: center;
+  background: #fff8f9;
 }
+
 .card .body {
   flex:1;
   display:flex;
@@ -475,5 +477,11 @@ textarea {
 @media (max-width: 1199px) {
   .catalogo {
     grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .card img {
+    aspect-ratio: 4 / 5; /* un poco más vertical en móviles */
   }
 }
