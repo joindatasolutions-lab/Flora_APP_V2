@@ -283,10 +283,18 @@
           const select = acciones.querySelector('select');
           const badge = card.querySelector('.estado');
 
-          // 🧩 Cambiar domiciliario
+          // 🧩 Cambiar domiciliario (bloquea después de seleccionar)
           select.addEventListener('change', () => {
-            if (select.value === 'Externo') abrirModalExterno(num, select);
-            else asignarDomiciliario(num, select.value);
+            if (select.value === 'Asignar domiciliario') return;
+
+            if (select.value === 'Externo') {
+              abrirModalExterno(num, select);
+            } else {
+              asignarDomiciliario(num, select.value);
+              select.disabled = true; // 🔒 Bloquea la lista
+              select.style.background = "#f5f5f5"; // cambia color visual para mostrar que está bloqueado
+              select.style.cursor = "not-allowed";
+            }
           });
 
           // 🧩 Cambiar estado
