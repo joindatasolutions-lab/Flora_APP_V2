@@ -20,8 +20,12 @@
     header{text-align:center;background:#fff;padding:20px;border-bottom:1px solid var(--borde);box-shadow:0 2px 6px rgba(0,0,0,.05);}
     header img{max-width:180px;margin-bottom:8px;}
     header h2{color:var(--rosa-osc);font-weight:700;margin:0;}
-    main{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:25px;padding:25px;justify-items:center;}
-    .card{background:#fff;border-radius:18px;overflow:hidden;box-shadow:0 3px 10px rgba(0,0,0,0.08);transition:all 0.25s ease;width:100%;max-width:380px;display:flex;flex-direction:column;}
+    main{padding:25px;}
+    .grupo{margin-bottom:40px;}
+    .grupo h3{text-align:center;color:var(--rosa-osc);margin-bottom:15px;}
+    .contenedor-grupo{display:flex;flex-wrap:wrap;gap:20px;justify-content:center;}
+
+    .card{background:#fff;border-radius:18px;overflow:hidden;box-shadow:0 3px 10px rgba(0,0,0,0.08);transition:all 0.25s ease;width:100%;max-width:360px;display:flex;flex-direction:column;cursor:grab;}
     .card:hover{transform:translateY(-3px);box-shadow:0 6px 16px rgba(0,0,0,0.12);}
     .encabezado{display:flex;justify-content:space-between;align-items:center;background:#FFF8FA;padding:10px 18px;border-bottom:1px solid var(--borde);}
     .pedido-num{font-weight:700;color:var(--rosa-osc);}
@@ -29,11 +33,10 @@
     .pendiente{background:var(--rosa);}
     .en_ruta{background:var(--rosa-osc);}
     .entregado{background:var(--verde);}
-    .img-card{width:100%;height:240px;object-fit:cover;background:#fff;}
+    .img-card{width:100%;height:200px;object-fit:cover;}
     .detalle{padding:14px 20px;flex:1;}
     .detalle h3{margin:4px 0 10px;font-size:1.1em;color:var(--rosa-osc);}
     .detalle p{margin:4px 0;font-size:.9em;color:var(--gris);}
-    .detalle strong{color:#222;}
     .acciones{display:flex;align-items:center;gap:10px;padding:12px 18px 18px;}
     select{flex:1;border:1px solid var(--borde);border-radius:8px;padding:8px 10px;font-size:.9em;background:#fff;}
     .btn-estado{border:none;padding:10px 22px;border-radius:10px;font-weight:600;color:#fff;cursor:pointer;background:var(--rosa-osc);font-size:.95em;}
@@ -51,10 +54,6 @@
     .modal-content button{margin:6px;padding:8px 16px;border:none;border-radius:8px;cursor:pointer;}
     .guardar{background:var(--verde);color:#fff;}
     .cancelar{background:var(--rosa-osc);color:#fff;}
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
   </style>
 </head>
 <body>
@@ -116,9 +115,6 @@
       const nombreInput = document.getElementById('nombreExterno');
       const telInput = document.getElementById('telefonoExterno');
 
-      // Reset
-      btnGuardar.textContent = "Guardar";
-      btnGuardar.disabled = false;
       nombreInput.value = "";
       telInput.value = "";
 
@@ -129,9 +125,6 @@
           mostrarToast("Completa todos los campos");
           return;
         }
-
-        btnGuardar.disabled = true;
-        btnGuardar.innerHTML = `<span style="display:inline-block;width:14px;height:14px;border:2px solid #fff;border-top:2px solid transparent;border-radius:50%;margin-right:8px;animation:spin 1s linear infinite;"></span> Registrando...`;
 
         try {
           const body = new URLSearchParams({
@@ -146,10 +139,11 @@
 
           if (data.status === "success") {
             mostrarToast(`✅ Externo asignado: ${nombre}`);
-            if (select) {
-              select.value = "Externo";
-              select.title = `${nombre} (${tel})`;
-            }
+            select.value = "Externo";
+            select.title = `${nombre} (${tel})`;
+            select.disabled = true;
+            select.style.background = "#f5f5f5";
+            select.style.cursor = "not-allowed";
             m.style.display = "none";
           } else {
             mostrarToast(`⚠️ ${data.message || "No se pudo registrar"}`);
@@ -157,15 +151,140 @@
         } catch (err) {
           console.error(err);
           mostrarToast("❌ Error al registrar externo");
-        } finally {
-          btnGuardar.disabled = false;
-          btnGuardar.textContent = "Guardar";
         }
       };
 
       btnCancelar.onclick = () => (m.style.display = "none");
     }
 
+    function renderizarDomicilios(domicilios) {
+      const contenedor = document.getElementById('contenedor-domicilios');
+      contenedor.innerHTML = '';
+
+      if (!domicilios?.length) {
+        contenedor.innerHTML = '<p style="text-align:center;">No hay pedidos.</p>';
+        return;
+      }
+
+      // Agrupar por domiciliario
+      const grupos = {};
+      domicilios.forEach(d => {
+        const dom = (d.domiciliario || 'Sin asignar').trim();
+        if (!grupos[dom]) grupos[dom] = [];
+        grupos[dom].push(d);
+      });
+
+      // Renderizar grupos
+      for (const [domiciliario, pedidos] of Object.entries(grupos)) {
+        const grupoDiv = document.createElement('div');
+        grupoDiv.classList.add('grupo');
+        grupoDiv.innerHTML = `<h3>🚴‍♂️ ${domiciliario}</h3>`;
+
+        const contenedorGrupo = document.createElement('div');
+        contenedorGrupo.classList.add('contenedor-grupo');
+        contenedorGrupo.dataset.domiciliario = domiciliario;
+
+        pedidos.forEach(pedido => {
+          const num = pedido["N°Pedido"] || pedido.pedido;
+          const est = pedido.estado || 'Pendiente';
+          const estClase = est.toLowerCase().replace(' ', '_');
+          const btnTxt = est === 'Pendiente' ? 'En Ruta' : est === 'En Ruta' ? 'Entregado' : 'Entregado';
+          const btnClass = /entregado/i.test(est) ? 'btn-estado entregado' : 'btn-estado';
+          const domi = (pedido.domiciliario || '').trim();
+          let valorActual = domi || 'Asignar domiciliario';
+
+          const card = document.createElement('div');
+          card.className = 'card';
+          card.setAttribute('draggable', true);
+          card.innerHTML = `
+            <div class="encabezado">
+              <div class="pedido-num">Pedido #${num}</div>
+              <div class="estado ${estClase}">${est}</div>
+            </div>
+            <img src="${pedido.imagen}" class="img-card">
+            <div class="detalle">
+              <h3>${pedido.producto}</h3>
+              <p><strong>Destinatario:</strong> ${pedido.destinatario || '—'}</p>
+              <p><strong>Dirección:</strong> ${pedido.direccion || '—'}</p>
+              <p><strong>Barrio:</strong> ${pedido.barrio || '—'}</p>
+              <p><strong>Teléfono:</strong> ${pedido.telefonoDestino || pedido.telefono || '—'}</p>
+            </div>
+          `;
+
+          if (!/entregado/i.test(est)) {
+            const acciones = document.createElement('div');
+            acciones.className = 'acciones';
+            acciones.innerHTML = `
+              <select>
+                <option ${valorActual === 'Asignar domiciliario' ? 'selected' : ''}>Asignar domiciliario</option>
+                <option ${valorActual === 'Elvis' ? 'selected' : ''}>Elvis</option>
+                <option ${valorActual === 'Oscar' ? 'selected' : ''}>Oscar</option>
+                <option ${valorActual === 'Externo' ? 'selected' : ''}>Externo</option>
+              </select>
+              <button class="${btnClass}">${btnTxt}</button>
+            `;
+            const select = acciones.querySelector('select');
+            const boton = acciones.querySelector('button');
+            const badge = card.querySelector('.estado');
+
+            // Bloquear si ya tiene domiciliario
+            if (valorActual !== 'Asignar domiciliario') {
+              select.disabled = true;
+              select.style.background = "#f5f5f5";
+              select.style.cursor = "not-allowed";
+            }
+
+            select.addEventListener('change', () => {
+              if (select.value === 'Asignar domiciliario') return;
+              if (select.value === 'Externo') abrirModalExterno(num, select);
+              else {
+                asignarDomiciliario(num, select.value);
+                select.disabled = true;
+                select.style.background = "#f5f5f5";
+                select.style.cursor = "not-allowed";
+              }
+            });
+
+            boton.addEventListener('click', () => {
+              const nuevoEstado = badge.textContent === 'Pendiente' ? 'En Ruta' : 'Entregado';
+              actualizarEstado(num, nuevoEstado, boton, badge, select);
+            });
+
+            card.appendChild(acciones);
+          }
+
+          contenedorGrupo.appendChild(card);
+        });
+
+        grupoDiv.appendChild(contenedorGrupo);
+        contenedor.appendChild(grupoDiv);
+      }
+
+      // Drag & Drop
+      let dragged = null;
+      document.addEventListener('dragstart', e => {
+        if (e.target.classList.contains('card')) {
+          dragged = e.target;
+          e.target.style.opacity = '0.5';
+        }
+      });
+
+      document.addEventListener('dragend', e => {
+        if (dragged) dragged.style.opacity = '1';
+        dragged = null;
+      });
+
+      document.addEventListener('dragover', e => {
+        e.preventDefault();
+        const card = e.target.closest('.card');
+        if (!card || card === dragged) return;
+        const contenedor = card.parentNode;
+        const rect = card.getBoundingClientRect();
+        const midY = rect.top + rect.height / 2;
+        if (e.clientY < midY) contenedor.insertBefore(dragged, card);
+        else contenedor.insertBefore(dragged, card.nextSibling);
+      });
+    }
 
     async function actualizarEstado(pedido,nuevoEstado,boton,badge,select){
       boton.disabled = true;
@@ -177,141 +296,25 @@
           pedido: String(pedido),
           estado: nuevoEstado
         });
-
         const res = await fetch(SCRIPT_URL, { method: 'POST', body });
         const data = await res.json();
-
-        if (data.result === "ok" || data.status === "success") {
-          if (nuevoEstado === "En Ruta") {
-            badge.textContent = "En Ruta";
-            badge.className = "estado en_ruta";
-            boton.textContent = "Entregado";
-            boton.classList.add("entregado");
-            mostrarToast("🚚 Pedido en ruta");
+        if (data.status === 'success' || data.result === 'ok') {
+          badge.textContent = nuevoEstado;
+          badge.className = `estado ${nuevoEstado.toLowerCase().replace(' ', '_')}`;
+          if (nuevoEstado === 'Entregado') {
+            mostrarToast('✅ Pedido entregado');
+            boton.style.display = 'none';
           } else {
-            badge.textContent = "Entregado";
-            badge.className = "estado entregado";
-            mostrarToast("✅ Pedido entregado");
-            const card = boton.closest(".card");
-            const select = card.querySelector("select");
-            if (select) select.style.display = "none";
-            boton.style.display = "none";
-            card.style.opacity = "0.8";
-            document.getElementById("contenedor-domicilios").appendChild(card);
+            boton.textContent = 'Entregado';
           }
-        } else {
-          mostrarToast("⚠️ No se pudo actualizar el estado");
-        }
+        } else mostrarToast('⚠️ Error al actualizar');
       } catch (e) {
-        console.error("❌ Error actualizando:", e);
-        mostrarToast("❌ Error de conexión con el servidor");
+        console.error(e);
+        mostrarToast('❌ Error de conexión');
       } finally {
         boton.disabled = false;
       }
     }
-
-    function renderizarDomicilios(domicilios) {
-      const c = document.getElementById('contenedor-domicilios');
-      c.innerHTML = '';
-      if (!domicilios?.length) {
-        c.innerHTML = '<p style="text-align:center;">No hay pedidos.</p>';
-        return;
-      }
-
-      // 🧮 Ordenar: Pendientes / En ruta arriba, Entregados al final
-      domicilios.sort((a, b) => {
-        const ea = (a.estado || '').toLowerCase();
-        const eb = (b.estado || '').toLowerCase();
-        if (ea.includes('entregado') && !eb.includes('entregado')) return 1;
-        if (!ea.includes('entregado') && eb.includes('entregado')) return -1;
-        return 0;
-      });
-
-      // 🧱 Renderizar tarjetas
-      domicilios.forEach(dom => {
-        const num = dom["N°Pedido"] || dom.pedido;
-        const est = dom.estado || 'Pendiente';
-        const estClase = est.toLowerCase().replace(' ', '_');
-        const btnTxt = est === 'Pendiente' ? 'En Ruta' : est === 'En Ruta' ? 'Entregado' : 'Entregado';
-        const btnClass = /entregado/i.test(est) ? 'btn-estado entregado' : 'btn-estado';
-
-        const domiciliario = (dom.domiciliario || '').trim();
-        let valorActual = 'Asignar domiciliario';
-
-        // 🧠 Detectar si es Externo
-        if (domiciliario) {
-          if (domiciliario.toLowerCase().includes('externo')) {
-            valorActual = 'Externo';
-          } else {
-            valorActual = domiciliario;
-          }
-        }
-
-        const card = document.createElement('div');
-        card.className = 'card';
-        card.innerHTML = `
-          <div class="encabezado">
-            <div class="pedido-num">Pedido #${num}</div>
-            <div class="estado ${estClase}">${est}</div>
-          </div>
-          <img src="${dom.imagen}" class="img-card">
-          <div class="detalle">
-            <h3>${dom.producto}</h3>
-            <p><strong>Destinatario:</strong> ${dom.destinatario || '—'}</p>
-            <p><strong>Dirección:</strong> ${dom.direccion || '—'}</p>
-            <p><strong>Barrio:</strong> ${dom.barrio || '—'}</p>
-            <p><strong>Teléfono:</strong> ${dom.telefonoDestino || dom.telefono || '—'}</p>
-            <p><strong>Entrega:</strong> ${dom.fechaEntrega || ''}</p>
-          </div>
-        `;
-
-        // 🧩 Acciones (solo si no está entregado)
-        if (!/entregado/i.test(est)) {
-          const acciones = document.createElement('div');
-          acciones.className = 'acciones';
-          acciones.innerHTML = `
-            <select title="${domiciliario.includes('- Externo') ? domiciliario : ''}">
-              <option ${valorActual === 'Asignar domiciliario' ? 'selected' : ''}>Asignar domiciliario</option>
-              <option ${valorActual === 'Elvis' ? 'selected' : ''}>Elvis</option>
-              <option ${valorActual === 'Oscar' ? 'selected' : ''}>Oscar</option>
-              <option ${valorActual === 'Externo' ? 'selected' : ''}>Externo</option>
-            </select>
-            <button class="${btnClass}">${btnTxt}</button>
-          `;
-
-          const boton = acciones.querySelector('button');
-          const select = acciones.querySelector('select');
-          const badge = card.querySelector('.estado');
-
-          // 🧩 Cambiar domiciliario (bloquea después de seleccionar)
-          select.addEventListener('change', () => {
-            if (select.value === 'Asignar domiciliario') return;
-
-            if (select.value === 'Externo') {
-              abrirModalExterno(num, select);
-            } else {
-              asignarDomiciliario(num, select.value);
-              select.disabled = true; // 🔒 Bloquea la lista
-              select.style.background = "#f5f5f5"; // cambia color visual para mostrar que está bloqueado
-              select.style.cursor = "not-allowed";
-            }
-          });
-
-          // 🧩 Cambiar estado
-          boton.addEventListener('click', () => {
-            const nuevoEstado = badge.textContent === 'Pendiente' ? 'En Ruta' : 'Entregado';
-            actualizarEstado(num, nuevoEstado, boton, badge, select);
-          });
-
-          card.appendChild(acciones);
-        } else {
-          card.style.opacity = '0.8';
-        }
-
-        c.appendChild(card);
-      });
-    }
-
 
     cargarDomicilios();
   </script>
