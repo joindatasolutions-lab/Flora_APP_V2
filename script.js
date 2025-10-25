@@ -64,13 +64,14 @@ function fillBarrios() {
 
 function actualizarDomicilio() {
   const barrioSel = document.getElementById("barrio").value;
-  state.domicilio = state.barrios[barrioSel] || 0;
-  renderDrawerCart();
-}
 
-function actualizarDomicilio() {
-  const barrioSel = document.getElementById("barrio").value;
-  state.domicilio = state.barrios[barrioSel] || 0;
+  // 🧠 Si no hay barrio seleccionado, domicilio = 0
+  if (!barrioSel || !state.barrios[barrioSel]) {
+    state.domicilio = 0;
+  } else {
+    state.domicilio = state.barrios[barrioSel];
+  }
+
   renderDrawerCart();
 }
 
