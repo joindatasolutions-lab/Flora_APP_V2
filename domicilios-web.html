@@ -260,29 +260,38 @@
         contenedor.appendChild(grupoDiv);
       }
 
-      // Drag & Drop
+      // === Drag & Drop solo dentro del mismo grupo ===
       let dragged = null;
-      document.addEventListener('dragstart', e => {
-        if (e.target.classList.contains('card')) {
+      let origenGrupo = null;
+
+      document.addEventListener("dragstart", (e) => {
+        if (e.target.classList.contains("card")) {
           dragged = e.target;
-          e.target.style.opacity = '0.5';
+          origenGrupo = e.target.closest(".contenedor-grupo");
+          e.target.style.opacity = "0.5";
         }
       });
 
-      document.addEventListener('dragend', e => {
-        if (dragged) dragged.style.opacity = '1';
+      document.addEventListener("dragend", (e) => {
+        if (dragged) dragged.style.opacity = "1";
         dragged = null;
+        origenGrupo = null;
       });
 
-      document.addEventListener('dragover', e => {
+      document.addEventListener("dragover", (e) => {
         e.preventDefault();
-        const card = e.target.closest('.card');
-        if (!card || card === dragged) return;
-        const contenedor = card.parentNode;
-        const rect = card.getBoundingClientRect();
-        const midY = rect.top + rect.height / 2;
-        if (e.clientY < midY) contenedor.insertBefore(dragged, card);
-        else contenedor.insertBefore(dragged, card.nextSibling);
+        const card = e.target.closest(".card");
+        const grupo = e.target.closest(".contenedor-grupo");
+
+        // 🚫 Solo permitir mover dentro del mismo grupo
+        if (!dragged || !grupo || grupo !== origenGrupo) return;
+
+        if (card && card !== dragged) {
+          const rect = card.getBoundingClientRect();
+          const midY = rect.top + rect.height / 2;
+          if (e.clientY < midY) grupo.insertBefore(dragged, card);
+          else grupo.insertBefore(dragged, card.nextSibling);
+        }
       });
     }
 
