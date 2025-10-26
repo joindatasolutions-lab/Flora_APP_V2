@@ -326,20 +326,24 @@ function toggleFirma() {
 document.getElementById("pedidoForm").addEventListener("submit", async e => {
   e.preventDefault();
 
+  const btnSubmit = document.getElementById("btnSubmit");
+  btnSubmit.disabled = true;
+  btnSubmit.textContent = "Procesando pedido..."; // ⏳ Cambia el texto
+
   if (state.cart.length === 0) {
     Swal.fire("Carrito vacío", "Agrega al menos un producto antes de enviar el pedido.", "warning");
+    btnSubmit.disabled = false;
+    btnSubmit.textContent = "Confirmar pedido"; // 🔁 Restablecer
     return;
   }
 
   const formData = new FormData(e.target);
 
-   // 🏠 Concatenar tipo de lugar con la dirección
   const direccion = document.getElementById("direccion")?.value.trim() || "";
   const tipoLugar = document.querySelector('input[name="tipoLugar"]:checked')?.value || "";
   const direccionFinal = tipoLugar ? `${direccion} - ${tipoLugar}` : direccion;
   formData.set("direccion", direccionFinal);
 
-  // 🧩 Agregar productos al payload
   const productos = state.cart.map(p => `${p.qty}× ${p.name}`).join(" | ");
   const cantidad = state.cart.reduce((a, p) => a + p.qty, 0);
   const subtotal = state.cart.reduce((a, p) => a + (p.price * p.qty), 0);
@@ -347,7 +351,6 @@ document.getElementById("pedidoForm").addEventListener("submit", async e => {
   const domicilio = state.domicilio || 0;
   const total = subtotal + iva + domicilio;
 
-  // 🧩 Enviar campos esperados por Apps Script
   formData.append("producto", productos);
   formData.append("cantidad", cantidad);
   formData.append("precio", subtotal);
@@ -372,8 +375,13 @@ document.getElementById("pedidoForm").addEventListener("submit", async e => {
   } catch (error) {
     console.error("❌ Error al enviar pedido:", error);
     Swal.fire("Error", "Hubo un problema al enviar el pedido.", "error");
+  } finally {
+    // 🔁 Restablecer botón tras terminar el proceso
+    btnSubmit.disabled = false;
+    btnSubmit.textContent = "Confirmar pedido";
   }
 });
+
 
 // === ACTUALIZAR IVA AL CAMBIAR IDENTIFICACIÓN ===
 document.getElementById("tipoIdent").addEventListener("change", () => renderDrawerCart());
