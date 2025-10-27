@@ -24,7 +24,7 @@ async function init() {
   }
 }
 
-// === RENDERIZAR CATÁLOGO ===
+// === RENDERIZAR CATÁLOGO ==
 function renderCatalog() {
   const cont = document.getElementById("catalogo");
   cont.innerHTML = "";
