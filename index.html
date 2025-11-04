@@ -14,16 +14,22 @@
 </head>
 
 <body>
-  <!-- === ENCABEZADO === -->
-  <header>
-    <img src="img/logo 2024 marca registrada-04.png" alt="Flora Logo">
-    <h2>Catálogo de Arreglos Florales</h2>
-    <!-- === BUSCADOR === -->
-    <div class="search-box">
-      <input type="text" id="searchInput" placeholder="🔍 Buscar un arreglo floral..." oninput="filtrarCatalogo()">
+    <!-- === ENCABEZADO === -->
+  <header class="catalog-header">
+    <div class="logo-area">
+      <img src="img/logo 2024 marca registrada-04.png" alt="Flora Logo">
     </div>
 
+    <div class="title-search">
+      <h2>Catálogo de Arreglos Florales</h2>
+
+      <!-- 🔍 BUSCADOR UBICADO JUNTO AL TÍTULO -->
+      <div class="search-box">
+        <input type="text" id="searchInput" placeholder="Buscar..." oninput="filtrarCatalogo()">
+      </div>
+    </div>
   </header>
+
 
   <!-- === CATÁLOGO === -->
   <section id="viewCatalog" class="view active">
