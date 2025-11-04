@@ -44,6 +44,38 @@ function renderCatalog() {
   });
 }
 
+// === BUSCADOR ===
+function filtrarCatalogo() {
+  const query = document.getElementById("searchInput").value.toLowerCase().trim();
+  const cont = document.getElementById("catalogo");
+  cont.innerHTML = "";
+
+  const productosFiltrados = state.catalogo.filter(p =>
+    p.name.toLowerCase().includes(query)
+  );
+
+  if (productosFiltrados.length === 0) {
+    cont.innerHTML = `<p style="text-align:center;color:#888;">No se encontraron productos con "${query}" 😔</p>`;
+    return;
+  }
+
+  productosFiltrados.forEach(prod => {
+    if (!prod.img) return;
+    const card = document.createElement("div");
+    card.className = "card";
+    card.innerHTML = `
+      <img src="${prod.img}" alt="${prod.name}">
+      <div class="body">
+        <div class="name">${prod.name}</div>
+        <div class="price">$${fmtCOP(prod.price)}</div>
+        <button class="btn-add">Agregar al carrito</button>
+      </div>`;
+    card.querySelector(".btn-add").addEventListener("click", () => addToCart(prod));
+    cont.appendChild(card);
+  });
+}
+
+
 // === BARRIOS ===
 function fillBarrios() {
   const sel = document.getElementById("barrio");

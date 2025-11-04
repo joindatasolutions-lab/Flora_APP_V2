@@ -485,3 +485,28 @@ textarea {
     aspect-ratio: 4 / 5; /* un poco más vertical en móviles */
   }
 }
+
+/* === BUSCADOR === */
+.search-box {
+  max-width: 600px;
+  margin: 0 auto 20px;
+  display: flex;
+  justify-content: center;
+}
+
+#searchInput {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid var(--borde);
+  border-radius: 12px;
+  font-size: 1rem;
+  background: #fff;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease;
+}
+
+#searchInput:focus {
+  outline: none;
+  border-color: var(--rosa);
+  box-shadow: 0 0 0 3px rgba(230,165,182,0.2);
+}
