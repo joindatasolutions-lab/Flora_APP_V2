@@ -44,15 +44,16 @@ function renderCatalog() {
   });
 }
 
-// === BUSCADOR ===
+// === BUSCADOR DE PRODUCTOS ===
 function filtrarCatalogo() {
   const query = document.getElementById("searchInput").value.toLowerCase().trim();
   const cont = document.getElementById("catalogo");
   cont.innerHTML = "";
 
-  const productosFiltrados = state.catalogo.filter(p =>
-    p.name.toLowerCase().includes(query)
-  );
+  // Si no hay texto, mostramos todo el catálogo
+  const productosFiltrados = query
+    ? state.catalogo.filter(p => p.name.toLowerCase().includes(query))
+    : state.catalogo;
 
   if (productosFiltrados.length === 0) {
     cont.innerHTML = `<p style="text-align:center;color:#888;">No se encontraron productos con "${query}" 😔</p>`;
