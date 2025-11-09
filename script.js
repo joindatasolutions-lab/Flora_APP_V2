@@ -113,33 +113,34 @@ const fechaEntregaInput = document.getElementById("fechaEntrega");
 const horaEntregaInput = document.getElementById("horaEntrega");
 
 function validarHoraEntrega() {
-  const fechaSeleccionada = new Date(fechaEntregaInput.value);
-  const hoy = new Date();
+  const fechaStr = fechaEntregaInput.value;
+  const horaStr = horaEntregaInput.value;
 
-  // Solo validar si la fecha es hoy
+  if (!fechaStr || !horaStr) return;
+
+  const ahora = new Date();
+  const fechaSeleccionada = new Date(fechaStr + "T" + horaStr + ":00");
+
+  // Verifica si la fecha seleccionada es hoy
   const esHoy =
-    fechaSeleccionada.getFullYear() === hoy.getFullYear() &&
-    fechaSeleccionada.getMonth() === hoy.getMonth() &&
-    fechaSeleccionada.getDate() === hoy.getDate();
+    fechaSeleccionada.getFullYear() === ahora.getFullYear() &&
+    fechaSeleccionada.getMonth() === ahora.getMonth() &&
+    fechaSeleccionada.getDate() === ahora.getDate();
 
   if (esHoy) {
-    const [hora, minuto] = horaEntregaInput.value.split(":").map(Number);
-    const horaEntrega = new Date();
-    horaEntrega.setHours(hora, minuto, 0, 0);
+    const horaMinima = new Date(ahora.getTime() + 2 * 60 * 60 * 1000); // +2 horas exactas
 
-    const horaMinima = new Date();
-    horaMinima.setHours(hoy.getHours() + 2, hoy.getMinutes(), 0, 0); // +2 horas
-
-    if (horaEntrega < horaMinima) {
+    if (fechaSeleccionada < horaMinima) {
       Swal.fire({
         icon: "warning",
         title: "Hora no válida ⏰",
         text: "La hora de entrega debe ser al menos 2 horas después de la hora actual.",
       });
-      horaEntregaInput.value = ""; // limpiar
+      horaEntregaInput.value = "";
     }
   }
 }
+
 
 // Escuchar cambios
 horaEntregaInput.addEventListener("change", validarHoraEntrega);
