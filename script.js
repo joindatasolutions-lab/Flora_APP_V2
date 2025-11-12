@@ -384,7 +384,8 @@ document.getElementById("pedidoForm").addEventListener("submit", async e => {
   const iva = state.iva || 0;
   const domicilio = state.domicilio || 0;
   const total = subtotal + iva + domicilio;
-
+  
+  formData.append("tipoIdent", document.getElementById("tipoIdent").value);
   formData.append("producto", productos);
   formData.append("cantidad", cantidad);
   formData.append("precio", subtotal);
