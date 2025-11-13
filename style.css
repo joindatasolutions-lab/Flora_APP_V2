@@ -613,13 +613,30 @@ textarea {
 }
 
 /* === FIX PARA IPHONE === */
-/* Evita que el texto dentro de los options se parta en iPhone */
-#indicativo,
-#indicativo option {
-  white-space: nowrap !important;
-  font-feature-settings: "tnum";
-  -webkit-text-size-adjust: 100%;
+.indicativo-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  background: white;
+  font-size: 16px;
 }
+
+.indicativo-wrapper select {
+  border: none;
+  width: 100%;
+  font-size: 16px;
+  background: transparent;
+  outline: none;
+}
+
+#flagIcon {
+  font-size: 20px;
+}
+
 
 /* Fijar el indicativo de país para evitar que se abra en iPhone */
 .phone-prefix {
