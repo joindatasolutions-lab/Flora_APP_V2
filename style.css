@@ -596,47 +596,67 @@ textarea {
   margin-right: 8px;
 }
 
-/* Ajuste visual del select */
-.phone-flag {
-  padding-left: 40px !important; /* espacio para la bandera */
-  background-repeat: no-repeat;
-  background-position: 8px center;
-  background-size: 26px 18px;
-}
-
-/* Dropdown con banderas */
-.phone-flag option {
-  background-repeat: no-repeat;
-  background-position: 6px center;
-  background-size: 20px 14px;
-  padding-left: 32px;
-}
-
 /* === FIX PARA IPHONE === */
-.indicativo-wrapper {
+/* Contenedor del campo (label + caja) */
+.indicativo-group {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.indicativo-group label {
+  font-weight: 600;
+  font-size: 15px;
+  color: #444;
+  margin-bottom: 6px;
+}
+
+/* Caja que contiene bandera + select */
+.flag-select {
   display: flex;
   align-items: center;
-  gap: 8px;
-  width: 100%;
-  padding: 8px 12px;
-  border: 1px solid #ddd;
+  gap: 10px;
+  background: #fff;
+  border: 1px solid #d9d9d9;
   border-radius: 10px;
-  background: white;
-  font-size: 16px;
+  padding: 10px 14px;
+  height: 45px; /* mismo tamaño que los inputs */
 }
 
-.indicativo-wrapper select {
-  border: none;
-  width: 100%;
-  font-size: 16px;
-  background: transparent;
-  outline: none;
-}
-
+/* Bandera */
 #flagIcon {
   font-size: 20px;
+  line-height: 1;
+  width: 28px;
+  text-align: center;
 }
 
+/* Select */
+.flag-select select {
+  border: none;
+  background: transparent;
+  font-size: 15px;
+  width: 100%;
+  flex: 1;
+  outline: none;
+  appearance: none;
+  padding-right: 22px;
+  white-space: nowrap !important; /* evita que Safari parta (+57) */
+}
+
+/* Flecha del select (unificada con inputs) */
+.flag-select {
+  position: relative;
+}
+
+.flag-select::after {
+  content: "⌄";
+  position: absolute;
+  right: 14px;
+  font-size: 16px;
+  color: #666;
+  pointer-events: none;
+}
 
 /* Fijar el indicativo de país para evitar que se abra en iPhone */
 .phone-prefix {
