@@ -373,6 +373,20 @@ document.getElementById("pedidoForm").addEventListener("submit", async e => {
 
   const formData = new FormData(e.target);
 
+  // ============================================================
+  // 🔥 1. NORMALIZAR EL TELÉFONO DEL CLIENTE (indicativo + número)
+  // ============================================================
+  const indicativo = document.getElementById("indicativo")?.value || "+57";
+  let telefonoCliente = document.getElementById("telefono").value.trim();
+
+  // Si no comienza en "+" → agregar indicativo
+  if (telefonoCliente && !telefonoCliente.startsWith("+")) {
+    telefonoCliente = indicativo + telefonoCliente;
+  }
+
+  // Reemplazar en el formData antes de enviar
+  formData.set("telefono", telefonoCliente);
+
   const direccion = document.getElementById("direccion")?.value.trim() || "";
   const tipoLugar = document.querySelector('input[name="tipoLugar"]:checked')?.value || "";
   const direccionFinal = tipoLugar ? `${direccion} - ${tipoLugar}` : direccion;
