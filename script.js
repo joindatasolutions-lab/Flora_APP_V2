@@ -24,6 +24,29 @@ async function init() {
   }
 }
 
+function setDefaultFechaHora() {
+  const fechaInput = document.getElementById("fechaEntrega");
+  const horaInput = document.getElementById("horaEntrega");
+
+  const now = new Date();
+
+  // 🟢 Fecha actual en formato YYYY-MM-DD
+  const yyyy = now.getFullYear();
+  const mm = String(now.getMonth() + 1).padStart(2, "0");
+  const dd = String(now.getDate()).padStart(2, "0");
+  const fechaActual = `${yyyy}-${mm}-${dd}`;
+
+  // 🟢 Hora +2 horas y +5 minutos
+  const futura = new Date(now.getTime() + (2 * 60 + 5) * 60000);
+  const hh = String(futura.getHours()).padStart(2, "0");
+  const min = String(futura.getMinutes()).padStart(2, "0");
+  const horaFutura = `${hh}:${min}`;
+
+  if (fechaInput) fechaInput.value = fechaActual;
+  if (horaInput) horaInput.value = horaFutura;
+}
+
+
 // === RENDERIZAR CATÁLOGO ==
 function renderCatalog() {
   const cont = document.getElementById("catalogo");
@@ -256,6 +279,11 @@ function renderDrawerCart() {
 function show(id) {
   document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
   document.getElementById(id).classList.add("active");
+
+  // 🟢 Si es el formulario → asignar fecha y hora por defecto
+  if (viewId === "viewFormulario") {
+    setDefaultFechaHora();
+  }
 }
 
 document.getElementById("btnPedidoDrawer").onclick = () => {
