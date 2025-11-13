@@ -423,3 +423,41 @@ document.getElementById("tipoIdent").addEventListener("change", () => renderDraw
 
 // === CARGA INICIAL ===
 init();
+
+// === BANDERAS E INDICATIVO ===
+document.addEventListener("DOMContentLoaded", function () {
+  const select = document.getElementById("indicativo");
+  if (!select) return;
+
+  function actualizarBandera() {
+    const option = select.options[select.selectedIndex];
+    const flagCode = option.getAttribute("data-flag");
+
+    if (flagCode) {
+      const ruta = `img/flags/4x3/${flagCode}.svg`;
+
+      // aplica la bandera al select
+      select.style.backgroundImage = `url(${ruta})`;
+      select.style.backgroundSize = "24px";
+      select.style.backgroundRepeat = "no-repeat";
+      select.style.backgroundPosition = "8px center";
+      select.style.paddingLeft = "40px";
+
+      // banderas dentro del dropdown
+      for (let opt of select.options) {
+        const f = opt.getAttribute("data-flag");
+        if (f) {
+          opt.style.backgroundImage = `url(img/flags/4x3/${f}.svg)`;
+          opt.style.backgroundSize = "20px";
+          opt.style.backgroundRepeat = "no-repeat";
+          opt.style.backgroundPosition = "4px center";
+          opt.style.paddingLeft = "30px";
+        }
+      }
+    }
+  }
+
+  actualizarBandera();
+  select.addEventListener("change", actualizarBandera);
+});
+

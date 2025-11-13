@@ -578,3 +578,36 @@ textarea {
 .phone-flag {
   font-family: "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif !important;
 }
+
+/* Contenedor general */
+.flag-select-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+/* Bandera que aparece afuera del select */
+.flag-display {
+  width: 26px;
+  height: 18px;
+  border-radius: 3px;
+  background-size: cover;
+  background-position: center;
+  margin-right: 8px;
+}
+
+/* Ajuste visual del select */
+.phone-flag {
+  padding-left: 40px !important; /* espacio para la bandera */
+  background-repeat: no-repeat;
+  background-position: 8px center;
+  background-size: 26px 18px;
+}
+
+/* Dropdown con banderas */
+.phone-flag option {
+  background-repeat: no-repeat;
+  background-position: 6px center;
+  background-size: 20px 14px;
+  padding-left: 32px;
+}
