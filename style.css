@@ -613,31 +613,22 @@ textarea {
 }
 
 /* === FIX PARA IPHONE === */
-#indicativo {
-    width: 100%;
-    font-size: 16px;
-    padding-left: 48px;   /* espacio para la bandera */
-    padding-right: 36px;
-    appearance: none;
-    -webkit-appearance: none;
-    background-color: #fff;
-
-    /* iPhone ignora background en <option>, pero sí en el select */
-    background-repeat: no-repeat;
-    background-size: 26px;
-    background-position: 10px center;
-
-    /* evita que corte el texto */
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-
-    border: 1px solid #d9d9d9;
-    border-radius: 10px;
+/* Evita que el texto dentro de los options se parta en iPhone */
+#indicativo,
+#indicativo option {
+  white-space: nowrap !important;
+  font-feature-settings: "tnum";
+  -webkit-text-size-adjust: 100%;
 }
 
-/* iPhone ignora backgrounds en OPTION → no los usamos */
-#indicativo option {
-    padding-left: 12px !important;
-    background-image: none !important;
+/* Fijar el indicativo de país para evitar que se abra en iPhone */
+.phone-prefix {
+  white-space: nowrap !important;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.phone-prefix span {
+  white-space: nowrap !important;
 }
