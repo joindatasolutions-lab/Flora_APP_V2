@@ -649,3 +649,24 @@ textarea {
 .phone-prefix span {
   white-space: nowrap !important;
 }
+
+.flag-select {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #fff;
+  border: 1px solid #ddd;
+  padding: 6px 10px;
+  border-radius: 8px;
+}
+
+.flag-select span {
+  font-size: 22px;
+}
+
+.flag-select select {
+  border: none;
+  background: transparent;
+  font-size: 16px;
+  outline: none;
+}
