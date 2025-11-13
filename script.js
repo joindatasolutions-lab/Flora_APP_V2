@@ -466,40 +466,27 @@ document.getElementById("tipoIdent").addEventListener("change", () => renderDraw
 // === CARGA INICIAL ===
 init();
 
-// === BANDERAS E INDICATIVO ===
+// === BANDERAS DEL INDICATIVO (COMPATIBLE iPhone/Android) ===
 document.addEventListener("DOMContentLoaded", function () {
   const select = document.getElementById("indicativo");
-  if (!select) return;
+  const flagIcon = document.getElementById("flagIcon");
 
-  function actualizarBandera() {
-    const option = select.options[select.selectedIndex];
-    const flagCode = option.getAttribute("data-flag");
+  if (!select || !flagIcon) return;
 
-    if (flagCode) {
-      const ruta = `img/flags/4x3/${flagCode}.svg`;
-
-      // aplica la bandera al select
-      select.style.backgroundImage = `url(${ruta})`;
-      select.style.backgroundSize = "24px";
-      select.style.backgroundRepeat = "no-repeat";
-      select.style.backgroundPosition = "8px center";
-      select.style.paddingLeft = "40px";
-
-      // banderas dentro del dropdown
-      for (let opt of select.options) {
-        const f = opt.getAttribute("data-flag");
-        if (f) {
-          opt.style.backgroundImage = `url(img/flags/4x3/${f}.svg)`;
-          opt.style.backgroundSize = "20px";
-          opt.style.backgroundRepeat = "no-repeat";
-          opt.style.backgroundPosition = "4px center";
-          opt.style.paddingLeft = "30px";
-        }
-      }
-    }
+  function countryFlagEmoji(code) {
+    return code
+      .toUpperCase()
+      .replace(/./g, char => String.fromCodePoint(127397 + char.charCodeAt()));
   }
 
-  actualizarBandera();
+  function actualizarBandera() {
+    const opt = select.selectedOptions[0];
+    const flag = opt.dataset.flag || "co";
+    flagIcon.textContent = countryFlagEmoji(flag);
+  }
+
   select.addEventListener("change", actualizarBandera);
+  actualizarBandera(); 
 });
+
 
