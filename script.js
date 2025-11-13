@@ -281,7 +281,7 @@ function show(id) {
   document.getElementById(id).classList.add("active");
 
   // 🟢 Si es el formulario → asignar fecha y hora por defecto
-  if (viewId === "viewFormulario") {
+  if (id === "viewForm") {
     setDefaultFechaHora();
   }
 }
