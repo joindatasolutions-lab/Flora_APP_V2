@@ -469,6 +469,8 @@ init();
 // === BANDERAS E INDICATIVO ===
 document.addEventListener("DOMContentLoaded", function () {
   const select = document.getElementById("indicativo");
+  sel.options[sel.selectedIndex].textContent =
+        sel.options[sel.selectedIndex].textContent.replace(/[^\x00-\x7F]/g, "");
   if (!select) return;
 
   function actualizarBandera() {
