@@ -235,26 +235,7 @@
       </div>
 
       <h3>Entrega</h3>
-      <div class="grid">
-        <div><label>Destinatario</label><input id="destinatario" name="destinatario" required></div>
-        <div><label>Teléfono destino</label><input id="telefonoDestino" name="telefonoDestino"></div>
-        <div><label>Dirección</label><input id="direccion" name="direccion" placeholder="Apto, Casa, Oficina" required></div>
-        <div>
-          <label>Barrio</label>
-          <select id="barrio" name="barrio" onchange="actualizarDomicilio()"></select>
-        </div>
-        </div>
-        <div class="entrega-fecha-hora">
-          <div>
-            <label>Fecha de entrega</label>
-            <input id="fechaEntrega" name="fechaEntrega" type="date" required>
-          </div>
-          <div>
-            <label>Hora de entrega</label>
-            <input id="horaEntrega" name="horaEntrega" type="time" required>
-          </div>
-        </div>
-        <div class="form-group tipo-lugar">
+      <div class="form-group tipo-lugar">
         <label for="tipoLugar" class="titulo-campo">Tipo de lugar *</label>
         <div class="radio-group">
           <label class="radio-option">
@@ -283,6 +264,25 @@
           </label>
         </div>
       </div>
+      <div class="grid">
+        <div><label>Destinatario</label><input id="destinatario" name="destinatario" required></div>
+        <div><label>Teléfono destino</label><input id="telefonoDestino" name="telefonoDestino"></div>
+        <div><label>Dirección</label><input id="direccion" name="direccion" placeholder="Apto, Casa, Oficina" required></div>
+        <div>
+          <label>Barrio</label>
+          <select id="barrio" name="barrio" onchange="actualizarDomicilio()"></select>
+        </div>
+        </div>
+        <div class="entrega-fecha-hora">
+          <div>
+            <label>Fecha de entrega</label>
+            <input id="fechaEntrega" name="fechaEntrega" type="date" required>
+          </div>
+          <div>
+            <label>Hora de entrega</label>
+            <input id="horaEntrega" name="horaEntrega" type="time" required>
+          </div>
+        </div>
       </div>
       <h3>Medio de Pago y Mensaje</h3>
       <div class="grid">
