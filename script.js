@@ -489,11 +489,15 @@ document.addEventListener("DOMContentLoaded", function () {
   actualizarBandera(); 
 });
 
-
 // === AUTO-RELLENO PARA "ENTREGA EN TIENDA" ===
 document.querySelectorAll('input[name="tipoLugar"]').forEach(radio => {
   radio.addEventListener("change", () => {
     const tipo = document.querySelector('input[name="tipoLugar"]:checked')?.value;
+
+    const destinatario = document.getElementById("destinatario");
+    const telefonoDestino = document.getElementById("telefonoDestino");
+    const direccion = document.getElementById("direccion");
+    const barrioSel = document.getElementById("barrio");
 
     if (tipo === "Entrega en tienda") {
 
@@ -502,41 +506,39 @@ document.querySelectorAll('input[name="tipoLugar"]').forEach(radio => {
       const apellido = document.getElementById("primerApellido").value.trim();
       const telefono = document.getElementById("telefono").value.trim();
 
-      // Asignar al formulario de entrega
-      document.getElementById("destinatario").value = `${nombre} ${apellido}`.trim();
-      document.getElementById("telefonoDestino").value = telefono;
-      document.getElementById("direccion").value = "Entrega En Tienda";
+      // Autollenar campos
+      destinatario.value = `${nombre} ${apellido}`.trim();
+      telefonoDestino.value = telefono;
+      direccion.value = "Entrega en Tienda";
 
-      // Insertar opción barrio "Entrega en Tienda" si no existe
-      let barrioSel = document.getElementById("barrio");
-      if (![...barrioSel.options].some(o => o.value === "Entrega En Tienda")) {
+      // Insertar opción del barrio si no existe — ¡ESTANDARIZADO!
+      if (![...barrioSel.options].some(o => o.value === "Entrega en Tienda")) {
         const opt = document.createElement("option");
-        opt.value = "Entrega En Tienda";
-        opt.textContent = "Entrega En Tienda";
+        opt.value = "Entrega en Tienda";
+        opt.textContent = "Entrega en Tienda";
         barrioSel.insertBefore(opt, barrioSel.firstChild);
       }
 
-      // Seleccionar automáticamente
-      barrioSel.value = "Entrega en Tienda";
+      // Seleccionar la opción correcta
+      barrioSel.value = "Entrega En Tienda";
 
-      // Domicilio siempre 0 en tienda
+      // Domicilio 0
       state.domicilio = 0;
       renderDrawerCart();
 
-      // 🔒 DESHABILITAR CAMPOS
+      // Deshabilitar campos
       destinatario.disabled = true;
       telefonoDestino.disabled = true;
       direccion.disabled = true;
       barrioSel.disabled = true;
 
     } else {
-      // 🔓 HABILITAR CAMPOS (cuando NO es tienda)
+      // Habilitar campos si NO es tienda
       destinatario.disabled = false;
       telefonoDestino.disabled = false;
       direccion.disabled = false;
       barrioSel.disabled = false;
 
-      // ⚠ No borramos valores del cliente, solo los de entrega
       telefonoDestino.value = "";
       direccion.value = "";
       barrioSel.value = "";
