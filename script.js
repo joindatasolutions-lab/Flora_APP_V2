@@ -520,7 +520,7 @@ document.querySelectorAll('input[name="tipoLugar"]').forEach(radio => {
       }
 
       // Seleccionar la opción correcta
-      barrioSel.value = "Entrega En Tienda";
+      barrioSel.value = "Entrega en Tienda";
 
       // Domicilio 0
       state.domicilio = 0;
