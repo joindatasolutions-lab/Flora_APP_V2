@@ -505,14 +505,14 @@ document.querySelectorAll('input[name="tipoLugar"]').forEach(radio => {
       // Asignar al formulario de entrega
       document.getElementById("destinatario").value = `${nombre} ${apellido}`.trim();
       document.getElementById("telefonoDestino").value = telefono;
-      document.getElementById("direccion").value = "Entrega en Tienda";
+      document.getElementById("direccion").value = "Entrega En Tienda";
 
       // Insertar opción barrio "Entrega en Tienda" si no existe
       let barrioSel = document.getElementById("barrio");
-      if (![...barrioSel.options].some(o => o.value === "Entrega en Tienda")) {
+      if (![...barrioSel.options].some(o => o.value === "Entrega En Tienda")) {
         const opt = document.createElement("option");
-        opt.value = "Entrega en Tienda";
-        opt.textContent = "Entrega en Tienda";
+        opt.value = "Entrega En Tienda";
+        opt.textContent = "Entrega En Tienda";
         barrioSel.insertBefore(opt, barrioSel.firstChild);
       }
 
@@ -522,6 +522,24 @@ document.querySelectorAll('input[name="tipoLugar"]').forEach(radio => {
       // Domicilio siempre 0 en tienda
       state.domicilio = 0;
       renderDrawerCart();
+
+      // 🔒 DESHABILITAR CAMPOS
+      destinatario.disabled = true;
+      telefonoDestino.disabled = true;
+      direccion.disabled = true;
+      barrioSel.disabled = true;
+
+    } else {
+      // 🔓 HABILITAR CAMPOS (cuando NO es tienda)
+      destinatario.disabled = false;
+      telefonoDestino.disabled = false;
+      direccion.disabled = false;
+      barrioSel.disabled = false;
+
+      // ⚠ No borramos valores del cliente, solo los de entrega
+      telefonoDestino.value = "";
+      direccion.value = "";
+      barrioSel.value = "";
     }
   });
 });
