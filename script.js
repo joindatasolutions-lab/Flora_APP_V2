@@ -490,3 +490,38 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 
+// === AUTO-RELLENO PARA "ENTREGA EN TIENDA" ===
+document.querySelectorAll('input[name="tipoLugar"]').forEach(radio => {
+  radio.addEventListener("change", () => {
+    const tipo = document.querySelector('input[name="tipoLugar"]:checked')?.value;
+
+    if (tipo === "Entrega en tienda") {
+
+      // Obtener los valores del cliente
+      const nombre = document.getElementById("primerNombre").value.trim();
+      const apellido = document.getElementById("primerApellido").value.trim();
+      const telefono = document.getElementById("telefono").value.trim();
+
+      // Asignar al formulario de entrega
+      document.getElementById("destinatario").value = `${nombre} ${apellido}`.trim();
+      document.getElementById("telefonoDestino").value = telefono;
+      document.getElementById("direccion").value = "Entrega en Tienda";
+
+      // Insertar opción barrio "Entrega en Tienda" si no existe
+      let barrioSel = document.getElementById("barrio");
+      if (![...barrioSel.options].some(o => o.value === "Entrega en Tienda")) {
+        const opt = document.createElement("option");
+        opt.value = "Entrega en Tienda";
+        opt.textContent = "Entrega en Tienda";
+        barrioSel.insertBefore(opt, barrioSel.firstChild);
+      }
+
+      // Seleccionar automáticamente
+      barrioSel.value = "Entrega en Tienda";
+
+      // Domicilio siempre 0 en tienda
+      state.domicilio = 0;
+      renderDrawerCart();
+    }
+  });
+});
