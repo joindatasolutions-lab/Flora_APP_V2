@@ -492,6 +492,7 @@ document.addEventListener("DOMContentLoaded", function () {
 // === AUTO-RELLENO PARA "ENTREGA EN TIENDA" ===
 document.querySelectorAll('input[name="tipoLugar"]').forEach(radio => {
   radio.addEventListener("change", () => {
+
     const tipo = document.querySelector('input[name="tipoLugar"]:checked')?.value;
 
     const destinatario = document.getElementById("destinatario");
@@ -499,41 +500,44 @@ document.querySelectorAll('input[name="tipoLugar"]').forEach(radio => {
     const direccion = document.getElementById("direccion");
     const barrioSel = document.getElementById("barrio");
 
-    if (tipo === "Entrega en tienda") {
+    // 🔥 Valor estandarizado único
+    const VALOR_TIENDA = "Entrega En Tienda";
 
-      // Obtener los valores del cliente
+    if (tipo === VALOR_TIENDA) {
+
+      // Obtener datos del cliente
       const nombre = document.getElementById("primerNombre").value.trim();
       const apellido = document.getElementById("primerApellido").value.trim();
       const telefono = document.getElementById("telefono").value.trim();
 
-      // Autollenar campos
+      // Autollenar
       destinatario.value = `${nombre} ${apellido}`.trim();
       telefonoDestino.value = telefono;
-      direccion.value = "Entrega en Tienda";
+      direccion.value = VALOR_TIENDA;
 
-      // Insertar opción del barrio si no existe — ¡ESTANDARIZADO!
-      if (![...barrioSel.options].some(o => o.value === "Entrega en Tienda")) {
+      // Si no existe el option → lo creamos
+      if (![...barrioSel.options].some(o => o.value === VALOR_TIENDA)) {
         const opt = document.createElement("option");
-        opt.value = "Entrega en Tienda";
-        opt.textContent = "Entrega en Tienda";
+        opt.value = VALOR_TIENDA;
+        opt.textContent = VALOR_TIENDA;
         barrioSel.insertBefore(opt, barrioSel.firstChild);
       }
 
-      // Seleccionar la opción correcta
-      barrioSel.value = "Entrega En Tienda";
+      // Seleccionarlo SIEMPRE
+      barrioSel.value = VALOR_TIENDA;
 
-      // Domicilio 0
+      // Domicilio = 0
       state.domicilio = 0;
       renderDrawerCart();
 
-      // Deshabilitar campos
+      // Habilitar / deshabilitar campos (si deseas bloquearlos déjame saber)
       destinatario.disabled = false;
       telefonoDestino.disabled = false;
       direccion.disabled = false;
       barrioSel.disabled = false;
 
     } else {
-      // Habilitar campos si NO es tienda
+      // Si NO es tienda → resetear
       destinatario.disabled = false;
       telefonoDestino.disabled = false;
       direccion.disabled = false;
@@ -545,3 +549,4 @@ document.querySelectorAll('input[name="tipoLugar"]').forEach(radio => {
     }
   });
 });
+
