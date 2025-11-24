@@ -136,7 +136,7 @@ const fechaEntregaInput = document.getElementById("fechaEntrega");
 const horaEntregaInput = document.getElementById("horaEntrega");
 
 function validarHoraEntrega() {
-  const fechaStr = fechaEntregaInput.value;
+  const fechaStr = fechaEntregaInput.value; 
   const horaStr = horaEntregaInput.value;
 
   if (!fechaStr || !horaStr) return;
@@ -520,17 +520,17 @@ document.querySelectorAll('input[name="tipoLugar"]').forEach(radio => {
       }
 
       // Seleccionar la opción correcta
-      barrioSel.value = "Entrega en Tienda";
+      barrioSel.value = "Entrega En Tienda";
 
       // Domicilio 0
       state.domicilio = 0;
       renderDrawerCart();
 
       // Deshabilitar campos
-      destinatario.disabled = true;
-      telefonoDestino.disabled = true;
-      direccion.disabled = true;
-      barrioSel.disabled = true;
+      destinatario.disabled = false;
+      telefonoDestino.disabled = false;
+      direccion.disabled = false;
+      barrioSel.disabled = false;
 
     } else {
       // Habilitar campos si NO es tienda
