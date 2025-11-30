@@ -422,6 +422,33 @@ document.getElementById("pedidoForm").addEventListener("submit", async e => {
   btnSubmit.disabled = true;
   btnSubmit.textContent = "Procesando pedido..."; // ⏳ Cambia el texto
 
+  // ============================================================
+  // 2. PASAR DESCRIPCIÓN PERSONALIZADA A "observaciones"
+  // ============================================================
+
+  const esPersonalizado = state.cart.length === 1 &&
+                          state.cart[0].name === "Arreglo Personalizado";
+
+  if (esPersonalizado) {
+      const textoPersonalizado =
+          document.getElementById("detallePersonalizado").value.trim();
+
+      if (!textoPersonalizado) {
+          Swal.fire("Falta descripción", "Debes describir tu arreglo personalizado.", "warning");
+          btnSubmit.disabled = false;
+          btnSubmit.textContent = "Confirmar pedido";
+          return;
+      }
+
+      // Guardar descripción en Observaciones
+      formData.set("observaciones", textoPersonalizado);
+  } else {
+      // Para pedidos normales → Observaciones = mensaje o vacío
+      const mensaje = document.getElementById("mensaje").value.trim();
+      formData.set("observaciones", mensaje);
+  }
+
+
   if (state.cart.length === 0) {
     Swal.fire("Carrito vacío", "Agrega al menos un producto antes de enviar el pedido.", "warning");
     btnSubmit.disabled = false;
