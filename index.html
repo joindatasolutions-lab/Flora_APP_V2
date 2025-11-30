@@ -33,6 +33,12 @@
 
   <!-- === CATÁLOGO === -->
   <section id="viewCatalog" class="view active">
+    <!-- === BOTÓN ARREGLO PERSONALIZADO === -->
+    <div style="text-align:center; margin-bottom:20px;">
+      <button class="btn-primary" id="btnIrPersonalizado">
+        🌸 Crear Arreglo Personalizado
+      </button>
+    </div>
     <div id="catalogo" class="catalogo"></div>
   </section>
 
@@ -239,7 +245,7 @@
         <label for="tipoLugar" class="titulo-campo">Tipo de lugar *</label>
         <div class="radio-group">
           <label class="radio-option">
-            <input type="radio" name="tipoLugar" value="Entrega en tienda" required>
+            <input type="radio" name="tipoLugar" value="Entrega En tienda" required>
             <span>🏪 Entrega En tienda</span>
           </label>
           <label class="radio-option">
@@ -314,6 +320,18 @@
           <label for="nombreFirma">Nombre para la firma</label>
           <input type="text" id="nombreFirma" name="nombreFirma" placeholder="Ej: Con cariño, Laura y Carlos">
         </div>
+      </div>
+
+      <!-- SOLO PARA ARREGLO PERSONALIZADO -->
+      <div id="boxPersonalizado" class="grid-1" style="margin-top:20px; display:none;">
+        <label style="font-weight:600; color:#b84c65;">
+          Describe tu arreglo personalizado *
+        </label>
+
+        <textarea id="detallePersonalizado" name="detallePersonalizado"
+          placeholder="Describe colores, estilo, flores preferidas, tamaño o referencias."
+          style="margin-top:6px; width:100%; min-height:90px; padding:10px 14px; border-radius:10px; border:1px solid #d9d9d9;">
+        </textarea>
       </div>
 
       <!-- Campos ocultos -->
