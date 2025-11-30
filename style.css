@@ -738,3 +738,7 @@ textarea {
     border-top: 1px solid #eee;
   }
 }
+
+#btnIrPersonalizado {
+  display: none !important;
+}

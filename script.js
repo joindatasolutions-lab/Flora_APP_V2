@@ -175,14 +175,45 @@ fechaEntregaInput.addEventListener("change", () => {
 
 // === CARRITO ===
 function addToCart(prod) {
+
+  // 🌸 DETECTAR ARREGLO PERSONALIZADO
+  if (prod.name === "Arreglo Personalizado") {
+
+    // dejar sólo este item especial
+    state.cart = [{
+      name: "Arreglo Personalizado",
+      price: 0,
+      qty: 1
+    }];
+
+    updateCartCount();
+    renderDrawerCart();
+
+    // ir al formulario
+    show("viewForm");
+
+    // activar cuadro de descripción personalizada
+    const boxPers = document.getElementById("boxPersonalizado");
+    if (boxPers) boxPers.style.display = "block";
+
+    // actualizar resumen del pedido
+    document.getElementById("resumenProducto").innerHTML =
+      `🌸 <strong>Arreglo Personalizado</strong>`;
+
+    return; // detener aquí, no seguir lógica normal
+  }
+
+  // 🛒 LÓGICA NORMAL PARA PRODUCTOS REGULARES
   const existing = state.cart.find(p => p.name === prod.name);
   if (existing) {
     existing.qty += 1;
   } else {
     state.cart.push({ ...prod, qty: 1 });
   }
+
   updateCartCount();
   renderDrawerCart();
+
   Swal.fire({
     title: 'Producto agregado',
     text: `${prod.name} se añadió al carrito`,
@@ -191,7 +222,6 @@ function addToCart(prod) {
     showConfirmButton: false
   });
 }
-
 function changeQty(name, delta) {
   const item = state.cart.find(p => p.name === name);
   if (!item) return;
@@ -550,3 +580,21 @@ document.querySelectorAll('input[name="tipoLugar"]').forEach(radio => {
   });
 });
 
+// === ACTIVAR ARREGLO PERSONALIZADO ===
+document.getElementById("btnIrPersonalizado").addEventListener("click", () => {
+  // vaciamos carrito para que no mezcle productos normales
+  state.cart = [{
+    name: "Arreglo Personalizado",
+    price: 0,
+    qty: 1
+  }];
+
+  updateCartCount();
+  renderDrawerCart();
+
+  // mostrar formulario
+  show("viewForm");
+
+  // activar la caja personalizada
+  document.getElementById("boxPersonalizado").style.display = "block";
+});
