@@ -378,6 +378,7 @@ async function buscarCliente(ident) {
   }
 }
 
+// prueba commit
 function setClienteBadge(encontrado) {
   const b = document.getElementById("badgeCliente");
   b.classList.remove("hidden", "ok", "warn");
