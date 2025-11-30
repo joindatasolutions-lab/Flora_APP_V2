@@ -422,12 +422,16 @@ document.getElementById("pedidoForm").addEventListener("submit", async e => {
   btnSubmit.disabled = true;
   btnSubmit.textContent = "Procesando pedido..."; // ⏳ Cambia el texto
 
+  // 📌 PRIMERO crear formData (ESTE ERA EL PROBLEMA)
+  const formData = new FormData(e.target);
+
   // ============================================================
   // 2. PASAR DESCRIPCIÓN PERSONALIZADA A "observaciones"
   // ============================================================
 
-  const esPersonalizado = state.cart.length === 1 &&
-                          state.cart[0].name === "Arreglo Personalizado";
+  const esPersonalizado =
+      state.cart.length === 1 &&
+      state.cart[0].name === "Arreglo Personalizado";
 
   if (esPersonalizado) {
       const textoPersonalizado =
@@ -440,15 +444,18 @@ document.getElementById("pedidoForm").addEventListener("submit", async e => {
           return;
       }
 
-      // Guardar descripción en Observaciones
+      // 🟢 Guardar descripción en Observaciones
       formData.set("observaciones", textoPersonalizado);
+
   } else {
       // Para pedidos normales → Observaciones = mensaje o vacío
       const mensaje = document.getElementById("mensaje").value.trim();
       formData.set("observaciones", mensaje);
   }
 
-
+  // ============================================================
+  // Validación: carrito vacío
+  // ============================================================
   if (state.cart.length === 0) {
     Swal.fire("Carrito vacío", "Agrega al menos un producto antes de enviar el pedido.", "warning");
     btnSubmit.disabled = false;
@@ -456,34 +463,36 @@ document.getElementById("pedidoForm").addEventListener("submit", async e => {
     return;
   }
 
-  const formData = new FormData(e.target);
-
   // ============================================================
   // 🔥 1. NORMALIZAR EL TELÉFONO DEL CLIENTE (indicativo + número)
   // ============================================================
   const indicativo = document.getElementById("indicativo")?.value || "+57";
   let telefonoCliente = document.getElementById("telefono").value.trim();
 
-  // Si no comienza en "+" → agregar indicativo
   if (telefonoCliente && !telefonoCliente.startsWith("+")) {
     telefonoCliente = indicativo + telefonoCliente;
   }
 
-  // Reemplazar en el formData antes de enviar
   formData.set("telefono", telefonoCliente);
 
+  // ============================================================
+  // 3. Dirección final (dirección + tipoLugar)
+  // ============================================================
   const direccion = document.getElementById("direccion")?.value.trim() || "";
   const tipoLugar = document.querySelector('input[name="tipoLugar"]:checked')?.value || "";
   const direccionFinal = tipoLugar ? `${direccion} - ${tipoLugar}` : direccion;
   formData.set("direccion", direccionFinal);
 
+  // ============================================================
+  // 4. Productos y totales
+  // ============================================================
   const productos = state.cart.map(p => `${p.qty}× ${p.name}`).join(" | ");
   const cantidad = state.cart.reduce((a, p) => a + p.qty, 0);
   const subtotal = state.cart.reduce((a, p) => a + (p.price * p.qty), 0);
   const iva = state.iva || 0;
   const domicilio = state.domicilio || 0;
   const total = subtotal + iva + domicilio;
-  
+
   formData.append("tipoIdent", document.getElementById("tipoIdent").value);
   formData.append("producto", productos);
   formData.append("cantidad", cantidad);
@@ -492,6 +501,9 @@ document.getElementById("pedidoForm").addEventListener("submit", async e => {
   formData.append("domicilio", domicilio);
   formData.append("total", total);
 
+  // ============================================================
+  // 5. Enviar pedido a Apps Script
+  // ============================================================
   try {
     const response = await fetch(SCRIPT_URL, { method: "POST", body: formData });
     const data = await response.json();
@@ -510,7 +522,6 @@ document.getElementById("pedidoForm").addEventListener("submit", async e => {
     console.error("❌ Error al enviar pedido:", error);
     Swal.fire("Error", "Hubo un problema al enviar el pedido.", "error");
   } finally {
-    // 🔁 Restablecer botón tras terminar el proceso
     btnSubmit.disabled = false;
     btnSubmit.textContent = "Confirmar pedido";
   }
