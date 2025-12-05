@@ -311,16 +311,23 @@
       </div>
 
       <div class="firma-box">
-        <label>¿Deseas que el mensaje vaya firmado o anónimo?</label>
-        <select id="firmaMensaje" name="firmaMensaje" required>
+  <label>Firma del mensaje</label>
+
+        <!-- Solo una opción y sin required -->
+        <select id="firmaMensaje" name="firmaMensaje">
           <option value="Firmado" selected>Firmado</option>
-          <option value="Anónimo">Anónimo</option>
         </select>
-        <div id="campoFirmaWrapper" style="margin-top:10px;">
-          <label for="nombreFirma">Nombre para la firma</label>
-          <input type="text" id="nombreFirma" name="nombreFirma" placeholder="Ej: Con cariño, Laura y Carlos">
+
+          <div id="campoFirmaWrapper" style="margin-top:10px;">
+            <label for="nombreFirma">Nombre para la firma (opcional)</label>
+            <input 
+              type="text" 
+              id="nombreFirma" 
+              name="nombreFirma" 
+              placeholder="Ej: Con cariño, Laura y Carlos"
+            >
+          </div>
         </div>
-      </div>
 
       <!-- SOLO PARA ARREGLO PERSONALIZADO -->
       <div id="boxPersonalizado" class="grid-1" style="margin-top:20px; display:none;">
