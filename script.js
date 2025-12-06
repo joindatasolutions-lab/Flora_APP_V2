@@ -451,7 +451,7 @@ document.getElementById("pedidoForm").addEventListener("submit", async e => {
   } else {
       // Para pedidos normales → Observaciones = mensaje o vacío
       const mensaje = document.getElementById("mensaje").value.trim();
-      formData.set("observaciones", mensaje);
+      formData.set("observaciones","");
   }
 
   // ============================================================
