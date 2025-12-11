@@ -464,8 +464,8 @@ document.getElementById("pedidoForm").addEventListener("submit", async e => {
 
   } else {
     // Para arreglos normales → Observaciones viene del input que reemplazó la firma
-    const observacionesNormal = document.getElementById("observacionesInput").value.trim();
-    formData.set("observaciones", observacionesNormal);
+    const observacionesNormal = document.getElementById("mensaje").value.trim();
+    formData.set("observaciones", "");
   }
 
   // ============================================================
