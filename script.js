@@ -133,8 +133,21 @@ function actualizarDomicilio() {
 }
 
 // === VALIDAR HORA DE ENTREGA ===
+// Inputs de fecha y hora (solo existen en el formulario)
 const fechaEntregaInput = document.getElementById("fechaEntrega");
-const horaEntregaInput = document.getElementById("horaEntrega");
+const horaEntregaInput  = document.getElementById("horaEntrega");
+
+// Evita errores cuando la página es el catálogo
+if (horaEntregaInput) {
+    horaEntregaInput.addEventListener("change", validarHoraEntrega);
+}
+
+if (fechaEntregaInput && horaEntregaInput) {
+    fechaEntregaInput.addEventListener("change", () => {
+        horaEntregaInput.value = "";
+    });
+}
+
 
 function validarHoraEntrega() {
   const fechaStr = fechaEntregaInput.value; 
@@ -654,3 +667,84 @@ document.getElementById("btnIrPersonalizado").addEventListener("click", () => {
   // activar la caja personalizada
   document.getElementById("boxPersonalizado").style.display = "block";
 });
+
+// === LLAMAR INIT AUTOMÁTICAMENTE ===
+document.addEventListener("DOMContentLoaded", () => {
+  init();
+  setDefaultFechaHora(); 
+});
+
+// === LLENAR BARRIOS ===
+function fillBarrios() {
+  const sel = document.getElementById("barrio");
+  if (!sel) return;
+
+  sel.innerHTML = `<option value="">Seleccionar...</option>`;
+
+  Object.entries(state.barrios).forEach(([barrio, valor]) => {
+    const op = document.createElement("option");
+    op.value = barrio;
+    op.textContent = `${barrio} ($${fmtCOP(valor)})`;
+    sel.appendChild(op);
+  });
+}
+
+// === ACTUALIZAR DOMICILIO ===
+function actualizarDomicilio() {
+  const sel = document.getElementById("barrio");
+  const barrio = sel.value;
+
+  state.domicilio = state.barrios[barrio] || 0;
+
+  document.getElementById("domicilio").value = state.domicilio;
+
+  updateCartTotals();
+}
+
+// === AGREGAR AL CARRITO ===
+function addToCart(prod) {
+  const item = state.cart.find(p => p.id === prod.id);
+  if (item) {
+    item.qty++;
+  } else {
+    state.cart.push({ ...prod, qty: 1 });
+  }
+  updateCartUI();
+  Swal.fire("Agregado", `${prod.name} fue agregado al carrito`, "success");
+}
+
+// === ACTUALIZAR UI DEL CARRITO ===
+function updateCartUI() {
+  const ul = document.getElementById("cartItemsDrawer");
+  const count = document.getElementById("cartCount");
+  ul.innerHTML = "";
+
+  let subtotal = 0;
+
+  state.cart.forEach(item => {
+    subtotal += item.price * item.qty;
+
+    const li = document.createElement("li");
+    li.innerHTML = `
+      <div class="cart-row">
+        <strong>${item.name}</strong>
+        <span>Cant: ${item.qty}</span>
+        <span>$${fmtCOP(item.price * item.qty)}</span>
+      </div>
+    `;
+    ul.appendChild(li);
+  });
+
+  count.textContent = state.cart.length;
+
+  state.iva = Math.round(subtotal * 0.19);
+  const total = subtotal + state.iva + state.domicilio;
+
+  document.getElementById("subtotalDrawer").textContent = fmtCOP(subtotal);
+  document.getElementById("ivaDrawer").textContent = fmtCOP(state.iva);
+  document.getElementById("domicilioDrawer").textContent = fmtCOP(state.domicilio);
+  document.getElementById("totalDrawer").textContent = fmtCOP(total);
+
+  document.getElementById("total").value = total;
+  document.getElementById("iva").value = state.iva;
+}
