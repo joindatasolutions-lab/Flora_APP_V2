@@ -282,7 +282,7 @@
         <div class="entrega-fecha-hora">
           <div>
             <label>Fecha de entrega</label>
-            <input id="fechaEntrega" name="fechaEntrega" type="date" required>
+            <input id="fechaEntrega" name="fechaEntrega" type="date">
           </div>
           <div>
             <label>Hora de entrega</label>
@@ -311,25 +311,23 @@
       </div>
 
       <div class="firma-box">
-        <label for="nombreFirma">Firma del mensaje</label>
-        <input 
-          type="text"
-          id="nombreFirma"
-          name="nombreFirma"
-          placeholder="Ej: Con cariño, Laura y Carlos"
-          style="width:100%; padding:10px; border-radius:10px;">
-        
+  <label>Firma del mensaje</label>
 
-          <div id="campoObservacionesWrapper" style="margin-top:10px;">
-            <label for="observacionesInput">Observaciones</label>
+        <!-- Solo una opción y sin required -->
+        <select id="firmaMensaje" name="firmaMensaje">
+          <option value="Firmado" selected>Firmado</option>
+        </select>
+
+          <div id="campoFirmaWrapper" style="margin-top:10px;">
+            <label for="nombreFirma">Nombre para la firma</label>
             <input 
               type="text" 
-              id="observacionesInput" 
-              name="observacionesInput" 
-              placeholder="Escribe aquí instrucciones especiales para el arreglo o el mensaje."
+              id="nombreFirma" 
+              name="nombreFirma" 
+              placeholder="Ej: Con cariño, Laura y Carlos"
             >
           </div>
-      </div>
+        </div>
 
       <!-- SOLO PARA ARREGLO PERSONALIZADO -->
       <div id="boxPersonalizado" class="grid-1" style="margin-top:20px; display:none;">
