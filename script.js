@@ -76,11 +76,8 @@ function filtrarCatalogo() {
 
   // Si no hay texto, mostramos todo el catálogo
   const productosFiltrados = query
-  ? state.catalogo.filter(p =>
-      p.name.toLowerCase().includes(query) || 
-      String(p.id).includes(query.replace(/[^0-9]/g, "")) // búsqueda por ID
-    )
-  : state.catalogo;
+    ? state.catalogo.filter(p => p.name.toLowerCase().includes(query))
+    : state.catalogo;
 
   if (productosFiltrados.length === 0) {
     cont.innerHTML = `<p style="text-align:center;color:#888;">No se encontraron productos con "${query}" 😔</p>`;
