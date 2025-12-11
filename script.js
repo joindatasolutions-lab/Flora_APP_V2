@@ -453,9 +453,25 @@ document.getElementById("pedidoForm").addEventListener("submit", async e => {
       formData.set("observaciones", textoPersonalizado);
 
   } else {
-      // Para pedidos normales → Observaciones = mensaje o vacío
-      const mensaje = document.getElementById("mensaje").value.trim();
-      formData.set("observaciones","");
+    // Para arreglos normales → Observaciones viene del input que reemplazó la firma
+    const observacionesNormal = document.getElementById("observacionesInput").value.trim();
+    formData.set("observaciones", observacionesNormal);
+  }
+
+  // ============================================================
+  // 3. FIRMA DEL MENSAJE → NombreFirma + firmado
+  // ============================================================
+  const firmaTexto = document.getElementById("nombreFirma")?.value.trim() || "";
+
+  // Guardar lo que la persona escribió como firma
+  formData.set("NombreFirma", firmaTexto);
+
+  // Si escribió firma → firmado = "Firmado"
+  // Si no escribió → firmado = ""
+  if (firmaTexto !== "") {
+      formData.set("firmado", "Firmado");
+  } else {
+      formData.set("firmado", "");
   }
 
   // ============================================================
