@@ -58,6 +58,7 @@ function renderCatalog() {
     card.innerHTML = `
       <img src="${prod.img}" alt="${prod.name}">
       <div class="body">
+        <div class="product-id">ID: ${prod.id}</div>
         <div class="name">${prod.name}</div>
         <div class="price">$${fmtCOP(prod.price)}</div>
         <button class="btn-add">Agregar al carrito</button>
