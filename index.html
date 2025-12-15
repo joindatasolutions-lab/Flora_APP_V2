@@ -314,7 +314,25 @@
       <div class="firma-box">
   <label>Firma del mensaje</label>
 
-        <!-- Solo una opción y sin required -->
+        <div class="firma-box">
+          <label for="firma">Firma</label>
+          <input
+            type="text"
+            id="firma"
+            name="firma"
+            placeholder="Ej: Con cariño, Laura y Carlos"
+          >
+
+          <label for="observaciones" style="margin-top:12px;">Observaciones</label>
+          <textarea
+            id="observaciones"
+            name="observaciones"
+            placeholder="Notas adicionales, indicaciones especiales, etc."
+          ></textarea>
+        </div>
+
+
+        <!-- Solo una opción y sin required 
         <select id="firmaMensaje" name="firmaMensaje">
           <option value="Firmado" selected>Firmado</option>
         </select>
@@ -328,7 +346,7 @@
               placeholder="Ej: Con cariño, Laura y Carlos"
             >
           </div>
-        </div>
+        </div>-->
 
       <!-- SOLO PARA ARREGLO PERSONALIZADO -->
       <div id="boxPersonalizado" class="grid-1" style="margin-top:20px; display:none;">

@@ -345,7 +345,7 @@ document.getElementById("btnPedidoDrawer").onclick = () => {
 
 document.getElementById("btnVolver").addEventListener("click", () => show("viewCatalog"));
 
-// === FIRMA MENSAJE ===
+/*// === FIRMA MENSAJE ===
 document.getElementById("firmaMensaje").addEventListener("change", e => {
   const campo = document.getElementById("campoFirmaWrapper");
   if (e.target.value === "Firmado") {
@@ -356,7 +356,7 @@ document.getElementById("firmaMensaje").addEventListener("change", e => {
     document.getElementById("nombreFirma").required = false;
     document.getElementById("nombreFirma").value = "";
   }
-});
+});*/
 
 // === DETECCIÓN Y AUTOCOMPLETADO DE CLIENTE EXISTENTE ===
 let lookupTimer = null;
@@ -426,12 +426,13 @@ function limpiarCliente(clearId) {
   document.getElementById("telefono").value = "";
 }
 
+/*
 function toggleFirma() {
   const firmado = document.getElementById("firmado").value;
   const nombreFirma = document.getElementById("nombreFirma");
   nombreFirma.parentElement.style.display = (firmado === "Firmado") ? "block" : "none";
   if (firmado === "Anónimo") nombreFirma.value = "";
-}
+}*/
 
 // === ENVÍO DEL FORMULARIO ===
 document.getElementById("pedidoForm").addEventListener("submit", async e => {
@@ -477,7 +478,7 @@ document.getElementById("pedidoForm").addEventListener("submit", async e => {
     const observacionesNormal = document.getElementById("mensaje").value.trim();
     formData.set("observaciones", "");
   }
-
+  /*
   // ============================================================
   // 3. FIRMA DEL MENSAJE → NombreFirma + firmado
   // ============================================================
@@ -492,7 +493,16 @@ document.getElementById("pedidoForm").addEventListener("submit", async e => {
       formData.set("firmado", "Firmado");
   } else {
       formData.set("firmado", "");
-  }
+  }*/
+
+  // ===============================
+  // FIRMA Y OBSERVACIONES (NUEVO)
+  // ===============================
+  const firma = document.getElementById("firma")?.value.trim() || "";
+  const observaciones = document.getElementById("observaciones")?.value.trim() || "";
+
+  formData.set("firma", firma);
+  formData.set("observaciones", observaciones);    
 
   // ============================================================
   // Validación: carrito vacío
