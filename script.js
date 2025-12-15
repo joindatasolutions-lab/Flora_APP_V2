@@ -24,6 +24,7 @@ async function init() {
   }
 }
 
+/*
 function setDefaultFechaHora() {
   const fechaInput = document.getElementById("fechaEntrega");
   const horaInput = document.getElementById("horaEntrega");
@@ -44,7 +45,7 @@ function setDefaultFechaHora() {
 
   if (fechaInput) fechaInput.value = fechaActual;
   if (horaInput) horaInput.value = horaFutura;
-}
+}*/
 
 
 // === RENDERIZAR CATÁLOGO ==
@@ -135,10 +136,10 @@ function actualizarDomicilio() {
 // === VALIDAR HORA DE ENTREGA ===
 // Inputs de fecha y hora (solo existen en el formulario)
 const fechaEntregaInput = document.getElementById("fechaEntrega");
-const horaEntregaInput  = document.getElementById("horaEntrega");
+//const horaEntregaInput  = document.getElementById("horaEntrega");
 
 // Evita errores cuando la página es el catálogo
-if (horaEntregaInput) {
+/*if (horaEntregaInput) {
     horaEntregaInput.addEventListener("change", validarHoraEntrega);
 }
 
@@ -146,9 +147,9 @@ if (fechaEntregaInput && horaEntregaInput) {
     fechaEntregaInput.addEventListener("change", () => {
         horaEntregaInput.value = "";
     });
-}
+}*/
 
-
+/*
 function validarHoraEntrega() {
   const fechaStr = fechaEntregaInput.value; 
   const horaStr = horaEntregaInput.value;
@@ -176,11 +177,11 @@ function validarHoraEntrega() {
       horaEntregaInput.value = "";
     }
   }
-}
+}*/
 
 
 // Escuchar cambios
-horaEntregaInput.addEventListener("change", validarHoraEntrega);
+//horaEntregaInput.addEventListener("change", validarHoraEntrega);
 fechaEntregaInput.addEventListener("change", () => {
   // Limpiar hora si cambia la fecha
   horaEntregaInput.value = "";
@@ -326,8 +327,11 @@ function show(id) {
 
   // 🟢 Si es el formulario → asignar fecha y hora por defecto
   if (id === "viewForm") {
-    setDefaultFechaHora();
+  const fechaInput = document.getElementById("fechaEntrega");
+  if (fechaInput && !fechaInput.value) {
+    fechaInput.value = new Date().toISOString().split("T")[0];
   }
+}
 }
 
 document.getElementById("btnPedidoDrawer").onclick = () => {
@@ -439,6 +443,12 @@ document.getElementById("pedidoForm").addEventListener("submit", async e => {
 
   // 📌 PRIMERO crear formData (ESTE ERA EL PROBLEMA)
   const formData = new FormData(e.target);
+
+  // ===============================
+  // HORA DE ENTREGA FIJA DESDE SCRIPT
+  // ===============================
+  formData.set("Hora de Entrega", "00:00:00");
+
 
   // ============================================================
   // 2. PASAR DESCRIPCIÓN PERSONALIZADA A "observaciones"

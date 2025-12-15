@@ -377,10 +377,7 @@ textarea {
 }
 /* === FECHA Y HORA EN UNA SOLA LÍNEA === */
 .entrega-fecha-hora {
-  display: flex;
-  gap: 16px;
-  align-items: flex-end;
-  justify-content: space-between;
+  display: block;
 }
 
 .entrega-fecha-hora > div {
