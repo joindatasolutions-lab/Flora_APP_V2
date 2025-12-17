@@ -440,82 +440,44 @@ document.getElementById("pedidoForm").addEventListener("submit", async e => {
 
   const btnSubmit = document.getElementById("btnSubmit");
   btnSubmit.disabled = true;
-  btnSubmit.textContent = "Procesando pedido..."; // ⏳ Cambia el texto
+  btnSubmit.textContent = "Procesando pedido...";
 
-  // 📌 PRIMERO crear formData (ESTE ERA EL PROBLEMA)
+  // 📌 Crear FormData
   const formData = new FormData(e.target);
 
   // ===============================
-  // HORA DE ENTREGA FIJA DESDE SCRIPT
+  // HORA DE ENTREGA FIJA
   // ===============================
   formData.set("Hora de Entrega", "00:00:00");
 
-
   // ============================================================
-  // 2. PASAR DESCRIPCIÓN PERSONALIZADA A "observaciones"
+  // OBSERVACIONES + FIRMA (CAMPO ÚNICO / NO OBLIGATORIO)
   // ============================================================
+  const obsInput = document.getElementById("observaciones");
+  const observaciones = obsInput ? obsInput.value.trim() : "";
 
-  const esPersonalizado =
-      state.cart.length === 1 &&
-      state.cart[0].name === "Arreglo Personalizado";
+  const firmaInput = document.getElementById("firma");
+  const firma = firmaInput ? firmaInput.value.trim() : "";
 
-  if (esPersonalizado) {
-      const textoPersonalizado =
-          document.getElementById("detallePersonalizado").value.trim();
-
-      if (!textoPersonalizado) {
-          Swal.fire("Falta descripción", "Debes describir tu arreglo personalizado.", "warning");
-          btnSubmit.disabled = false;
-          btnSubmit.textContent = "Confirmar pedido";
-          return;
-      }
-
-      // 🟢 Guardar descripción en Observaciones
-      formData.set("observaciones", textoPersonalizado);
-
-  } else {
-    // Para arreglos normales → Observaciones viene del input que reemplazó la firma
-    const observacionesNormal = document.getElementById("mensaje").value.trim();
-    formData.set("observaciones", "");
-  }
-  /*
-  // ============================================================
-  // 3. FIRMA DEL MENSAJE → NombreFirma + firmado
-  // ============================================================
-  const firmaTexto = document.getElementById("nombreFirma")?.value.trim() || "";
-
-  // Guardar lo que la persona escribió como firma
-  formData.set("NombreFirma", firmaTexto);
-
-  // Si escribió firma → firmado = "Firmado"
-  // Si no escribió → firmado = ""
-  if (firmaTexto !== "") {
-      formData.set("firmado", "Firmado");
-  } else {
-      formData.set("firmado", "");
-  }*/
-
-  // ===============================
-  // FIRMA Y OBSERVACIONES (NUEVO)
-  // ===============================
-  const firma = document.getElementById("firma")?.value.trim() || "";
-  const observaciones = document.getElementById("observaciones")?.value.trim() || "";
-
+  formData.set("observaciones", observaciones);
   formData.set("firma", firma);
-  formData.set("observaciones", observaciones);    
 
   // ============================================================
   // Validación: carrito vacío
   // ============================================================
   if (state.cart.length === 0) {
-    Swal.fire("Carrito vacío", "Agrega al menos un producto antes de enviar el pedido.", "warning");
+    Swal.fire(
+      "Carrito vacío",
+      "Agrega al menos un producto antes de enviar el pedido.",
+      "warning"
+    );
     btnSubmit.disabled = false;
-    btnSubmit.textContent = "Confirmar pedido"; // 🔁 Restablecer
+    btnSubmit.textContent = "Confirmar pedido";
     return;
   }
 
   // ============================================================
-  // 🔥 1. NORMALIZAR EL TELÉFONO DEL CLIENTE (indicativo + número)
+  // NORMALIZAR TELÉFONO
   // ============================================================
   const indicativo = document.getElementById("indicativo")?.value || "+57";
   let telefonoCliente = document.getElementById("telefono").value.trim();
@@ -523,44 +485,53 @@ document.getElementById("pedidoForm").addEventListener("submit", async e => {
   if (telefonoCliente && !telefonoCliente.startsWith("+")) {
     telefonoCliente = indicativo + telefonoCliente;
   }
-
   formData.set("telefono", telefonoCliente);
 
   // ============================================================
-  // 3. Dirección final (dirección + tipoLugar)
+  // Dirección final (dirección + tipoLugar)
   // ============================================================
   const direccion = document.getElementById("direccion")?.value.trim() || "";
-  const tipoLugar = document.querySelector('input[name="tipoLugar"]:checked')?.value || "";
+  const tipoLugar =
+    document.querySelector('input[name="tipoLugar"]:checked')?.value || "";
   const direccionFinal = tipoLugar ? `${direccion} - ${tipoLugar}` : direccion;
+
   formData.set("direccion", direccionFinal);
 
   // ============================================================
-  // 4. Productos y totales
+  // Productos y totales
   // ============================================================
   const productos = state.cart.map(p => `${p.qty}× ${p.name}`).join(" | ");
   const cantidad = state.cart.reduce((a, p) => a + p.qty, 0);
-  const subtotal = state.cart.reduce((a, p) => a + (p.price * p.qty), 0);
+  const subtotal = state.cart.reduce((a, p) => a + p.price * p.qty, 0);
   const iva = state.iva || 0;
   const domicilio = state.domicilio || 0;
   const total = subtotal + iva + domicilio;
 
-  formData.append("tipoIdent", document.getElementById("tipoIdent").value);
-  formData.append("producto", productos);
-  formData.append("cantidad", cantidad);
-  formData.append("precio", subtotal);
-  formData.append("iva", iva);
-  formData.append("domicilio", domicilio);
-  formData.append("total", total);
+  formData.set("tipoIdent", document.getElementById("tipoIdent").value);
+  formData.set("producto", productos);
+  formData.set("cantidad", cantidad);
+  formData.set("precio", subtotal);
+  formData.set("iva", iva);
+  formData.set("domicilio", domicilio);
+  formData.set("total", total);
 
   // ============================================================
-  // 5. Enviar pedido a Apps Script
+  // Enviar pedido a Apps Script
   // ============================================================
   try {
-    const response = await fetch(SCRIPT_URL, { method: "POST", body: formData });
+    const response = await fetch(SCRIPT_URL, {
+      method: "POST",
+      body: formData
+    });
     const data = await response.json();
 
     if (data.status === "success") {
-      Swal.fire("Pedido enviado", "Tu pedido fue registrado correctamente 🌸", "success");
+      Swal.fire(
+        "Pedido enviado",
+        "Tu pedido fue registrado correctamente 🌸",
+        "success"
+      );
+
       state.cart = [];
       updateCartCount();
       renderDrawerCart();
