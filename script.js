@@ -383,6 +383,7 @@ async function buscarCliente(ident) {
       document.getElementById("primerNombre").value = data.primerNombre || "";
       document.getElementById("primerApellido").value = data.primerApellido || "";
       document.getElementById("telefono").value = data.telefono || "";
+      document.getElementById("email").value = data.email || "";
       if (document.getElementById("email")) {
         document.getElementById("email").value = data.email || "";
       }
