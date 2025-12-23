@@ -72,28 +72,26 @@ function renderCatalog() {
 // === BUSCADOR DE PRODUCTOS ===
 function filtrarCatalogo() {
   const input = document.getElementById("searchInput");
-  const query = input.value.toLowerCase().trim();
+  const query = input.value.trim().toLowerCase();
   const cont = document.getElementById("catalogo");
   cont.innerHTML = "";
 
-  // Filtrar por nombre o por código numérico
   const productosFiltrados = query
     ? state.catalogo.filter(p => {
         const nombre = (p.name || "").toLowerCase();
 
-        // Normalizamos el código: solo números
-        const codigo = String(p.id || "")
-          .replace(/\D/g, "") // elimina todo lo que no sea número
-          .toLowerCase();
+        // 🔑 CAMPO REAL DEL CATÁLOGO
+        const numero = String(p["N°"] ?? "")
+          .toLowerCase()
+          .trim();
 
         return (
           nombre.includes(query) ||
-          codigo.includes(query)
+          numero.includes(query)
         );
       })
     : state.catalogo;
 
-  // Si no hay resultados
   if (productosFiltrados.length === 0) {
     cont.innerHTML = `
       <p style="text-align:center;color:#888;">
@@ -102,6 +100,30 @@ function filtrarCatalogo() {
     `;
     return;
   }
+
+  productosFiltrados.forEach(prod => {
+    if (!prod.img) return;
+
+    const card = document.createElement("div");
+    card.className = "card";
+
+    card.innerHTML = `
+      <img src="${prod.img}" alt="${prod.name}">
+      <div class="body">
+        <div class="product-id">N°: ${prod["N°"]}</div>
+        <div class="name">${prod.name}</div>
+        <div class="price">$${fmtCOP(prod.price)}</div>
+        <button class="btn-add">Agregar al carrito</button>
+      </div>
+    `;
+
+    card.querySelector(".btn-add")
+      .addEventListener("click", () => addToCart(prod));
+
+    cont.appendChild(card);
+  });
+}
+
 
   // Render del catálogo filtrado
   productosFiltrados.forEach(prod => {
