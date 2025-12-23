@@ -83,12 +83,9 @@ function filtrarCatalogo() {
   const productosFiltrados = query
     ? state.catalogo.filter(p => {
         const nombre = (p.name || "").toLowerCase();
-        const codigo = String(p["N°"] || "").toLowerCase(); // 👈 CLAVE REAL
+        const codigo = String(p.id || "").toLowerCase(); // ✅ USAR id
 
-        return (
-          nombre.includes(query) ||
-          codigo.includes(query)
-        );
+        return nombre.includes(query) || codigo.includes(query);
       })
     : state.catalogo;
 
@@ -110,7 +107,7 @@ function filtrarCatalogo() {
     card.innerHTML = `
       <img src="${prod.img}" alt="${prod.name}">
       <div class="body">
-        <div class="product-id">N°: ${prod["N°"] ?? "-"}</div>
+        <div class="product-id">N°: ${prod.id}</div> <!-- ✅ SIEMPRE -->
         <div class="name">${prod.name}</div>
         <div class="price">$${fmtCOP(prod.price)}</div>
         <button class="btn-add">Agregar al carrito</button>
@@ -123,7 +120,6 @@ function filtrarCatalogo() {
     cont.appendChild(card);
   });
 }
-
 
 // === BARRIOS ===
 function fillBarrios() {
