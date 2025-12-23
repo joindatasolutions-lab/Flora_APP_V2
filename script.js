@@ -69,10 +69,14 @@ function renderCatalog() {
   });
 }
 
-// === BUSCADOR DE PRODUCTOS ===
+// === BUSCADOR DE PRODUCTOS (ROBUSTO) ===
 function filtrarCatalogo() {
-  const input = document.getElementById("searchInput");
-  const query = input.value.trim().toLowerCase();
+  const query = document
+    .getElementById("searchInput")
+    .value
+    .trim()
+    .toLowerCase();
+
   const cont = document.getElementById("catalogo");
   cont.innerHTML = "";
 
@@ -80,18 +84,23 @@ function filtrarCatalogo() {
     ? state.catalogo.filter(p => {
         const nombre = (p.name || "").toLowerCase();
 
-        // 🔑 CAMPO REAL DEL CATÁLOGO
-        const numero = String(p["N°"] ?? "")
-          .toLowerCase()
-          .trim();
+        // 🔎 detectar automáticamente el campo numérico
+        const codigo =
+          p["N°"] ??
+          p["Nº"] ??
+          p["N"] ??
+          p["numero"] ??
+          p["codigo"] ??
+          "";
+
+        const codigoStr = String(codigo).toLowerCase();
 
         return (
           nombre.includes(query) ||
-          numero.includes(query)
+          codigoStr.includes(query)
         );
       })
     : state.catalogo;
-
 
   if (productosFiltrados.length === 0) {
     cont.innerHTML = `
@@ -105,13 +114,21 @@ function filtrarCatalogo() {
   productosFiltrados.forEach(prod => {
     if (!prod.img) return;
 
+    const codigo =
+      prod["N°"] ??
+      prod["Nº"] ??
+      prod["N"] ??
+      prod["numero"] ??
+      prod["codigo"] ??
+      "";
+
     const card = document.createElement("div");
     card.className = "card";
 
     card.innerHTML = `
       <img src="${prod.img}" alt="${prod.name}">
       <div class="body">
-        <div class="product-id">N°: ${prod["N°"]}</div>
+        <div class="product-id">N°: ${codigo}</div>
         <div class="name">${prod.name}</div>
         <div class="price">$${fmtCOP(prod.price)}</div>
         <button class="btn-add">Agregar al carrito</button>
@@ -123,8 +140,8 @@ function filtrarCatalogo() {
 
     cont.appendChild(card);
   });
- 
 }
+
 
 
 
