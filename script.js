@@ -69,7 +69,7 @@ function renderCatalog() {
   });
 }
 
-// === BUSCADOR DE PRODUCTOS (ROBUSTO) ===
+// === BUSCADOR DE PRODUCTOS (POR NOMBRE O CÓDIGO REAL) ===
 function filtrarCatalogo() {
   const query = document
     .getElementById("searchInput")
@@ -83,21 +83,11 @@ function filtrarCatalogo() {
   const productosFiltrados = query
     ? state.catalogo.filter(p => {
         const nombre = (p.name || "").toLowerCase();
-
-        // 🔎 detectar automáticamente el campo numérico
-        const codigo =
-          p["N°"] ??
-          p["Nº"] ??
-          p["N"] ??
-          p["numero"] ??
-          p["codigo"] ??
-          "";
-
-        const codigoStr = String(codigo).toLowerCase();
+        const codigo = String(p.id || "").toLowerCase();
 
         return (
           nombre.includes(query) ||
-          codigoStr.includes(query)
+          codigo.includes(query)
         );
       })
     : state.catalogo;
@@ -114,21 +104,13 @@ function filtrarCatalogo() {
   productosFiltrados.forEach(prod => {
     if (!prod.img) return;
 
-    const codigo =
-      prod["N°"] ??
-      prod["Nº"] ??
-      prod["N"] ??
-      prod["numero"] ??
-      prod["codigo"] ??
-      "";
-
     const card = document.createElement("div");
     card.className = "card";
 
     card.innerHTML = `
       <img src="${prod.img}" alt="${prod.name}">
       <div class="body">
-        <div class="product-id">N°: ${codigo}</div>
+        <div class="product-id">N°: ${prod.id}</div>
         <div class="name">${prod.name}</div>
         <div class="price">$${fmtCOP(prod.price)}</div>
         <button class="btn-add">Agregar al carrito</button>
@@ -141,6 +123,7 @@ function filtrarCatalogo() {
     cont.appendChild(card);
   });
 }
+
 
 
 
