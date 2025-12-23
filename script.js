@@ -92,6 +92,7 @@ function filtrarCatalogo() {
       })
     : state.catalogo;
 
+
   if (productosFiltrados.length === 0) {
     cont.innerHTML = `
       <p style="text-align:center;color:#888;">
@@ -122,31 +123,7 @@ function filtrarCatalogo() {
 
     cont.appendChild(card);
   });
-}
-
-
-  // Render del catálogo filtrado
-  productosFiltrados.forEach(prod => {
-    if (!prod.img) return;
-
-    const card = document.createElement("div");
-    card.className = "card";
-
-    card.innerHTML = `
-      <img src="${prod.img}" alt="${prod.name}">
-      <div class="body">
-        <div class="product-id">N°: ${prod.id}</div>
-        <div class="name">${prod.name}</div>
-        <div class="price">$${fmtCOP(prod.price)}</div>
-        <button class="btn-add">Agregar al carrito</button>
-      </div>
-    `;
-
-    card.querySelector(".btn-add")
-      .addEventListener("click", () => addToCart(prod));
-
-    cont.appendChild(card);
-  });
+ 
 }
 
 
