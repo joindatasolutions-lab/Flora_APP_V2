@@ -52,22 +52,36 @@ function setDefaultFechaHora() {
 function renderCatalog() {
   const cont = document.getElementById("catalogo");
   cont.innerHTML = "";
+
   state.catalogo.forEach(prod => {
     if (!prod.img) return;
+
+    // Normalización segura del código
+    const codigo =
+      prod.id !== undefined && prod.id !== null && prod.id !== ""
+        ? prod.id
+        : "-";
+
     const card = document.createElement("div");
     card.className = "card";
+
     card.innerHTML = `
       <img src="${prod.img}" alt="${prod.name}">
       <div class="body">
-        <div class="product-id">N°: ${prod.id}</div>
+        <div class="product-id">N°: ${codigo}</div>
         <div class="name">${prod.name}</div>
         <div class="price">$${fmtCOP(prod.price)}</div>
         <button class="btn-add">Agregar al carrito</button>
-      </div>`;
-    card.querySelector(".btn-add").addEventListener("click", () => addToCart(prod));
+      </div>
+    `;
+
+    card.querySelector(".btn-add")
+      .addEventListener("click", () => addToCart(prod));
+
     cont.appendChild(card);
   });
 }
+
 
 // === BUSCADOR DE PRODUCTOS ===
 function filtrarCatalogo() {
