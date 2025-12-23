@@ -71,42 +71,62 @@ function renderCatalog() {
 
 // === BUSCADOR DE PRODUCTOS ===
 function filtrarCatalogo() {
-  const query = document.getElementById("searchInput").value.toLowerCase().trim();
+  const input = document.getElementById("searchInput");
+  const query = input.value.toLowerCase().trim();
   const cont = document.getElementById("catalogo");
   cont.innerHTML = "";
 
-  // Si no hay texto, mostramos todo el catálogo
+  // Filtrar por nombre o por código numérico
   const productosFiltrados = query
-    ? state.catalogo.filter(p => p.name.toLowerCase().includes(query))
+    ? state.catalogo.filter(p => {
+        const nombre = (p.name || "").toLowerCase();
+
+        // Normalizamos el código: solo números
+        const codigo = String(p.id || "")
+          .replace(/\D/g, "") // elimina todo lo que no sea número
+          .toLowerCase();
+
+        return (
+          nombre.includes(query) ||
+          codigo.includes(query)
+        );
+      })
     : state.catalogo;
 
+  // Si no hay resultados
   if (productosFiltrados.length === 0) {
-    cont.innerHTML = `<p style="text-align:center;color:#888;">No se encontraron productos con "${query}" 😔</p>`;
+    cont.innerHTML = `
+      <p style="text-align:center;color:#888;">
+        No se encontraron productos con "${query}" 😔
+      </p>
+    `;
     return;
   }
 
+  // Render del catálogo filtrado
   productosFiltrados.forEach(prod => {
-  if (!prod.img) return;
+    if (!prod.img) return;
 
-  const card = document.createElement("div");
-  card.className = "card";
-  card.innerHTML = `
-    <img src="${prod.img}" alt="${prod.name}">
-    <div class="body">
-      <div class="product-id">N°: ${prod.id}</div>
-      <div class="name">${prod.name}</div>
-      <div class="price">$${fmtCOP(prod.price)}</div>
-      <button class="btn-add">Agregar al carrito</button>
-    </div>
-  `;
+    const card = document.createElement("div");
+    card.className = "card";
 
-  card.querySelector(".btn-add")
-    .addEventListener("click", () => addToCart(prod));
+    card.innerHTML = `
+      <img src="${prod.img}" alt="${prod.name}">
+      <div class="body">
+        <div class="product-id">N°: ${prod.id}</div>
+        <div class="name">${prod.name}</div>
+        <div class="price">$${fmtCOP(prod.price)}</div>
+        <button class="btn-add">Agregar al carrito</button>
+      </div>
+    `;
 
-  cont.appendChild(card);
+    card.querySelector(".btn-add")
+      .addEventListener("click", () => addToCart(prod));
+
+    cont.appendChild(card);
   });
-
 }
+
 
 
 // === BARRIOS ===
