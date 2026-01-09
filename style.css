@@ -740,7 +740,7 @@ textarea {
   display: none !important;
 }
 
-/* === CTA Carrito optimizado para móvil === */
+/* === CTA Carrito optimizado para móvil (gris) === */
 @media (max-width: 600px) {
   .cart-fab {
     width: calc(100% - 32px);      /* ocupa casi todo el ancho */
@@ -752,8 +752,11 @@ textarea {
     font-size: 1.1rem;
     padding: 16px 20px;
 
-    /* background: #b84c65;          más oscuro = más contraste */
+    background: #4b4b4b;           /* ✅ gris principal */
+    color: #ffffff;
+
     box-shadow: 0 12px 28px rgba(0,0,0,.25);
+    border-radius: 18px;
   }
 
   .cart-fab .cart-text {
@@ -762,9 +765,10 @@ textarea {
   }
 
   #cartCount {
-    background: #fff;
-    color: var(--rosa-osc);
+    background: #ffffff;
+    color: #4b4b4b;                /* gris consistente */
     font-size: 1rem;
     margin-left: 8px;
+    font-weight: 800;
   }
 }
