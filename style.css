@@ -740,7 +740,7 @@ textarea {
   display: none !important;
 }
 
-/* === CTA Carrito optimizado para móvil (gris) === */
+/* === CTA Carrito optimizado para móvil (gris suave) === */
 @media (max-width: 600px) {
   .cart-fab {
     width: calc(100% - 32px);      /* ocupa casi todo el ancho */
@@ -752,10 +752,10 @@ textarea {
     font-size: 1.1rem;
     padding: 16px 20px;
 
-    background: #4b4b4b;           /* ✅ gris principal */
+    background: #6b6b6b;           /* ✅ gris suave */
     color: #ffffff;
 
-    box-shadow: 0 12px 28px rgba(0,0,0,.25);
+    box-shadow: 0 12px 28px rgba(0,0,0,.22);
     border-radius: 18px;
   }
 
@@ -766,7 +766,7 @@ textarea {
 
   #cartCount {
     background: #ffffff;
-    color: #4b4b4b;                /* gris consistente */
+    color: #6b6b6b;                /* mismo gris */
     font-size: 1rem;
     margin-left: 8px;
     font-weight: 800;
