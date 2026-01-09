@@ -739,3 +739,32 @@ textarea {
 #btnIrPersonalizado {
   display: none !important;
 }
+
+/* === CTA Carrito optimizado para móvil === */
+@media (max-width: 600px) {
+  .cart-fab {
+    width: calc(100% - 32px);      /* ocupa casi todo el ancho */
+    right: 16px;
+    left: 16px;
+    bottom: 16px;
+
+    justify-content: center;
+    font-size: 1.1rem;
+    padding: 16px 20px;
+
+    background: #b84c65;          /* más oscuro = más contraste */
+    box-shadow: 0 12px 28px rgba(0,0,0,.25);
+  }
+
+  .cart-fab .cart-text {
+    font-weight: 800;
+    letter-spacing: .3px;
+  }
+
+  #cartCount {
+    background: #fff;
+    color: #b84c65;
+    font-size: 1rem;
+    margin-left: 8px;
+  }
+}
