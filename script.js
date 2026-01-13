@@ -575,21 +575,21 @@ document.getElementById("pedidoForm").addEventListener("submit", async e => {
             Tu solicitud fue registrada correctamente.
           </p>
           <p style="margin-bottom:10px;">
-            📲 Para continuar con el proceso de pago, escríbenos ahora mismo por WhatsApp.
+            📲 Para continuar con el proceso de pago,
+            <strong>escríbenos ahora mismo por WhatsApp</strong>.
           </p>
           <p style="font-size:14px;color:#666;">
             Una persona del equipo Flora te responderá para confirmar el pedido
             y brindarte las instrucciones de pago.
           </p>
         `,
-        confirmButtonText: "Escribir por WhatsApp",
-        showCancelButton: true,
-        cancelButtonText: "Entendido",
-        confirmButtonColor: "#25D366"
-      }).then(result => {
-        if (result.isConfirmed) {
-          window.open(whatsappLink, "_blank");
-        }
+        confirmButtonText: "Continuar por WhatsApp",
+        confirmButtonColor: "#25D366", // 🟢 WhatsApp
+        showCancelButton: false,       // ❌ sin “Entendido”
+        allowOutsideClick: false,      // 🔒 no cerrar clic afuera
+        allowEscapeKey: false          // 🔒 no cerrar con ESC
+      }).then(() => {
+        window.open(whatsappLink, "_blank");
       });
 
       // 🔄 Reset normal del flujo
@@ -610,6 +610,7 @@ document.getElementById("pedidoForm").addEventListener("submit", async e => {
     btnSubmit.textContent = "Confirmar pedido";
   }
   });
+
 
 
 
