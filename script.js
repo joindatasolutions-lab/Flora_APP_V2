@@ -585,7 +585,7 @@ document.getElementById("pedidoForm").addEventListener("submit", async e => {
         confirmButtonText: "Escribir por WhatsApp",
         showCancelButton: true,
         cancelButtonText: "Entendido",
-        confirmButtonColor: "#b84c65"
+        confirmButtonColor: "#25D366"
       }).then(result => {
         if (result.isConfirmed) {
           window.open(whatsappLink, "_blank");
