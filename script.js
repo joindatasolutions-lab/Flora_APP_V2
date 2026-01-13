@@ -561,7 +561,7 @@ document.getElementById("pedidoForm").addEventListener("submit", async e => {
 
     if (data.status === "success") {
 
-      const telefonoFlora = "573013755838"; // 📲 WhatsApp oficial Flora
+      const telefonoFlora = ("57" + "3013755838").replace(/\D/g, ""); // 📲 WhatsApp oficial Flora
       const mensaje = encodeURIComponent(
         "Hola 🌸 Ya realicé el registro de mi pedido en el formulario y quedo atento(a) para continuar con el proceso de pago."
       );
