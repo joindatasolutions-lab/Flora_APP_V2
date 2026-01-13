@@ -560,17 +560,45 @@ document.getElementById("pedidoForm").addEventListener("submit", async e => {
     const data = await response.json();
 
     if (data.status === "success") {
-      Swal.fire(
-        "Pedido enviado",
-        "Tu pedido fue registrado correctamente 🌸",
-        "success"
-      );
 
+      const telefonoFlora = "57301375583"; // 📲 WhatsApp oficial Flora
+      const mensaje = encodeURIComponent(
+        "Hola 🌸 Ya realicé el registro de mi pedido en el formulario y quedo atento(a) para continuar con el proceso de pago."
+      );
+      const whatsappLink = `https://wa.me/${telefonoFlora}?text=${mensaje}`;
+
+      Swal.fire({
+        icon: "success",
+        title: "Pedido recibido 🌸",
+        html: `
+          <p style="margin-bottom:10px;">
+            Tu solicitud fue registrada correctamente.
+          </p>
+          <p style="margin-bottom:10px;">
+            📲 Para continuar con el proceso de pago, escríbenos ahora mismo por WhatsApp.
+          </p>
+          <p style="font-size:14px;color:#666;">
+            Una persona del equipo Flora te responderá para confirmar el pedido
+            y brindarte las instrucciones de pago.
+          </p>
+        `,
+        confirmButtonText: "Escribir por WhatsApp",
+        showCancelButton: true,
+        cancelButtonText: "Entendido",
+        confirmButtonColor: "#b84c65"
+      }).then(result => {
+        if (result.isConfirmed) {
+          window.open(whatsappLink, "_blank");
+        }
+      });
+
+      // 🔄 Reset normal del flujo
       state.cart = [];
       updateCartCount();
       renderDrawerCart();
       show("viewCatalog");
       e.target.reset();
+
     } else {
       Swal.fire("Error", "No se pudo registrar el pedido correctamente.", "error");
     }
@@ -581,7 +609,8 @@ document.getElementById("pedidoForm").addEventListener("submit", async e => {
     btnSubmit.disabled = false;
     btnSubmit.textContent = "Confirmar pedido";
   }
-});
+  });
+
 
 
 // === ACTUALIZAR IVA AL CAMBIAR IDENTIFICACIÓN ===
