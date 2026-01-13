@@ -725,7 +725,7 @@ document.getElementById("btnIrPersonalizado").addEventListener("click", () => {
 // === LLAMAR INIT AUTOMÁTICAMENTE ===
 document.addEventListener("DOMContentLoaded", () => {
   init();
-  setDefaultFechaHora(); 
+  //setDefaultFechaHora(); 
 });
 
 // === LLENAR BARRIOS ===
