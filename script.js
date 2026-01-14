@@ -138,20 +138,22 @@ function filtrarCatalogo() {
 // === BARRIOS ===
 function fillBarrios() {
   const sel = document.getElementById("barrio");
-  sel.innerHTML = '<option value="">Selecciona un barrio...</option>';
+  if (!sel) return;
 
-  // 🔤 Ordenar los barrios alfabéticamente
+  sel.innerHTML = `<option value="">Selecciona un barrio...</option>`;
+
   const barriosOrdenados = Object.keys(state.barrios).sort((a, b) =>
     a.localeCompare(b, 'es', { sensitivity: 'base' })
   );
 
-  barriosOrdenados.forEach(b => {
-    const opt = document.createElement("option");
-    opt.value = b;
-    opt.textContent = b; // solo mostramos el nombre
-    sel.appendChild(opt);
+  barriosOrdenados.forEach(barrio => {
+    const op = document.createElement("option");
+    op.value = barrio;
+    op.textContent = `${barrio} ($${fmtCOP(state.barrios[barrio])})`;
+    sel.appendChild(op);
   });
 }
+
 
 function actualizarDomicilio() {
   const barrioSel = document.getElementById("barrio").value;
@@ -729,20 +731,7 @@ document.addEventListener("DOMContentLoaded", () => {
   //setDefaultFechaHora(); 
 });
 
-// === LLENAR BARRIOS ===
-function fillBarrios() {
-  const sel = document.getElementById("barrio");
-  if (!sel) return;
 
-  sel.innerHTML = `<option value="">Seleccionar...</option>`;
-
-  Object.entries(state.barrios).forEach(([barrio, valor]) => {
-    const op = document.createElement("option");
-    op.value = barrio;
-    op.textContent = `${barrio} ($${fmtCOP(valor)})`;
-    sel.appendChild(op);
-  });
-}
 
 // === ACTUALIZAR DOMICILIO ===
 function actualizarDomicilio() {
