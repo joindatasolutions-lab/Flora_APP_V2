@@ -171,49 +171,6 @@ function actualizarDomicilio() {
 // === VALIDAR HORA DE ENTREGA ===
 // Inputs de fecha y hora (solo existen en el formulario)
 const fechaEntregaInput = document.getElementById("fechaEntrega");
-//const horaEntregaInput  = document.getElementById("horaEntrega");
-
-// Evita errores cuando la página es el catálogo
-/*if (horaEntregaInput) {
-    horaEntregaInput.addEventListener("change", validarHoraEntrega);
-}
-
-if (fechaEntregaInput && horaEntregaInput) {
-    fechaEntregaInput.addEventListener("change", () => {
-        horaEntregaInput.value = "";
-    });
-}*/
-
-/*
-function validarHoraEntrega() {
-  const fechaStr = fechaEntregaInput.value; 
-  const horaStr = horaEntregaInput.value;
-
-  if (!fechaStr || !horaStr) return;
-
-  const ahora = new Date();
-  const fechaSeleccionada = new Date(fechaStr + "T" + horaStr + ":00");
-
-  // Verifica si la fecha seleccionada es hoy
-  const esHoy =
-    fechaSeleccionada.getFullYear() === ahora.getFullYear() &&
-    fechaSeleccionada.getMonth() === ahora.getMonth() &&
-    fechaSeleccionada.getDate() === ahora.getDate();
-
-  if (esHoy) {
-    const horaMinima = new Date(ahora.getTime() + 2 * 60 * 60 * 1000); // +2 horas exactas
-
-    if (fechaSeleccionada < horaMinima) {
-      Swal.fire({
-        icon: "warning",
-        title: "Hora no válida ⏰",
-        text: "La hora de entrega debe ser al menos 2 horas después de la hora actual.",
-      });
-      horaEntregaInput.value = "";
-    }
-  }
-}*/
-
 
 // Escuchar cambios
 //horaEntregaInput.addEventListener("change", validarHoraEntrega);
@@ -485,6 +442,11 @@ document.getElementById("pedidoForm").addEventListener("submit", async e => {
   // HORA DE ENTREGA FIJA
   // ===============================
   formData.set("Hora de Entrega", "00:00:00");
+
+  // ==================================
+  // 🔑 ACCIÓN PARA ACTUALIZAR EMAIL
+  // ==================================
+  formData.set("accion", "actualizarEmail");
 
   // ============================================================
   // OBSERVACIONES + FIRMA (CAMPO ÚNICO / NO OBLIGATORIO)
