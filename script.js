@@ -1,5 +1,5 @@
 // === CONFIGURACIÓN GENERAL ===
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxmJTD-hah5be-RiDETQSglkQOzDfc6muSPvHjtv_ADvEiRbpJuvkJfFzbhpJjvXxUP/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwdixPJBCFos9aUaUT_NDxQ2ZMW3s2CXoQ0KRNVNe8aYmaXtTSONvKgPRXIFcFpSSmO/exec";
 const state = {
   catalogo: [],
   barrios: {},
