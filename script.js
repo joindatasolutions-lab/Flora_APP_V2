@@ -1,3 +1,4 @@
+const ORIGEN_CATALOGO = "normal";
 // === CONFIGURACIÓN GENERAL ===
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwdixPJBCFos9aUaUT_NDxQ2ZMW3s2CXoQ0KRNVNe8aYmaXtTSONvKgPRXIFcFpSSmO/exec";
 const state = {
@@ -23,30 +24,6 @@ async function init() {
     Swal.fire("Error", "No se pudieron cargar los datos del catálogo", "error");
   }
 }
-
-/*
-function setDefaultFechaHora() {
-  const fechaInput = document.getElementById("fechaEntrega");
-  const horaInput = document.getElementById("horaEntrega");
-
-  const now = new Date();
-
-  // 🟢 Fecha actual en formato YYYY-MM-DD
-  const yyyy = now.getFullYear();
-  const mm = String(now.getMonth() + 1).padStart(2, "0");
-  const dd = String(now.getDate()).padStart(2, "0");
-  const fechaActual = `${yyyy}-${mm}-${dd}`;
-
-  // 🟢 Hora +2 horas y +5 minutos
-  const futura = new Date(now.getTime() + (2 * 60 + 5) * 60000);
-  const hh = String(futura.getHours()).padStart(2, "0");
-  const min = String(futura.getMinutes()).padStart(2, "0");
-  const horaFutura = `${hh}:${min}`;
-
-  if (fechaInput) fechaInput.value = fechaActual;
-  if (horaInput) horaInput.value = horaFutura;
-}*/
-
 
 // === RENDERIZAR CATÁLOGO ==
 function renderCatalog() {
@@ -337,19 +314,6 @@ document.getElementById("btnPedidoDrawer").onclick = () => {
 
 document.getElementById("btnVolver").addEventListener("click", () => show("viewCatalog"));
 
-/*// === FIRMA MENSAJE ===
-document.getElementById("firmaMensaje").addEventListener("change", e => {
-  const campo = document.getElementById("campoFirmaWrapper");
-  if (e.target.value === "Firmado") {
-    campo.style.display = "block";
-    document.getElementById("nombreFirma").required = true;
-  } else {
-    campo.style.display = "none";
-    document.getElementById("nombreFirma").required = false;
-    document.getElementById("nombreFirma").value = "";
-  }
-});*/
-
 // === DETECCIÓN Y AUTOCOMPLETADO DE CLIENTE EXISTENTE ===
 let lookupTimer = null;
 
@@ -419,14 +383,6 @@ function limpiarCliente(clearId) {
   document.getElementById("telefono").value = "";
 }
 
-/*
-function toggleFirma() {
-  const firmado = document.getElementById("firmado").value;
-  const nombreFirma = document.getElementById("nombreFirma");
-  nombreFirma.parentElement.style.display = (firmado === "Firmado") ? "block" : "none";
-  if (firmado === "Anónimo") nombreFirma.value = "";
-}*/
-
 // === ENVÍO DEL FORMULARIO ===
 document.getElementById("pedidoForm").addEventListener("submit", async e => {
   e.preventDefault();
@@ -437,6 +393,9 @@ document.getElementById("pedidoForm").addEventListener("submit", async e => {
 
   // 📌 Crear FormData
   const formData = new FormData(e.target);
+
+  // 🟢 BANDERA: origen del catálogo
+  formData.set("origenCatalogo", ORIGEN_CATALOGO);
 
   // ===============================
   // HORA DE ENTREGA FIJA
@@ -574,9 +533,6 @@ document.getElementById("pedidoForm").addEventListener("submit", async e => {
     btnSubmit.textContent = "Confirmar pedido";
   }
   });
-
-
-
 
 // === ACTUALIZAR IVA AL CAMBIAR IDENTIFICACIÓN ===
 document.getElementById("tipoIdent").addEventListener("change", () => renderDrawerCart());
