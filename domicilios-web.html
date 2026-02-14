@@ -4,336 +4,71 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Domicilios - Join Data</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --rosa: #E6A5B6;
-      --rosa-osc: #C97B94;
-      --verde: #4C7C62;
-      --beige: #FAF6F3;
-      --gris: #5C5C5C;
-      --borde: #EBD8DB;
-      --hover: #B5647B;
-    }
-
-    body {font-family:'Inter',sans-serif;background:var(--beige);margin:0;color:#333;}
-    header{text-align:center;background:#fff;padding:20px;border-bottom:1px solid var(--borde);box-shadow:0 2px 6px rgba(0,0,0,.05);}
-    header img{max-width:180px;margin-bottom:8px;}
-    header h2{color:var(--rosa-osc);font-weight:700;margin:0;}
-    main{padding:25px;}
-    .grupo{margin-bottom:40px;}
-    .grupo h3{text-align:center;color:var(--rosa-osc);margin-bottom:15px;}
-    .contenedor-grupo{display:flex;flex-wrap:wrap;gap:20px;justify-content:center;}
-
-    .card{background:#fff;border-radius:18px;overflow:hidden;box-shadow:0 3px 10px rgba(0,0,0,0.08);transition:all 0.25s ease;width:100%;max-width:360px;display:flex;flex-direction:column;cursor:grab;}
-    .card:hover{transform:translateY(-3px);box-shadow:0 6px 16px rgba(0,0,0,0.12);}
-    .encabezado{display:flex;justify-content:space-between;align-items:center;background:#FFF8FA;padding:10px 18px;border-bottom:1px solid var(--borde);}
-    .pedido-num{font-weight:700;color:var(--rosa-osc);}
-    .estado{font-weight:600;padding:5px 12px;border-radius:12px;font-size:.9em;color:#fff;text-transform:capitalize;}
-    .pendiente{background:var(--rosa);}
-    .en_ruta{background:var(--rosa-osc);}
-    .entregado{background:var(--verde);}
-    .img-card{width:100%;height:200px;object-fit:cover;}
-    .detalle{padding:14px 20px;flex:1;}
-    .detalle h3{margin:4px 0 10px;font-size:1.1em;color:var(--rosa-osc);}
-    .detalle p{margin:4px 0;font-size:.9em;color:var(--gris);}
-    .acciones{display:flex;align-items:center;gap:10px;padding:12px 18px 18px;}
-    select{flex:1;border:1px solid var(--borde);border-radius:8px;padding:8px 10px;font-size:.9em;background:#fff;}
-    .btn-estado{border:none;padding:10px 22px;border-radius:10px;font-weight:600;color:#fff;cursor:pointer;background:var(--rosa-osc);font-size:.95em;}
-    .btn-estado:hover{background:var(--hover);}
-    .btn-estado.entregado{background:var(--verde);}
-    .btn-estado.entregado:hover{background:#3A614E;}
-    footer{text-align:center;color:var(--gris);padding:18px;font-size:.85em;}
-    #toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:var(--rosa-osc);color:white;padding:12px 24px;border-radius:10px;box-shadow:0 4px 12px rgba(0,0,0,0.15);font-weight:600;opacity:0;pointer-events:none;transition:opacity .4s ease;z-index:1000;}
-    #toast.show{opacity:1;}
-
-    /* Modal externo */
-    .modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);justify-content:center;align-items:center;z-index:2000;}
-    .modal-content{background:white;padding:20px;border-radius:10px;text-align:center;width:90%;max-width:400px;}
-    .modal-content input{width:100%;margin:8px 0;padding:8px;border:1px solid var(--borde);border-radius:6px;}
-    .modal-content button{margin:6px;padding:8px 16px;border:none;border-radius:8px;cursor:pointer;}
-    .guardar{background:var(--verde);color:#fff;}
-    .cancelar{background:var(--rosa-osc);color:#fff;}
-  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Manrope:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="domicilios-web.css">
 </head>
 <body>
-  <header>
-    <img src="https://floraapp.s3.us-east-1.amazonaws.com/logo+2024+marca+registrada-04.png" alt="Logo">
-    <h2>Panel de Domicilios</h2>
+  <header class="hero">
+    <div class="hero-inner">
+      <img src="https://floraapp.s3.us-east-1.amazonaws.com/logo+2024+marca+registrada-04.png" alt="Logo Flora">
+      <div>
+        <h1>Panel de Domicilios</h1>
+        <p>Controla estados, asignaciones y tiempos de entrega en un solo lugar.</p>
+      </div>
+    </div>
   </header>
-  <!-- 🔍 BUSCADOR -->
-  <div style="text-align:center; margin:20px;">
-    <input 
-      id="buscarPedido" 
-      type="text" 
-      placeholder="🔍 Buscar pedido, destinatario o barrio..." 
-      style="padding:10px 14px;width:90%;max-width:400px;border:1px solid #ddd;border-radius:10px;font-size:1rem;">
-  </div>
 
-  <main id="contenedor-domicilios"><p style="text-align:center;">Cargando pedidos...</p></main>
-  <footer>🌸 Flora App - Domicilios</footer>
+  <section class="toolbar">
+    <div class="toolbar-left">
+      <label class="field">
+        <span>Buscar</span>
+        <input 
+          id="buscarPedido" 
+          type="search" 
+          placeholder="Pedido, destinatario, barrio..." 
+          class="buscador-input"
+          aria-label="Buscar pedidos">
+      </label>
+      <label class="field">
+        <span>Estado</span>
+        <select id="filtroEstado" class="filtro" aria-label="Filtrar por estado">
+          <option value="Todos">Todos los estados</option>
+        </select>
+      </label>
+      <label class="field">
+        <span>Domiciliario</span>
+        <select id="filtroDomiciliario" class="filtro" aria-label="Filtrar por domiciliario">
+          <option value="Todos">Todos los domiciliarios</option>
+        </select>
+      </label>
+    </div>
+    <div class="toolbar-right">
+      <button id="btnRefresh" class="btn-refresh" type="button">Actualizar</button>
+      <div class="stats">
+        <span id="statsCount">0</span>
+        <small>Pedidos visibles</small>
+      </div>
+      <div id="statsInfo" class="stats-info"></div>
+      <div id="lastUpdate" class="last-update">Actualizado: --</div>
+    </div>
+  </section>
+
+  <main id="contenedor-domicilios" class="contenedor"><p class="loading">Cargando pedidos...</p></main>
+  <footer>Flora App · Domicilios</footer>
   <div id="toast"></div>
 
-  <!-- Modal Externo -->
-  <div id="modalExterno" class="modal">
+  <div id="modalExterno" class="modal" aria-hidden="true">
     <div class="modal-content">
       <h3>Registrar domiciliario externo</h3>
       <input id="nombreExterno" placeholder="Nombre completo">
       <input id="telefonoExterno" placeholder="Teléfono">
-      <div>
+      <div class="modal-actions">
         <button id="btnRegistrarExterno" class="guardar">Guardar</button>
         <button id="btnCancelarExterno" class="cancelar">Cancelar</button>
       </div>
     </div>
   </div>
 
-  <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxmJTD-hah5be-RiDETQSglkQOzDfc6muSPvHjtv_ADvEiRbpJuvkJfFzbhpJjvXxUP/exec";
-
-    const mostrarToast = msg => {
-      const t = document.getElementById('toast');
-      t.textContent = msg;
-      t.classList.add('show');
-      setTimeout(()=>t.classList.remove('show'),3000);
-    };
-
-    async function cargarDomicilios(){
-      try{
-        const res=await fetch(`${SCRIPT_URL}?hoja=Domicilios`);
-        const data=await res.json();
-        renderizarDomicilios(data);
-      }catch(e){console.error(e);mostrarToast('Error cargando pedidos');}
-    }
-
-    async function asignarDomiciliario(pedido, domiciliario){
-      if(!domiciliario) return;
-      const body=new URLSearchParams({accion:'asignarDomiciliario',hoja:'Domicilios',pedido:String(pedido),domiciliario});
-      const res=await fetch(SCRIPT_URL,{method:'POST',body});
-      const data=await res.json();
-      if(data.status==='ok') mostrarToast('Domiciliario asignado');
-    }
-
-    // Modal para registrar externo
-    function abrirModalExterno(pedido, select) {
-      const m = document.getElementById('modalExterno');
-      m.style.display = 'flex';
-
-      const btnGuardar = document.getElementById('btnRegistrarExterno');
-      const btnCancelar = document.getElementById('btnCancelarExterno');
-      const nombreInput = document.getElementById('nombreExterno');
-      const telInput = document.getElementById('telefonoExterno');
-
-      nombreInput.value = "";
-      telInput.value = "";
-
-      btnGuardar.onclick = async () => {
-        const nombre = nombreInput.value.trim();
-        const tel = telInput.value.trim();
-        if (!nombre || !tel) {
-          mostrarToast("Completa todos los campos");
-          return;
-        }
-
-        try {
-          const body = new URLSearchParams({
-            accion: "registrarExterno",
-            Nombre: nombre,
-            Telefono: tel,
-            pedido: String(pedido)
-          });
-
-          const res = await fetch(SCRIPT_URL, { method: "POST", body });
-          const data = await res.json();
-
-          if (data.status === "success") {
-            mostrarToast(`✅ Externo asignado: ${nombre}`);
-            select.value = "Externo";
-            select.title = `${nombre} (${tel})`;
-            select.disabled = true;
-            select.style.background = "#f5f5f5";
-            select.style.cursor = "not-allowed";
-            m.style.display = "none";
-          } else {
-            mostrarToast(`⚠️ ${data.message || "No se pudo registrar"}`);
-          }
-        } catch (err) {
-          console.error(err);
-          mostrarToast("❌ Error al registrar externo");
-        }
-      };
-
-      btnCancelar.onclick = () => (m.style.display = "none");
-    }
-
-    function renderizarDomicilios(domicilios) {
-      const contenedor = document.getElementById('contenedor-domicilios');
-      contenedor.innerHTML = '';
-
-      if (!domicilios?.length) {
-        contenedor.innerHTML = '<p style="text-align:center;">No hay pedidos.</p>';
-        return;
-      }
-
-      // Agrupar por domiciliario
-      const grupos = {};
-      domicilios.forEach(d => {
-        const dom = (d.domiciliario || 'Sin asignar').trim();
-        if (!grupos[dom]) grupos[dom] = [];
-        grupos[dom].push(d);
-      });
-
-      // Renderizar grupos
-      for (const [domiciliario, pedidos] of Object.entries(grupos)) {
-        const grupoDiv = document.createElement('div');
-        grupoDiv.classList.add('grupo');
-        grupoDiv.innerHTML = `<h3>🚴‍♂️ ${domiciliario}</h3>`;
-
-        const contenedorGrupo = document.createElement('div');
-        contenedorGrupo.classList.add('contenedor-grupo');
-        contenedorGrupo.dataset.domiciliario = domiciliario;
-
-        pedidos.forEach(pedido => {
-          const num = pedido["N°Pedido"] || pedido.pedido;
-          const est = pedido.estado || 'Pendiente';
-          const estClase = est.toLowerCase().replace(' ', '_');
-          const btnTxt = est === 'Pendiente' ? 'En Ruta' : est === 'En Ruta' ? 'Entregado' : 'Entregado';
-          const btnClass = /entregado/i.test(est) ? 'btn-estado entregado' : 'btn-estado';
-          const domi = (pedido.domiciliario || '').trim();
-          let valorActual = domi || 'Asignar domiciliario';
-
-          const card = document.createElement('div');
-          card.className = 'card';
-          card.setAttribute('draggable', true);
-          card.innerHTML = `
-            <div class="encabezado">
-              <div class="pedido-num">Pedido #${num}</div>
-              <div class="estado ${estClase}">${est}</div>
-            </div>
-            <img src="${pedido.imagen}" class="img-card">
-            <div class="detalle">
-              <h3>${pedido.producto}</h3>
-              <p><strong>Destinatario:</strong> ${pedido.destinatario || '—'}</p>
-              <p><strong>Dirección:</strong> ${pedido.direccion || '—'}</p>
-              <p><strong>Barrio:</strong> ${pedido.barrio || '—'}</p>
-              <p><strong>Teléfono:</strong> ${pedido.telefonoDestino || pedido.telefono || '—'}</p>
-            </div>
-          `;
-
-          if (!/entregado/i.test(est)) {
-            const acciones = document.createElement('div');
-            acciones.className = 'acciones';
-            acciones.innerHTML = `
-              <select>
-                <option ${valorActual === 'Asignar domiciliario' ? 'selected' : ''}>Asignar domiciliario</option>
-                <option ${valorActual === 'Elvis' ? 'selected' : ''}>Elvis</option>
-                <option ${valorActual === 'Oscar' ? 'selected' : ''}>Oscar</option>
-                <option ${valorActual === 'Externo' ? 'selected' : ''}>Externo</option>
-              </select>
-              <button class="${btnClass}">${btnTxt}</button>
-            `;
-            const select = acciones.querySelector('select');
-            const boton = acciones.querySelector('button');
-            const badge = card.querySelector('.estado');
-
-            // Bloquear si ya tiene domiciliario
-            if (valorActual !== 'Asignar domiciliario') {
-              select.disabled = true;
-              select.style.background = "#f5f5f5";
-              select.style.cursor = "not-allowed";
-            }
-
-            select.addEventListener('change', () => {
-              if (select.value === 'Asignar domiciliario') return;
-              if (select.value === 'Externo') abrirModalExterno(num, select);
-              else {
-                asignarDomiciliario(num, select.value);
-                select.disabled = true;
-                select.style.background = "#f5f5f5";
-                select.style.cursor = "not-allowed";
-              }
-            });
-
-            boton.addEventListener('click', () => {
-              const nuevoEstado = badge.textContent === 'Pendiente' ? 'En Ruta' : 'Entregado';
-              actualizarEstado(num, nuevoEstado, boton, badge, select);
-            });
-
-            card.appendChild(acciones);
-          }
-
-          contenedorGrupo.appendChild(card);
-        });
-
-        grupoDiv.appendChild(contenedorGrupo);
-        contenedor.appendChild(grupoDiv);
-      }
-
-      // === Drag & Drop solo dentro del mismo grupo ===
-      let dragged = null;
-      let origenGrupo = null;
-
-      document.addEventListener("dragstart", (e) => {
-        if (e.target.classList.contains("card")) {
-          dragged = e.target;
-          origenGrupo = e.target.closest(".contenedor-grupo");
-          e.target.style.opacity = "0.5";
-        }
-      });
-
-      document.addEventListener("dragend", (e) => {
-        if (dragged) dragged.style.opacity = "1";
-        dragged = null;
-        origenGrupo = null;
-      });
-
-      document.addEventListener("dragover", (e) => {
-        e.preventDefault();
-        const card = e.target.closest(".card");
-        const grupo = e.target.closest(".contenedor-grupo");
-
-        // 🚫 Solo permitir mover dentro del mismo grupo
-        if (!dragged || !grupo || grupo !== origenGrupo) return;
-
-        if (card && card !== dragged) {
-          const rect = card.getBoundingClientRect();
-          const midY = rect.top + rect.height / 2;
-          if (e.clientY < midY) grupo.insertBefore(dragged, card);
-          else grupo.insertBefore(dragged, card.nextSibling);
-        }
-      });
-    }
-
-    async function actualizarEstado(pedido,nuevoEstado,boton,badge,select){
-      boton.disabled = true;
-      boton.textContent = "Actualizando...";
-      try {
-        const body = new URLSearchParams({
-          accion: 'actualizarEstado',
-          hoja: 'Domicilios',
-          pedido: String(pedido),
-          estado: nuevoEstado
-        });
-        const res = await fetch(SCRIPT_URL, { method: 'POST', body });
-        const data = await res.json();
-        if (data.status === 'success' || data.result === 'ok') {
-          badge.textContent = nuevoEstado;
-          badge.className = `estado ${nuevoEstado.toLowerCase().replace(' ', '_')}`;
-          if (nuevoEstado === 'Entregado') {
-            mostrarToast('✅ Pedido entregado');
-            boton.style.display = 'none';
-          } else {
-            boton.textContent = 'Entregado';
-          }
-        } else mostrarToast('⚠️ Error al actualizar');
-      } catch (e) {
-        console.error(e);
-        mostrarToast('❌ Error de conexión');
-      } finally {
-        boton.disabled = false;
-      }
-    }
-
-    cargarDomicilios();
-  </script>
+  <script src="domicilios-web.js"></script>
 </body>
 </html>
