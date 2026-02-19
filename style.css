@@ -103,22 +103,32 @@ header h2 {
   position:fixed;
   right:16px;
   bottom:16px;
-  background:var(--rosa);
-  color:#fff;
-  border:none;
+  background:linear-gradient(135deg, #f7c7d6 0%, #e8a7bd 100%);
+  color:#6b2f46;
+  border:1px solid #f1b7c8;
   border-radius:9999px;
-  padding:10px 14px;
+  padding:10px 16px;
   font-weight:700;
   cursor:pointer;
   display:flex;
   align-items:center;
   gap:8px;
-  box-shadow:0 10px 24px rgba(0,0,0,.15);
+  box-shadow:0 10px 24px rgba(0,0,0,.12);
   z-index:900;
+  transition:transform .2s ease, box-shadow .2s ease, opacity .2s ease;
+}
+.cart-fab:hover {
+  transform:translateY(-1px);
+  box-shadow:0 12px 28px rgba(0,0,0,.14);
+}
+.cart-fab.is-hidden {
+  opacity:0;
+  pointer-events:none;
+  transform:translateY(6px);
 }
 #cartCount {
   background:#fff;
-  color:var(--rosa);
+  color:#b84c65;
   border-radius:999px;
   padding:2px 8px;
   font-weight:800;
@@ -519,6 +529,21 @@ textarea {
 
   .card img {
     aspect-ratio: 4 / 5; /* un poco más vertical en móviles */
+  }
+
+  .cart-fab {
+    right: 12px;
+    bottom: 12px;
+    padding: 8px 12px;
+    gap: 6px;
+    font-size: 0.9rem;
+    box-shadow: 0 6px 16px rgba(0,0,0,.12);
+  }
+
+  #cartCount {
+    padding: 2px 6px;
+    min-width: 20px;
+    font-size: 0.8rem;
   }
 }
 

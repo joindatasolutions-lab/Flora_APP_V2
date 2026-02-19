@@ -231,6 +231,7 @@ function vaciarCarrito() {
 
 // === DRAWER ===
 const drawer = document.getElementById("drawerCarrito");
+let hideFabOnForm = false;
 document.getElementById("btnDrawer").onclick = () => {
   renderDrawerCart();
   drawer.classList.add("open");
@@ -293,6 +294,13 @@ function renderDrawerCart() {
 function show(id) {
   document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
   document.getElementById(id).classList.add("active");
+  const fab = document.getElementById("btnDrawer");
+  if (fab) {
+    fab.classList.toggle("is-hidden", id === "viewForm" && hideFabOnForm);
+    if (id !== "viewForm") {
+      hideFabOnForm = false;
+    }
+  }
 
   // 🟢 Si es el formulario → asignar fecha y hora por defecto
   if (id === "viewForm") {
@@ -309,6 +317,7 @@ document.getElementById("btnPedidoDrawer").onclick = () => {
   const subtotal = state.cart.reduce((a, b) => a + b.price * b.qty, 0);
   document.getElementById("resumenProducto").textContent =
     `🛍 ${resumen} — Subtotal: $${fmtCOP(subtotal)} + Domicilio: $${fmtCOP(state.domicilio)}`;
+  hideFabOnForm = true;
   show("viewForm");
 };
 
@@ -488,7 +497,8 @@ document.getElementById("pedidoForm").addEventListener("submit", async e => {
   // Dirección final (dirección + tipoLugar)
   // ============================================================
   const direccion = document.getElementById("direccion")?.value.trim() || "";
-  const tipoLugar = document.getElementById("tipoLugar")?.value || "";
+  const tipoLugar =
+    document.querySelector('input[name="tipoLugar"]:checked')?.value || "";
   const direccionFinal = tipoLugar ? `${direccion} - ${tipoLugar}` : direccion;
 
   formData.set("direccion", direccionFinal);
@@ -600,11 +610,10 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 // === AUTO-RELLENO PARA "ENTREGA EN TIENDA" ===
-const tipoLugarSelect = document.getElementById("tipoLugar");
-if (tipoLugarSelect) {
-  tipoLugarSelect.addEventListener("change", () => {
+document.querySelectorAll('input[name="tipoLugar"]').forEach(radio => {
+  radio.addEventListener("change", () => {
 
-    const tipo = tipoLugarSelect.value;
+    const tipo = document.querySelector('input[name="tipoLugar"]:checked')?.value;
 
     const destinatario = document.getElementById("destinatario");
     const telefonoDestino = document.getElementById("telefonoDestino");
@@ -677,7 +686,7 @@ if (tipoLugarSelect) {
       }
     }
   });
-}
+});
 
 // Si el usuario edita manualmente, dejar de considerar auto-llenado
 const direccionInput = document.getElementById("direccion");
@@ -711,6 +720,7 @@ document.getElementById("btnIrPersonalizado").addEventListener("click", () => {
   renderDrawerCart();
 
   // mostrar formulario
+  hideFabOnForm = false;
   show("viewForm");
 
   // activar la caja personalizada
