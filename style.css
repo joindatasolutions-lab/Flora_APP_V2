@@ -325,6 +325,36 @@ textarea {
   border-radius:12px;
   background:#fff9fa;
 }
+.section-card {
+  margin-top:18px;
+  padding:18px 18px;
+  border:1px solid #f2d5de;
+  border-radius:16px;
+  background:linear-gradient(180deg, #fff8fa 0%, #ffffff 100%);
+  box-shadow:0 6px 18px rgba(0,0,0,.04);
+}
+.section-title {
+  margin:0 0 12px;
+  padding-bottom:8px;
+  border-bottom:1px solid #f1cbd7;
+  color:var(--rosa-osc);
+  font-size:1.05rem;
+  font-weight:700;
+}
+.help-text {
+  margin-top:6px;
+  font-size:0.85rem;
+  color:#8a5c6a;
+}
+.observaciones-card {
+  border:2px solid #f0b8c8;
+  background:linear-gradient(180deg, #fff3f7 0%, #fffdfd 100%);
+}
+.observaciones-title {
+  text-transform:uppercase;
+  letter-spacing:0.5px;
+  color:#b84c65;
+}
 .badge {
   display:inline-block;
   font-size:0.85rem;
@@ -466,6 +496,10 @@ textarea {
     width: 100%;
     font-size: 16px;
     padding: 12px;
+  }
+
+  .section-card {
+    padding:16px;
   }
 }
 

@@ -244,32 +244,14 @@
       <h3>Entrega</h3>
       <div class="form-group tipo-lugar">
         <label for="tipoLugar" class="titulo-campo">Tipo de lugar *</label>
-        <div class="radio-group">
-          <label class="radio-option">
-            <input type="radio" name="tipoLugar" value="Entrega En Tienda" required>
-            <span>🏪 Entrega En Tienda</span>
-          </label>
-          <label class="radio-option">
-            <input type="radio" name="tipoLugar" value="Casa" required checked>
-            <span>🏠 Casa</span>
-          </label>
-          <label class="radio-option">
-            <input type="radio" name="tipoLugar" value="Edificio" required>
-            <span>🏢 Edificio</span>
-          </label>
-          <label class="radio-option">
-            <input type="radio" name="tipoLugar" value="Conjunto" required>
-            <span>🏡 Conjunto</span>
-          </label>
-          <label class="radio-option">
-            <input type="radio" name="tipoLugar" value="Oficina" required>
-            <span>🏬 Oficina</span>
-          </label>
-          <label class="radio-option">
-            <input type="radio" name="tipoLugar" value="Centro Comercial" required>
-            <span>🏙️ Centro Comercial</span>
-          </label>
-        </div>
+        <select id="tipoLugar" name="tipoLugar" required>
+          <option value="Entrega En Tienda">🏪 Entrega En Tienda</option>
+          <option value="Casa" selected>🏠 Casa</option>
+          <option value="Edificio">🏢 Edificio</option>
+          <option value="Conjunto">🏡 Conjunto</option>
+          <option value="Oficina">🏬 Oficina</option>
+          <option value="Centro Comercial">🏙️ Centro Comercial</option>
+        </select>
       </div>
       <div class="grid">
         <div><label>Destinatario</label><input id="destinatario" name="destinatario" required></div>
@@ -285,52 +267,49 @@
             <label>Fecha de entrega</label>
             <input id="fechaEntrega" name="fechaEntrega" type="date">
           </div>
-          <!-- 
+        </div>
+      </div>
+      <div class="section-card">
+        <h3 class="section-title">Mensaje para la tarjeta</h3>
+        <div class="grid">
+          <div class="grid-1">
+            <label for="mensaje">Mensaje</label>
+            <textarea id="mensaje" name="mensaje" placeholder="Ej: Te mando un abrazo enorme en tu dia especial."></textarea>
+            <p class="help-text">Esto es lo que aparecerá impreso en la tarjeta del arreglo.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-card">
+        <h3 class="section-title">Firma del mensaje</h3>
+        <div class="grid">
           <div>
-            <label>Hora de entrega</label>
-            <input id="horaEntrega" name="horaEntrega" type="time" required>
-          </div>-->
-        </div>
-      </div>
-      <h3>Mensaje</h3>
-      <div class="grid">
-        <!--<div>
-          <label>Medio de pago</label>
-          <select id="formaPago" name="formaPago" required>
-            <option value="">Selecciona una opción...</option>
-            <option value="TRANSFERENCIA">TRANSFERENCIA</option>
-            <option value="TARJETA">TARJETA</option>
-            <option value="LINK">LINK</option>
-            <option value="EFECTIVO">EFECTIVO</option>
-            <option value="CUENTAS POR COBRAR">CUENTAS POR COBRAR</option>
-            <option value="CONTRAENTREGA">CONTRAENTREGA - EN TIENDA</option>
-          </select>
-        </div> -->
-        <div class="grid-1">
-          <label>Mensaje</label>
-          <textarea id="mensaje"name="mensaje" placeholder="Escribe un mensaje opcional"></textarea>
+            <label for="firma">Firma</label>
+            <input
+              type="text"
+              id="firma"
+              name="firma"
+              placeholder="Ej: Con carino, Laura y Carlos"
+            >
+            <p class="help-text">Indica quien envia el mensaje.</p>
+          </div>
         </div>
       </div>
 
-      <div class="firma-box">
-  <label>Firma del mensaje</label>
-
-        <div class="firma-box">
-          <label for="firma">Firma</label>
-          <input
-            type="text"
-            id="firma"
-            name="firma"
-            placeholder="Ej: Con cariño, Laura y Carlos"
-          >
-
-          <label for="observaciones" style="margin-top:12px;">Observaciones/Arreglo Personalizado</label>
-          <textarea
-            id="observaciones"
-            name="observaciones"
-            placeholder="Notas adicionales, indicaciones especiales, etc."
-          ></textarea>
+      <div class="section-card observaciones-card" id="observacionesCard">
+        <h3 class="section-title observaciones-title">OBSERVACIONES / ARREGLO PERSONALIZADO</h3>
+        <div class="grid">
+          <div class="grid-1">
+            <label for="observaciones">Observaciones</label>
+            <textarea
+              id="observaciones"
+              name="observaciones"
+              placeholder="Ej: Colores pastel, rosas y lirios, estilo romantico, tamano mediano."
+            ></textarea>
+            <p class="help-text">Instrucciones para el florista (colores, flores, tamano, estilo, detalles especiales).</p>
+          </div>
         </div>
+      </div>
 
 
         <!-- Solo una opción y sin required 

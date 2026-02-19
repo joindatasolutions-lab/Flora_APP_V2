@@ -322,6 +322,11 @@ document.getElementById("identificacion").addEventListener("input", e => {
   const val = e.target.value.trim();
   if (!val) {
     setClienteBadge(null);
+    document.getElementById("telefono").value = "";
+    document.getElementById("primerNombre").value = "";
+    document.getElementById("primerApellido").value = "";
+    const emailInput = document.getElementById("email");
+    if (emailInput) emailInput.value = "";
     return;
   }
   lookupTimer = setTimeout(() => buscarCliente(val), 300);
@@ -335,22 +340,57 @@ async function buscarCliente(ident) {
     if (data && data.found) {
       setClienteBadge(true);
 
-      // autocompletar con los nombres reales que devuelve el Apps Script
       document.getElementById("primerNombre").value = data.primerNombre || "";
       document.getElementById("primerApellido").value = data.primerApellido || "";
       document.getElementById("telefono").value = data.telefono || "";
-      document.getElementById("email").value = data.email || "";
-      if (document.getElementById("email")) {
-        document.getElementById("email").value = data.email || "";
+
+      // 🔥 ESTA LÍNEA ES LA QUE FALTA
+      if (data.tipoIdent) {
+        document.getElementById("tipoIdent").value = data.tipoIdent;
       }
+
+      const emailInput = document.getElementById("email");
+      const emailValor = extraerEmailDeData(data);
+      if (emailInput && emailValor) emailInput.value = emailValor;
+
+      // 🔥 Recalcular IVA si cambia a NIT
+      renderDrawerCart();
+
     } else {
       setClienteBadge(false);
-      limpiarCliente(false);
     }
+
   } catch (err) {
     console.error("Error al buscar cliente:", err);
     setClienteBadge(null);
   }
+}
+
+
+function extraerEmailDeData(data) {
+  if (!data || typeof data !== "object") return "";
+  const directKeys = [
+    "email",
+    "correo",
+    "correoElectronico",
+    "emailCliente",
+    "Email",
+    "Correo",
+    "CorreoElectronico",
+    "EmailCliente"
+  ];
+  for (const key of directKeys) {
+    const value = data[key];
+    if (typeof value === "string" && value.includes("@")) return value.trim();
+  }
+  for (const [key, value] of Object.entries(data)) {
+    if (typeof value !== "string") continue;
+    const lowerKey = key.toLowerCase();
+    if ((lowerKey.includes("email") || lowerKey.includes("correo")) && value.includes("@")) {
+      return value.trim();
+    }
+  }
+  return "";
 }
 
 // prueba commit
@@ -448,8 +488,7 @@ document.getElementById("pedidoForm").addEventListener("submit", async e => {
   // Dirección final (dirección + tipoLugar)
   // ============================================================
   const direccion = document.getElementById("direccion")?.value.trim() || "";
-  const tipoLugar =
-    document.querySelector('input[name="tipoLugar"]:checked')?.value || "";
+  const tipoLugar = document.getElementById("tipoLugar")?.value || "";
   const direccionFinal = tipoLugar ? `${direccion} - ${tipoLugar}` : direccion;
 
   formData.set("direccion", direccionFinal);
@@ -537,9 +576,6 @@ document.getElementById("pedidoForm").addEventListener("submit", async e => {
 // === ACTUALIZAR IVA AL CAMBIAR IDENTIFICACIÓN ===
 document.getElementById("tipoIdent").addEventListener("change", () => renderDrawerCart());
 
-// === CARGA INICIAL ===
-init();
-
 // === BANDERAS DEL INDICATIVO (COMPATIBLE iPhone/Android) ===
 document.addEventListener("DOMContentLoaded", function () {
   const select = document.getElementById("indicativo");
@@ -564,10 +600,11 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 // === AUTO-RELLENO PARA "ENTREGA EN TIENDA" ===
-document.querySelectorAll('input[name="tipoLugar"]').forEach(radio => {
-  radio.addEventListener("change", () => {
+const tipoLugarSelect = document.getElementById("tipoLugar");
+if (tipoLugarSelect) {
+  tipoLugarSelect.addEventListener("change", () => {
 
-    const tipo = document.querySelector('input[name="tipoLugar"]:checked')?.value;
+    const tipo = tipoLugarSelect.value;
 
     const destinatario = document.getElementById("destinatario");
     const telefonoDestino = document.getElementById("telefonoDestino");
@@ -578,16 +615,20 @@ document.querySelectorAll('input[name="tipoLugar"]').forEach(radio => {
     const VALOR_TIENDA = "Entrega En Tienda";
 
     if (tipo === VALOR_TIENDA) {
-
       // Obtener datos del cliente
       const nombre = document.getElementById("primerNombre").value.trim();
       const apellido = document.getElementById("primerApellido").value.trim();
       const telefono = document.getElementById("telefono").value.trim();
 
-      // Autollenar
+      // Autollenar destinatario y telefono destino
       destinatario.value = `${nombre} ${apellido}`.trim();
+      destinatario.dataset.autofilled = "true";
       telefonoDestino.value = telefono;
+      telefonoDestino.dataset.autofilled = "true";
+
+      // Asignar direccion para Entrega En Tienda
       direccion.value = VALOR_TIENDA;
+      direccion.dataset.autofilled = "true";
 
       // Si no existe el option → lo creamos
       if (![...barrioSel.options].some(o => o.value === VALOR_TIENDA)) {
@@ -599,6 +640,7 @@ document.querySelectorAll('input[name="tipoLugar"]').forEach(radio => {
 
       // Seleccionarlo SIEMPRE
       barrioSel.value = VALOR_TIENDA;
+      barrioSel.dataset.autofilled = "true";
 
       // Domicilio = 0
       state.domicilio = 0;
@@ -617,12 +659,44 @@ document.querySelectorAll('input[name="tipoLugar"]').forEach(radio => {
       direccion.disabled = false;
       barrioSel.disabled = false;
 
-      telefonoDestino.value = "";
-      direccion.value = "";
-      barrioSel.value = "";
+      if (destinatario.dataset.autofilled === "true") {
+        destinatario.value = "";
+        delete destinatario.dataset.autofilled;
+      }
+      if (telefonoDestino.dataset.autofilled === "true") {
+        telefonoDestino.value = "";
+        delete telefonoDestino.dataset.autofilled;
+      }
+      if (direccion.dataset.autofilled === "true" && direccion.value === VALOR_TIENDA) {
+        direccion.value = "";
+        delete direccion.dataset.autofilled;
+      }
+      if (barrioSel.dataset.autofilled === "true" && barrioSel.value === VALOR_TIENDA) {
+        barrioSel.value = "";
+        delete barrioSel.dataset.autofilled;
+      }
     }
   });
-});
+}
+
+// Si el usuario edita manualmente, dejar de considerar auto-llenado
+const direccionInput = document.getElementById("direccion");
+if (direccionInput) {
+  direccionInput.addEventListener("input", () => {
+    if (direccionInput.dataset.autofilled === "true" && direccionInput.value !== "Entrega En Tienda") {
+      delete direccionInput.dataset.autofilled;
+    }
+  });
+}
+
+const barrioSelect = document.getElementById("barrio");
+if (barrioSelect) {
+  barrioSelect.addEventListener("change", () => {
+    if (barrioSelect.dataset.autofilled === "true" && barrioSelect.value !== "Entrega En Tienda") {
+      delete barrioSelect.dataset.autofilled;
+    }
+  });
+}
 
 // === ACTIVAR ARREGLO PERSONALIZADO ===
 document.getElementById("btnIrPersonalizado").addEventListener("click", () => {
@@ -646,19 +720,4 @@ document.getElementById("btnIrPersonalizado").addEventListener("click", () => {
 // === LLAMAR INIT AUTOMÁTICAMENTE ===
 document.addEventListener("DOMContentLoaded", () => {
   init();
-  //setDefaultFechaHora(); 
 });
-
-
-
-// === ACTUALIZAR DOMICILIO ===
-function actualizarDomicilio() {
-  const sel = document.getElementById("barrio");
-  const barrio = sel.value;
-
-  state.domicilio = state.barrios[barrio] || 0;
-
-  document.getElementById("domicilio").value = state.domicilio;
-
-  updateCartTotals();
-}
