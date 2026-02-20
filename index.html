@@ -244,32 +244,18 @@
       <h3>Entrega</h3>
       <div class="form-group tipo-lugar">
         <label for="tipoLugar" class="titulo-campo">Tipo de lugar *</label>
-        <div class="radio-group" role="radiogroup" aria-label="Tipo de lugar">
-          <label class="radio-option">
-            <input type="radio" name="tipoLugar" value="Entrega En Tienda" required>
-            <span>🏪 Entrega En Tienda</span>
-          </label>
-          <label class="radio-option">
-            <input type="radio" name="tipoLugar" value="Casa" required checked>
-            <span>🏠 Casa</span>
-          </label>
-          <label class="radio-option">
-            <input type="radio" name="tipoLugar" value="Edificio" required>
-            <span>🏢 Edificio</span>
-          </label>
-          <label class="radio-option">
-            <input type="radio" name="tipoLugar" value="Conjunto" required>
-            <span>🏡 Conjunto</span>
-          </label>
-          <label class="radio-option">
-            <input type="radio" name="tipoLugar" value="Oficina" required>
-            <span>🏬 Oficina</span>
-          </label>
-          <label class="radio-option">
-            <input type="radio" name="tipoLugar" value="Centro Comercial" required>
-            <span>🏙️ Centro Comercial</span>
-          </label>
-        </div>
+        <select id="tipoLugar" name="tipoLugar" required>
+          <option value="">Selecciona un tipo de lugar...</option>
+          <option value="Casa">🏠 Casa</option>
+          <option value="Edificio">🏢 Edificio</option>
+          <option value="Conjunto">🏡 Conjunto</option>
+          <option value="Oficina">🏬 Oficina</option>
+          <option value="Entrega En Tienda">🏪 Entrega En Tienda</option>
+          <option value="Centro Comercial">🏙️ Centro Comercial</option>
+          <option value="Hotel">🏨 Hotel</option>
+          <option value="Restaurante">🍽️ Restaurante</option>
+          <option value="Clinica">🏥 Clínica</option>
+        </select>
       </div>
       <div class="grid">
         <div><label>Destinatario</label><input id="destinatario" name="destinatario" required></div>
