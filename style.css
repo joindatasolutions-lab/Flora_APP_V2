@@ -50,6 +50,11 @@ header h2 {
   max-width:1100px;
   margin:0 auto;
 }
+
+/* Cuando las categorías están presentes, hacer que se apilen verticalmente */
+.catalogo .categoria-seccion {
+  grid-column: 1 / -1;
+}
 .card {
   background:#fff;
   border:1px solid var(--borde);
@@ -878,4 +883,116 @@ textarea {
   gap: 16px;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   margin-bottom: 12px;
+}
+
+/* === ESTILOS PARA FILTRO DE CATEGORÍAS (PREMIUM) === */
+.filtro-categorias-container {
+  /* Separación visual elegante del buscador */
+  margin-top: 32px;
+  padding: 28px 0;
+  border-top: 2px solid #f0e6eb;
+  
+  /* Layout flex para alineación de label + select */
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  
+  /* Responsive: desktop horizontal, móvil vertical */
+  @media (min-width: 768px) {
+    flex-direction: row;
+    align-items: flex-end;
+    gap: 16px;
+  }
+}
+
+.filtro-label {
+  /* Typography premium */
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--rosa-osc);
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+  
+  /* Responsive */
+  @media (min-width: 768px) {
+    white-space: nowrap;
+    padding-bottom: 4px;
+  }
+}
+
+.filtro-select {
+  /* Dimensiones y padding */
+  width: 100%;
+  padding: 12px 16px;
+  padding-right: 40px; /* espacio para la flecha personalizada */
+  
+  /* Estilo premium con bordes redondeados */
+  border: 1.5px solid var(--rosa);
+  border-radius: 20px;
+  background-color: #fff;
+  
+  /* Typography */
+  font-size: 0.95rem;
+  color: #333;
+  font-weight: 500;
+  
+  /* Sombra suave y elegante */
+  box-shadow: 0 4px 12px rgba(201, 123, 148, 0.08);
+  
+  /* Cursor y aspecto */
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: none;
+  
+  /* Transiciones suaves */
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  /* Responsive */
+  @media (min-width: 768px) {
+    flex: 1;
+    max-width: 280px;
+  }
+}
+
+/* Flecha personalizada elegante */
+.filtro-select::after {
+  content: "▼";
+  position: absolute;
+  right: 16px;
+  pointer-events: none;
+  color: var(--rosa-osc);
+  font-size: 0.7rem;
+}
+
+/* Estados del select */
+.filtro-select:hover {
+  border-color: var(--rosa-osc);
+  box-shadow: 0 6px 16px rgba(201, 123, 148, 0.12);
+  transform: translateY(-2px);
+}
+
+.filtro-select:focus {
+  outline: none;
+  border-color: var(--rosa-osc);
+  box-shadow: 0 0 0 4px rgba(230, 165, 182, 0.25), 0 6px 16px rgba(201, 123, 148, 0.12);
+}
+
+.filtro-select:active {
+  transform: translateY(0);
+}
+
+/* Responsive adicional en móviles */
+@media (max-width: 767px) {
+  .filtro-categorias-container {
+    padding: 20px 0;
+  }
+  
+  .filtro-select {
+    font-size: 0.9rem;
+    padding: 11px 14px;
+    padding-right: 36px;
+  }
 }
