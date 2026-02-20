@@ -896,9 +896,10 @@ textarea {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  
-  /* Responsive: desktop horizontal, móvil vertical */
-  @media (min-width: 768px) {
+}
+
+@media (min-width: 768px) {
+  .filtro-categorias-container {
     flex-direction: row;
     align-items: flex-end;
     gap: 16px;
@@ -913,9 +914,10 @@ textarea {
   margin: 0;
   text-transform: uppercase;
   letter-spacing: 0.7px;
-  
-  /* Responsive */
-  @media (min-width: 768px) {
+}
+
+@media (min-width: 768px) {
+  .filtro-label {
     white-space: nowrap;
     padding-bottom: 4px;
   }
@@ -949,9 +951,10 @@ textarea {
   
   /* Transiciones suaves */
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  
-  /* Responsive */
-  @media (min-width: 768px) {
+}
+
+@media (min-width: 768px) {
+  .filtro-select {
     flex: 1;
     max-width: 280px;
   }
@@ -994,5 +997,13 @@ textarea {
     font-size: 0.9rem;
     padding: 11px 14px;
     padding-right: 36px;
+  }
+}
+
+/* Mantener 2 columnas en tarjetas de móviles */
+@media (max-width: 767px) {
+  .catalogo-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
   }
 }
