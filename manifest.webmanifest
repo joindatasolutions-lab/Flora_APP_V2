@@ -1,0 +1,26 @@
+{
+  "name": "Domicilios Join Data",
+  "short_name": "Domicilios",
+  "description": "Panel de domicilios para control de estados, asignaciones y entregas.",
+  "lang": "es-CO",
+  "start_url": "./domicilios-web.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f7f1ee",
+  "theme_color": "#b96c86",
+  "icons": [
+    {
+      "src": "img/logo%202024%20marca%20registrada-04.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "img/logo%202024%20marca%20registrada-04.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

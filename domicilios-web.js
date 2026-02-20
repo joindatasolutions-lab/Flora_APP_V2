@@ -55,6 +55,38 @@ const normalizarTexto = value => {
     .replace(/[\u0300-\u036f]/g, "");
 };
 
+const obtenerNombreExterno = pedido => {
+  if (!pedido) return '';
+  const posiblesCampos = [
+    pedido.externoNombre,
+    pedido.nombreExterno,
+    pedido.NombreExterno,
+    pedido.nombre_externo,
+    pedido['Nombre Externo'],
+    pedido['Nombre externo'],
+    pedido['Domiciliario Externo'],
+    pedido['Domiciliario externo'],
+    pedido.domiciliarioExterno
+  ];
+  const nombre = posiblesCampos.find(value => (value ?? '').toString().trim());
+  return (nombre ?? '').toString().trim();
+};
+
+const obtenerTelefonoExterno = pedido => {
+  if (!pedido) return '';
+  const posiblesCampos = [
+    pedido.telefonoExterno,
+    pedido.TelefonoExterno,
+    pedido.telefono_externo,
+    pedido['Telefono Externo'],
+    pedido['Teléfono Externo'],
+    pedido['Teléfono externo'],
+    pedido['Telefono externo']
+  ];
+  const telefono = posiblesCampos.find(value => (value ?? '').toString().trim());
+  return (telefono ?? '').toString().trim();
+};
+
 const formatearFechaEntrega = pedido => {
   const raw =
     pedido.fechaEntrega ||
@@ -261,6 +293,17 @@ async function asignarDomiciliario(pedido, domiciliario){
 
 function abrirModalExterno(pedido, select) {
   if (!dom.modal) return;
+  const valorPrevio = select?.value || 'Asignar domiciliario';
+  const estabaDeshabilitado = Boolean(select?.disabled);
+  const backgroundPrevio = select?.style?.background || '';
+  const cursorPrevio = select?.style?.cursor || '';
+
+  if (select) {
+    select.disabled = true;
+    select.style.background = "#f5f5f5";
+    select.style.cursor = "not-allowed";
+  }
+
   dom.modal.style.display = 'flex';
   dom.modal.setAttribute('aria-hidden', 'false');
 
@@ -298,7 +341,12 @@ function abrirModalExterno(pedido, select) {
         select.style.cursor = "not-allowed";
         dom.modal.style.display = "none";
         dom.modal.setAttribute('aria-hidden', 'true');
-        actualizarEnCache(pedido, { domiciliario: 'Externo' });
+        actualizarEnCache(pedido, {
+          domiciliario: 'Externo',
+          externoNombre: nombre,
+          nombreExterno: nombre,
+          telefonoExterno: tel
+        });
         aplicarFiltros();
       } else {
         mostrarToast(data?.message || "No se pudo registrar");
@@ -312,7 +360,10 @@ function abrirModalExterno(pedido, select) {
   dom.btnCancelar.onclick = () => {
     dom.modal.style.display = "none";
     dom.modal.setAttribute('aria-hidden', 'true');
-    select.value = 'Asignar domiciliario';
+    select.value = valorPrevio;
+    select.disabled = estabaDeshabilitado;
+    select.style.background = backgroundPrevio;
+    select.style.cursor = cursorPrevio;
   };
 }
 
@@ -338,9 +389,23 @@ function renderizarDomicilios(domicilios, options = {}) {
   });
 
   for (const [domiciliario, pedidos] of Object.entries(grupos)) {
+    const nombreExterno = pedidos
+      .map(obtenerNombreExterno)
+      .find(nombre => Boolean(nombre));
+    const telefonoExterno = pedidos
+      .map(obtenerTelefonoExterno)
+      .find(telefono => Boolean(telefono));
+    const nombreConTelefono = telefonoExterno
+      ? `${nombreExterno} (${telefonoExterno})`
+      : nombreExterno;
+    const tituloGrupo =
+      normalizarTexto(domiciliario) === normalizarTexto('Externo') && nombreExterno
+        ? nombreConTelefono
+        : domiciliario;
+
     const grupoDiv = document.createElement('div');
     grupoDiv.classList.add('grupo');
-    grupoDiv.innerHTML = `<h3>${domiciliario} <small>(${pedidos.length})</small></h3>`;
+    grupoDiv.innerHTML = `<h3>${tituloGrupo} <small>(${pedidos.length})</small></h3>`;
 
     const contenedorGrupo = document.createElement('div');
     contenedorGrupo.classList.add('contenedor-grupo');
@@ -354,6 +419,7 @@ function renderizarDomicilios(domicilios, options = {}) {
       const btnClass = /entregado/i.test(est) ? 'btn-estado entregado' : 'btn-estado';
       const domi = (pedido.domiciliario || '').trim();
       const valorActual = domi || 'Asignar domiciliario';
+      const valorActualNorm = normalizarTexto(valorActual);
 
       const imgSrc = pedido.imagen || IMG_FALLBACK;
       const producto = pedido.producto || 'Producto';
@@ -384,10 +450,10 @@ function renderizarDomicilios(domicilios, options = {}) {
         acciones.className = 'acciones';
         acciones.innerHTML = `
           <select>
-            <option ${valorActual === 'Asignar domiciliario' ? 'selected' : ''}>Asignar domiciliario</option>
-            <option ${valorActual === 'Elvis' ? 'selected' : ''}>Elvis</option>
-            <option ${valorActual === 'Oscar' ? 'selected' : ''}>Oscar</option>
-            <option ${valorActual === 'Externo' ? 'selected' : ''}>Externo</option>
+            <option ${valorActualNorm === normalizarTexto('Asignar domiciliario') ? 'selected' : ''}>Asignar domiciliario</option>
+            <option ${valorActualNorm === normalizarTexto('Elvis') ? 'selected' : ''}>Elvis</option>
+            <option ${valorActualNorm === normalizarTexto('Oscar') ? 'selected' : ''}>Oscar</option>
+            <option ${valorActualNorm === normalizarTexto('Externo') ? 'selected' : ''}>Externo</option>
           </select>
           <button class="${btnClass}">${btnTxt}</button>
         `;
@@ -467,6 +533,14 @@ async function actualizarEstado(pedido, nuevoEstado, boton, originalText) {
 }
 
 function init() {
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js').catch(err => {
+        console.error('No se pudo registrar el service worker:', err);
+      });
+    });
+  }
+
   setupBuscador();
   setupFiltros();
   cargarDomicilios();
