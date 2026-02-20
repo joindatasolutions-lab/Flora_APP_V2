@@ -843,3 +843,39 @@ textarea {
     padding-bottom: 100px; /* espacio para el botón flotante */
   }
 }
+
+/* === ESTILOS PARA CATEGORÍAS === */
+.categoria-seccion {
+  margin-top: 28px;
+}
+
+.categoria-seccion:first-child {
+  margin-top: 0;
+}
+
+.categoria-header {
+  margin-bottom: 14px;
+  padding-top: 18px;
+  border-top: 1px solid #e8d7de;
+}
+
+.categoria-seccion:first-child .categoria-header {
+  border-top: none;
+  padding-top: 0;
+}
+
+.categoria-titulo {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #a34b6d;
+  margin: 0;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+
+.catalogo-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  margin-bottom: 12px;
+}

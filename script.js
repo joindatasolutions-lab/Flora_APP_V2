@@ -3,10 +3,12 @@ const ORIGEN_CATALOGO = "normal";
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwdixPJBCFos9aUaUT_NDxQ2ZMW3s2CXoQ0KRNVNe8aYmaXtTSONvKgPRXIFcFpSSmO/exec";
 const state = {
   catalogo: [],
+  catalogoEnriquecido: [],
   barrios: {},
   cart: [],
   domicilio: 0,
   iva: 0,
+  categoriaSeleccionada: null,
 };
 const fmtCOP = v => Number(v || 0).toLocaleString('es-CO');
 
@@ -16,47 +18,81 @@ async function init() {
     const res = await fetch(SCRIPT_URL);
     const data = await res.json();
     state.catalogo = data.catalogo || [];
+    state.catalogoEnriquecido = enriquecerCatalogoCategorias(state.catalogo);
     state.barrios = data.barrios || {};
-    renderCatalog();
+    renderCatalogoPorCategorias();
     fillBarrios();
+    fillFiltrosCategorias();
   } catch (error) {
     console.error("Error al cargar datos:", error);
     Swal.fire("Error", "No se pudieron cargar los datos del catálogo", "error");
   }
 }
 
-// === RENDERIZAR CATÁLOGO ==
-function renderCatalog() {
+// === RENDERIZAR CATÁLOGO POR CATEGORÍAS ===
+function renderCatalogoPorCategorias() {
   const cont = document.getElementById("catalogo");
   cont.innerHTML = "";
 
-  state.catalogo.forEach(prod => {
-    if (!prod.img) return;
+  // Filtrar por categoría si está seleccionada
+  const catalagoParaMostrar = state.categoriaSeleccionada
+    ? filtrarPorCategoria(state.catalogoEnriquecido, state.categoriaSeleccionada)
+    : state.catalogoEnriquecido;
 
-    // Normalización segura del código
-    const codigo =
-      prod.id !== undefined && prod.id !== null && prod.id !== ""
+  // Agrupar por categoría
+  const grupos = agruparPorCategoria(catalagoParaMostrar);
+
+  // Renderizar cada grupo
+  Object.entries(grupos).forEach(([categoria, productos]) => {
+    if (productos.length === 0) return;
+
+    // Contenedor de categoría con título sutil
+    const seccionDiv = document.createElement("div");
+    seccionDiv.className = "categoria-seccion";
+
+    // Título de categoría más sutil
+    const tituloDiv = document.createElement("div");
+    tituloDiv.className = "categoria-header";
+    tituloDiv.innerHTML = `<h3 class="categoria-titulo">${categoria}</h3>`;
+    seccionDiv.appendChild(tituloDiv);
+
+    // Grid de productos
+    const gridDiv = document.createElement("div");
+    gridDiv.className = "catalogo-grid";
+
+    productos.forEach(prod => {
+      if (!prod.img) return;
+
+      const codigo = prod.id !== undefined && prod.id !== null && prod.id !== ""
         ? prod.id
         : "-";
 
-    const card = document.createElement("div");
-    card.className = "card";
+      const card = document.createElement("div");
+      card.className = "card";
 
-    card.innerHTML = `
-      <img src="${prod.img}" alt="${prod.name}">
-      <div class="body">
-        <div class="product-id">N°: ${codigo}</div>
-        <div class="name">${prod.name}</div>
-        <div class="price">$${fmtCOP(prod.price)}</div>
-        <button class="btn-add">Agregar al carrito</button>
-      </div>
-    `;
+      card.innerHTML = `
+        <img src="${prod.img}" alt="${prod.name}">
+        <div class="body">
+          <div class="product-id">N°: ${codigo}</div>
+          <div class="name">${prod.name}</div>
+          <div class="price">$${fmtCOP(prod.price)}</div>
+          <button class="btn-add">Agregar al carrito</button>
+        </div>
+      `;
 
-    card.querySelector(".btn-add")
-      .addEventListener("click", () => addToCart(prod));
+      card.querySelector(".btn-add")
+        .addEventListener("click", () => addToCart(prod));
 
-    cont.appendChild(card);
+      gridDiv.appendChild(card);
+    });
+
+    seccionDiv.appendChild(gridDiv);
+    cont.appendChild(seccionDiv);
   });
+
+  if (Object.values(grupos).every(p => p.length === 0)) {
+    cont.innerHTML = `<p style="text-align:center; color:#888; padding:40px 20px;">No hay productos en esta categoría 😔</p>`;
+  }
 }
 
 
@@ -68,47 +104,72 @@ function filtrarCatalogo() {
     .toLowerCase()
     .trim();
 
+  // Aplicar búsqueda y filtro de categoría
+  let productosFiltrados = state.catalogoEnriquecido;
+  
+  // Filtrar por búsqueda si hay query
+  if (query) {
+    productosFiltrados = productosFiltrados.filter(p => {
+      const nombre = (p.name || "").toLowerCase();
+      const codigo = String(p.id || "").toLowerCase();
+      return nombre.includes(query) || codigo.includes(query);
+    });
+  }
+
+  // Limpiar la búsqueda y renderizar
+  state.categoriaSeleccionada = null;
+  document.getElementById("filtroCategorias").value = "";
+  
+  // Renderizar con el nuevo set de productos
   const cont = document.getElementById("catalogo");
   cont.innerHTML = "";
 
-  const productosFiltrados = query
-    ? state.catalogo.filter(p => {
-        const nombre = (p.name || "").toLowerCase();
-        const codigo = String(p.id || "").toLowerCase(); // ✅ USAR id
-
-        return nombre.includes(query) || codigo.includes(query);
-      })
-    : state.catalogo;
-
   if (productosFiltrados.length === 0) {
-    cont.innerHTML = `
-      <p style="text-align:center;color:#888;">
-        No se encontraron productos con "${query}" 😔
-      </p>
-    `;
+    cont.innerHTML = `<p style="text-align:center;color:#888; padding:40px 20px;">No se encontraron productos con "${query}" 😔</p>`;
     return;
   }
 
-  productosFiltrados.forEach(prod => {
-    if (!prod.img) return;
+  // Agrupar y renderizar con estilos mejorados
+  const grupos = agruparPorCategoria(productosFiltrados);
+  
+  Object.entries(grupos).forEach(([categoria, productos]) => {
+    if (productos.length === 0) return;
 
-    const card = document.createElement("div");
-    card.className = "card";
+    const seccionDiv = document.createElement("div");
+    seccionDiv.className = "categoria-seccion";
 
-    card.innerHTML = `
-      <img src="${prod.img}" alt="${prod.name}">
-      <div class="body">
-        <div class="product-id">N°: ${prod.id}</div> <!-- ✅ SIEMPRE -->
-        <div class="name">${prod.name}</div>
-        <div class="price">$${fmtCOP(prod.price)}</div>
-        <button class="btn-add">Agregar al carrito</button>
-      </div>
-    `;
+    const headerDiv = document.createElement("div");
+    headerDiv.className = "categoria-header";
+    headerDiv.innerHTML = `<h3 class="categoria-titulo">${categoria}</h3>`;
+    seccionDiv.appendChild(headerDiv);
 
-    card.querySelector(".btn-add")
-      .addEventListener("click", () => addToCart(prod));
+    const gridDiv = document.createElement("div");
+    gridDiv.className = "catalogo-grid";
 
-    cont.appendChild(card);
+    productos.forEach(prod => {
+      if (!prod.img) return;
+
+      const card = document.createElement("div");
+      card.className = "card";
+
+      card.innerHTML = `
+        <img src="${prod.img}" alt="${prod.name}">
+        <div class="body">
+          <div class="product-id">N°: ${prod.id}</div>
+          <div class="name">${prod.name}</div>
+          <div class="price">$${fmtCOP(prod.price)}</div>
+          <button class="btn-add">Agregar al carrito</button>
+        </div>
+      `;
+
+      card.querySelector(".btn-add")
+        .addEventListener("click", () => addToCart(prod));
+
+      gridDiv.appendChild(card);
+    });
+
+    seccionDiv.appendChild(gridDiv);
+    cont.appendChild(seccionDiv);
   });
 }
 
@@ -131,6 +192,49 @@ function fillBarrios() {
   });
 }
 
+// === FILTRO POR CATEGORÍA ===
+function fillFiltrosCategorias() {
+  // Verificar si el select existe, si no crearlo
+  let filtroSelect = document.getElementById("filtroCategorias");
+  if (!filtroSelect) {
+    const searchBox = document.querySelector(".search-box");
+    if (searchBox && searchBox.parentElement) {
+      const filtroDiv = document.createElement("div");
+      filtroDiv.style.marginTop = "12px";
+      filtroDiv.innerHTML = `
+        <label>Categoría:</label>
+        <select id="filtroCategorias" style="width:100%; padding:10px; border-radius:8px; border:1px solid #ddd; font-size:0.95rem;">
+          <option value="">Todas las categorías</option>
+        </select>
+      `;
+      searchBox.parentElement.parentElement.appendChild(filtroDiv);
+      filtroSelect = document.getElementById("filtroCategorias");
+    }
+  }
+
+  if (!filtroSelect) return;
+
+  // Llenar opciones
+  const categorias = obtenerTodasLasCategorias();
+  const options = filtroSelect.querySelectorAll("option");
+  
+  // Agregar nuevas opciones si no existen
+  categorias.forEach(cat => {
+    if (![...options].find(o => o.value === cat)) {
+      const op = document.createElement("option");
+      op.value = cat;
+      op.textContent = cat;
+      filtroSelect.appendChild(op);
+    }
+  });
+
+  // Evento de cambio
+  filtroSelect.addEventListener("change", (e) => {
+    state.categoriaSeleccionada = e.target.value || null;
+    document.getElementById("searchInput").value = "";
+    renderCatalogoPorCategorias();
+  });
+}
 
 function actualizarDomicilio() {
   const barrioSel = document.getElementById("barrio").value;
@@ -497,8 +601,7 @@ document.getElementById("pedidoForm").addEventListener("submit", async e => {
   // Dirección final (dirección + tipoLugar)
   // ============================================================
   const direccion = document.getElementById("direccion")?.value.trim() || "";
-  const tipoLugar =
-    document.querySelector('input[name="tipoLugar"]:checked')?.value || "";
+  const tipoLugar = document.getElementById("tipoLugar")?.value || "";
   const direccionFinal = tipoLugar ? `${direccion} - ${tipoLugar}` : direccion;
 
   formData.set("direccion", direccionFinal);
@@ -610,10 +713,10 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 // === AUTO-RELLENO PARA "ENTREGA EN TIENDA" ===
-document.querySelectorAll('input[name="tipoLugar"]').forEach(radio => {
-  radio.addEventListener("change", () => {
-
-    const tipo = document.querySelector('input[name="tipoLugar"]:checked')?.value;
+const tipoLugarSelect = document.getElementById("tipoLugar");
+if (tipoLugarSelect) {
+  tipoLugarSelect.addEventListener("change", () => {
+    const tipo = tipoLugarSelect.value;
 
     const destinatario = document.getElementById("destinatario");
     const telefonoDestino = document.getElementById("telefonoDestino");
@@ -655,7 +758,7 @@ document.querySelectorAll('input[name="tipoLugar"]').forEach(radio => {
       state.domicilio = 0;
       renderDrawerCart();
 
-      // Habilitar / deshabilitar campos (si deseas bloquearlos déjame saber)
+      // Habilitar / deshabilitar campos
       destinatario.disabled = false;
       telefonoDestino.disabled = false;
       direccion.disabled = false;
@@ -686,7 +789,7 @@ document.querySelectorAll('input[name="tipoLugar"]').forEach(radio => {
       }
     }
   });
-});
+}
 
 // Si el usuario edita manualmente, dejar de considerar auto-llenado
 const direccionInput = document.getElementById("direccion");
