@@ -1,0 +1,9 @@
+{
+  "name": "flora-v2-domicilios",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Panel de domicilios con pruebas unitarias",
+  "scripts": {
+    "test": "node --test tests/*.test.js"
+  }
+}

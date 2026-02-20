@@ -1,21 +1,22 @@
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwdixPJBCFos9aUaUT_NDxQ2ZMW3s2CXoQ0KRNVNe8aYmaXtTSONvKgPRXIFcFpSSmO/exec";
 const IMG_FALLBACK = "https://via.placeholder.com/360x200?text=Sin+imagen";
+const getById = id => (typeof document !== 'undefined' ? document.getElementById(id) : null);
 
 const dom = {
-  contenedor: document.getElementById('contenedor-domicilios'),
-  toast: document.getElementById('toast'),
-  buscar: document.getElementById('buscarPedido'),
-  filtroEstado: document.getElementById('filtroEstado'),
-  filtroDomiciliario: document.getElementById('filtroDomiciliario'),
-  btnRefresh: document.getElementById('btnRefresh'),
-  statsCount: document.getElementById('statsCount'),
-  statsInfo: document.getElementById('statsInfo'),
-  lastUpdate: document.getElementById('lastUpdate'),
-  modal: document.getElementById('modalExterno'),
-  btnGuardar: document.getElementById('btnRegistrarExterno'),
-  btnCancelar: document.getElementById('btnCancelarExterno'),
-  nombreExterno: document.getElementById('nombreExterno'),
-  telefonoExterno: document.getElementById('telefonoExterno')
+  contenedor: getById('contenedor-domicilios'),
+  toast: getById('toast'),
+  buscar: getById('buscarPedido'),
+  filtroEstado: getById('filtroEstado'),
+  filtroDomiciliario: getById('filtroDomiciliario'),
+  btnRefresh: getById('btnRefresh'),
+  statsCount: getById('statsCount'),
+  statsInfo: getById('statsInfo'),
+  lastUpdate: getById('lastUpdate'),
+  modal: getById('modalExterno'),
+  btnGuardar: getById('btnRegistrarExterno'),
+  btnCancelar: getById('btnCancelarExterno'),
+  nombreExterno: getById('nombreExterno'),
+  telefonoExterno: getById('telefonoExterno')
 };
 
 const state = {
@@ -546,4 +547,17 @@ function init() {
   cargarDomicilios();
 }
 
-init();
+if (typeof document !== 'undefined') {
+  init();
+}
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = {
+    normalizarTexto,
+    obtenerNombreExterno,
+    obtenerTelefonoExterno,
+    formatearFechaEntrega,
+    ordenarUnicos,
+    isOkResponse
+  };
+}
