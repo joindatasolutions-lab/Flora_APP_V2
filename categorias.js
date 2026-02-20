@@ -4,6 +4,7 @@
  */
 
 const CATEGORIAS_MAP = [
+  { nombre: 'Personalizados', rango: [95, 95] },
   { nombre: 'Flora boxes', rango: [1, 32] },
   { nombre: 'Flora canasto', rango: [33, 41] },
   { nombre: 'Flora bouquets', rango: [42, 53] },
@@ -12,7 +13,7 @@ const CATEGORIAS_MAP = [
   { nombre: 'Cerámica & vidrio', rango: [68, 71] },
   { nombre: 'Anchetas', rango: [72, 74] },
   { nombre: 'Condolencias', rango: [75, 79] },
-  { nombre: 'Adicionales', rango: [80, 93] }
+  { nombre: 'Adicionales', rango: [80, 94] }
 ];
 
 /**
