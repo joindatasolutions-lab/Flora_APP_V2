@@ -176,6 +176,13 @@ const filtrosActivos = () => {
 
 const filtrarData = data => {
   let filtrados = [...data];
+  
+  // Excluir domicilios con estado "Entregado"
+  filtrados = filtrados.filter(p => {
+    const estado = (p.estado || '').toString().trim();
+    return !/entregado/i.test(estado);
+  });
+  
   const estado = dom.filtroEstado?.value || 'Todos';
   const domiciliario = dom.filtroDomiciliario?.value || 'Todos';
   if (estado !== 'Todos') {
