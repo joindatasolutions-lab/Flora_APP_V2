@@ -5,45 +5,73 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Flora - Catálogo de Arreglos Florales</title>
 
-  <!-- Fuentes y librerías -->
+  <!-- Fuentes externas -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Librerías de UI -->
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-  <!-- Estilos -->
+  <!-- Estilos principales -->
   <link rel="stylesheet" href="style.css" />
 </head>
 
 <body>
-    <!-- === ENCABEZADO === -->
+  <!-- ========================================
+       HEADER: Logo, título y controles
+       ======================================== -->
   <header class="catalog-header">
     <div class="logo-area">
       <img src="img/logo 2024 marca registrada-04.png" alt="Flora Logo">
     </div>
 
-    <div class="title-search">
+    <div class="title-area">
       <h2>Catálogo de Arreglos Florales</h2>
+    </div>
 
-      <!-- 🔍 BUSCADOR UBICADO JUNTO AL TÍTULO -->
+    <div class="controls-area">
+      <!-- Buscador -->
       <div class="search-box">
-        <input type="text" id="searchInput" placeholder="Buscar..." oninput="filtrarCatalogo()">
+        <label for="searchInput" class="visually-hidden">Buscar productos</label>
+        <input 
+          type="text" 
+          id="searchInput" 
+          placeholder="Buscar..." 
+          oninput="filtrarCatalogo()"
+          aria-label="Buscar en el catálogo">
+      </div>
+
+      <!-- Filtro de categoría (se llena dinámicamente) -->
+      <div class="filtro-categorias-container">
+        <label class="filtro-label" for="filtroCategorias">Categoría:</label>
+        <select id="filtroCategorias" class="filtro-select">
+          <option value="">Todas las categorías</option>
+        </select>
       </div>
     </div>
   </header>
 
-
-  <!-- === CATÁLOGO === -->
+  <!-- ========================================
+       VISTA CATÁLOGO: Grid de productos
+       ======================================== -->
   <section id="viewCatalog" class="view active">
-    <!-- === BOTÓN ARREGLO PERSONALIZADO === -->
+    <!-- Botón para crear arreglo personalizado -->
     <div style="text-align:center; margin-bottom:20px;">
-      <button class="btn-primary" id="btnIrPersonalizado">
+      <button 
+        class="btn-primary" 
+        id="btnIrPersonalizado"
+        aria-label="Ir a crear arreglo personalizado">
         🌸 Crear Arreglo Personalizado
       </button>
     </div>
-    <div id="catalogo" class="catalogo"></div>
+    
+    <!-- Contenedor dinámico de productos -->
+    <div id="catalogo" class="catalogo" role="list" aria-label="Lista de productos"></div>
   </section>
 
-  <!-- === DRAWER CARRITO === -->
-  <aside id="drawerCarrito" class="drawer">
+  <!-- ========================================
+       DRAWER CARRITO: Panel deslizable
+       ======================================== -->
+  <aside id="drawerCarrito" class="drawer" role="complementary" aria-label="Carrito de compras">
     <div class="drawer-header">
       <strong>🛍️ Tu carrito</strong>
       <button id="cerrarDrawer" class="icon-btn">✕</button>
@@ -58,46 +86,53 @@
           <h3><strong>Total:</strong> $<span id="totalDrawer">0</span></h3>
         </div>
         <div class="drawer-actions">
-          <button id="vaciarCarrito" class="btn-outline">Vaciar</button>
-          <button id="btnPedidoDrawer" class="btn-primary">Continuar</button>
+          <button id="vaciarCarrito" class="btn-outline" aria-label="Vaciar carrito">Vaciar</button>
+          <button id="btnPedidoDrawer" class="btn-primary" aria-label="Continuar con el pedido">Continuar</button>
         </div>
       </div>
     </div>
   </aside>
 
-  <!-- === BOTÓN FLOTANTE CARRITO === -->
-  <button id="btnDrawer" class="cart-fab">
+  <!-- ========================================
+       BOTÓN FLOTANTE: Acceso rápido al carrito
+       ======================================== -->
+  <button id="btnDrawer" class="cart-fab" aria-label="Abrir carrito de compras">
     🛍️<span class="cart-text">Continuar</span>
-      <span id="cartCount">0</span>
+      <span id="cartCount" aria-live="polite">0</span>
   </button>
 
-  <!-- === FORMULARIO DE PEDIDO === -->
+  <!-- ========================================
+       VISTA FORMULARIO: Datos del pedido
+       ======================================== -->
   <section id="viewForm" class="view">
-    <form id="pedidoForm">
-      <div class="pedido-summary" id="resumenProducto">🛍 Tu pedido</div>
+    <form id="pedidoForm" aria-label="Formulario de pedido">
+      <div class="pedido-summary" id="resumenProducto" role="status" aria-live="polite">🛍 Tu pedido</div>
 
       <h3>Datos del Cliente 
-        <span id="badgeCliente" class="badge warn">Nuevo cliente</span>
+        <span id="badgeCliente" class="badge warn" role="status">Nuevo cliente</span>
       </h3>
 
       <div class="grid">
         <div>
-          <label>Tipo de identificación</label>
-          <select id="tipoIdent" required>
+          <label for="tipoIdent">Tipo de identificación</label>
+          <select id="tipoIdent" name="tipoIdent" required>
             <option value="CEDULA" selected>Cédula</option>
             <option value="NIT">NIT</option>
           </select>
         </div>
-        <div><label>Identificación</label><input id="identificacion" type="number" name="identificacion" required></div>
+        <div>
+          <label for="identificacion">Identificación</label>
+          <input id="identificacion" type="number" name="identificacion" required>
+        </div>
         
         <div class="indicativo-group">
           <label for="indicativo">Indicativo</label>
           
           <div class="flag-select">
-            <span id="flagIcon">🇨🇴</span>
-            <select id="indicativo" name="indicativo" required>
+            <span id="flagIcon" aria-hidden="true">🇨🇴</span>
+            <select id="indicativo" name="indicativo" required aria-label="Seleccionar código telefónico del país">
 
-            <!-- 🌎 AMÉRICAS -->
+            <!-- AMÉRICAS -->
             <option value="+1-268" data-flag="ag">Antigua y Barbuda (+1-268)</option>
             <option value="+54" data-flag="ar">Argentina (+54)</option>
             <option value="+1-246" data-flag="bb">Barbados (+1-246)</option>
@@ -235,10 +270,22 @@
           
         </div>
 
-        <div><label>Teléfono (desde donde nos escribes por WhatsApp)</label><input id="telefono" name="telefono" required></div>
-        <div><label>Nombre</label><input id="primerNombre" name="primerNombre" required></div>
-        <div><label>Apellido(s)</label><input id="primerApellido" name="primerApellido"></div>
-        <div><label>Email (opcional)</label><input type="email" id="email" name="email"></div>
+        <div>
+          <label for="telefono">Teléfono (desde donde nos escribes por WhatsApp)</label>
+          <input id="telefono" name="telefono" type="tel" required>
+        </div>
+        <div>
+          <label for="primerNombre">Nombre</label>
+          <input id="primerNombre" name="primerNombre" type="text" required>
+        </div>
+        <div>
+          <label for="primerApellido">Apellido(s)</label>
+          <input id="primerApellido" name="primerApellido" type="text">
+        </div>
+        <div>
+          <label for="email">Email (opcional)</label>
+          <input id="email" name="email" type="email" autocomplete="email">
+        </div>
       </div>
 
       <h3>Entrega</h3>
@@ -258,17 +305,26 @@
         </select>
       </div>
       <div class="grid">
-        <div><label>Destinatario</label><input id="destinatario" name="destinatario" required></div>
-        <div><label>Teléfono destino</label><input id="telefonoDestino" name="telefonoDestino"></div>
-        <div><label>Dirección</label><input id="direccion" name="direccion" placeholder="Apto, Casa, Oficina" required></div>
         <div>
-          <label>Barrio</label>
-          <select id="barrio" name="barrio" onchange="actualizarDomicilio()"></select>
+          <label for="destinatario">Destinatario</label>
+          <input id="destinatario" name="destinatario" type="text" required>
+        </div>
+        <div>
+          <label for="telefonoDestino">Teléfono destino</label>
+          <input id="telefonoDestino" name="telefonoDestino" type="tel">
+        </div>
+        <div>
+          <label for="direccion">Dirección</label>
+          <input id="direccion" name="direccion" type="text" placeholder="Apto, Casa, Oficina" required>
+        </div>
+        <div>
+          <label for="barrio">Barrio</label>
+          <select id="barrio" name="barrio" onchange="actualizarDomicilio()" aria-label="Seleccionar barrio"></select>
         </div>
         </div>
         <div class="entrega-fecha-hora">
           <div>
-            <label>Fecha de entrega</label>
+            <label for="fechaEntrega">Fecha de entrega</label>
             <input id="fechaEntrega" name="fechaEntrega" type="date">
           </div>
         </div>
@@ -351,13 +407,15 @@
       <!-- <input type="hidden" id="observaciones" name="observaciones">  -->
 
       <div class="actions">
-        <button type="button" class="btn-outline" id="btnVolver">Regresar</button>
-        <button type="submit" class="btn-primary" id="btnSubmit">Confirmar pedido</button>
+        <button type="button" class="btn-outline" id="btnVolver" aria-label="Regresar al catálogo">Regresar</button>
+        <button type="submit" class="btn-primary" id="btnSubmit" aria-label="Confirmar y enviar pedido">Confirmar pedido</button>
       </div>
     </form>
   </section>
 
-  <!-- === SCRIPT PRINCIPAL === -->
+  <!-- ========================================
+       SCRIPTS: Lógica de la aplicación
+       ======================================== -->
   <script src="categorias.js"></script>
   <script src="script.js?v=20260201"></script>
 </body>

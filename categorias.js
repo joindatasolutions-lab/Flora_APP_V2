@@ -98,3 +98,15 @@ function filtrarPorCategoria(catalogo, categorias) {
     cats.includes(prod.categoria || obtenerCategoria(prod.id))
   );
 }
+
+// Exportar para tests de Node.js
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = {
+    CATEGORIAS_MAP,
+    obtenerCategoria,
+    obtenerTodasLasCategorias,
+    enriquecerCatalogoCategorias,
+    agruparPorCategoria,
+    filtrarPorCategoria
+  };
+}

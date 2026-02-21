@@ -1,6 +1,18 @@
 const ORIGEN_CATALOGO = "normal";
 // === CONFIGURACIÓN GENERAL ===
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwdixPJBCFos9aUaUT_NDxQ2ZMW3s2CXoQ0KRNVNe8aYmaXtTSONvKgPRXIFcFpSSmO/exec";
+
+/**
+ * Estado global de la aplicación
+ * @type {Object}
+ * @property {Array} catalogo - Catálogo original de productos
+ * @property {Array} catalogoEnriquecido - Catálogo con categorías asignadas
+ * @property {Object} barrios - Objeto con barrios y costos de domicilio
+ * @property {Array} cart - Productos en el carrito
+ * @property {number} domicilio - Costo de domicilio seleccionado
+ * @property {number} iva - IVA aplicado (19% para NIT)
+ * @property {string|null} categoriaSeleccionada - Filtro de categoría activo
+ */
 const state = {
   catalogo: [],
   catalogoEnriquecido: [],
@@ -10,9 +22,19 @@ const state = {
   iva: 0,
   categoriaSeleccionada: null,
 };
+
+/**
+ * Formatea un número como moneda colombiana (COP)
+ * @param {number|string} v - Valor a formatear
+ * @returns {string} Valor formateado con separadores de miles
+ */
 const fmtCOP = v => Number(v || 0).toLocaleString('es-CO');
 
-// === INICIALIZACIÓN ===
+/**
+ * Inicializa la aplicación cargando datos del servidor
+ * @async
+ * @returns {Promise<void>}
+ */
 async function init() {
   try {
     const res = await fetch(SCRIPT_URL);
@@ -35,12 +57,12 @@ function renderCatalogoPorCategorias() {
   cont.innerHTML = "";
 
   // Filtrar por categoría si está seleccionada
-  const catalagoParaMostrar = state.categoriaSeleccionada
+  const catalogoParaMostrar = state.categoriaSeleccionada
     ? filtrarPorCategoria(state.catalogoEnriquecido, state.categoriaSeleccionada)
     : state.catalogoEnriquecido;
 
   // Agrupar por categoría
-  const grupos = agruparPorCategoria(catalagoParaMostrar);
+  const grupos = agruparPorCategoria(catalogoParaMostrar);
 
   // Renderizar cada grupo
   Object.entries(grupos).forEach(([categoria, productos]) => {
@@ -194,24 +216,9 @@ function fillBarrios() {
 
 // === FILTRO POR CATEGORÍA ===
 function fillFiltrosCategorias() {
-  // Verificar si el select existe, si no crearlo
-  let filtroSelect = document.getElementById("filtroCategorias");
-  if (!filtroSelect) {
-    const searchBox = document.querySelector(".search-box");
-    if (searchBox && searchBox.parentElement) {
-      const filtroDiv = document.createElement("div");
-      filtroDiv.style.marginTop = "12px";
-      filtroDiv.innerHTML = `
-        <label>Categoría:</label>
-        <select id="filtroCategorias" style="width:100%; padding:10px; border-radius:8px; border:1px solid #ddd; font-size:0.95rem;">
-          <option value="">Todas las categorías</option>
-        </select>
-      `;
-      searchBox.parentElement.parentElement.appendChild(filtroDiv);
-      filtroSelect = document.getElementById("filtroCategorias");
-    }
-  }
-
+  // El select ya existe en el HTML, solo lo obtenemos
+  const filtroSelect = document.getElementById("filtroCategorias");
+  
   if (!filtroSelect) return;
 
   // Llenar opciones
@@ -250,18 +257,29 @@ function actualizarDomicilio() {
 }
 
 // === VALIDAR HORA DE ENTREGA ===
-// Inputs de fecha y hora (solo existen en el formulario)
-const fechaEntregaInput = document.getElementById("fechaEntrega");
-
-// Escuchar cambios
-//horaEntregaInput.addEventListener("change", validarHoraEntrega);
-fechaEntregaInput.addEventListener("change", () => {
-  // Limpiar hora si cambia la fecha
-  horaEntregaInput.value = "";
-});
+if (typeof document !== 'undefined') {
+  // Inputs de fecha y hora (solo existen en el formulario)
+  const fechaEntregaInput = document.getElementById("fechaEntrega");
+  
+  // Escuchar cambios
+  //horaEntregaInput.addEventListener("change", validarHoraEntrega);
+  if (fechaEntregaInput) {
+    fechaEntregaInput.addEventListener("change", () => {
+      // Limpiar hora si cambia la fecha
+      const horaEntregaInput = document.getElementById("horaEntrega");
+      if (horaEntregaInput) horaEntregaInput.value = "";
+    });
+  }
+}
 
 
 // === CARRITO ===
+/**
+ * Agrega un producto al carrito
+ * @param {Object} prod - Producto a agregar
+ * @param {string} prod.name - Nombre del producto
+ * @param {number} prod.price - Precio del producto
+ */
 function addToCart(prod) {
 
   // 🌸 DETECTAR ARREGLO PERSONALIZADO
@@ -334,14 +352,26 @@ function vaciarCarrito() {
 }
 
 // === DRAWER ===
-const drawer = document.getElementById("drawerCarrito");
 let hideFabOnForm = false;
-document.getElementById("btnDrawer").onclick = () => {
-  renderDrawerCart();
-  drawer.classList.add("open");
-};
-document.getElementById("cerrarDrawer").onclick = () => drawer.classList.remove("open");
-document.getElementById("vaciarCarrito").onclick = vaciarCarrito;
+if (typeof document !== 'undefined') {
+  const drawer = document.getElementById("drawerCarrito");
+  const btnDrawer = document.getElementById("btnDrawer");
+  const cerrarDrawer = document.getElementById("cerrarDrawer");
+  const vaciarCarritoBtn = document.getElementById("vaciarCarrito");
+  
+  if (btnDrawer) {
+    btnDrawer.onclick = () => {
+      renderDrawerCart();
+      if (drawer) drawer.classList.add("open");
+    };
+  }
+  if (cerrarDrawer && drawer) {
+    cerrarDrawer.onclick = () => drawer.classList.remove("open");
+  }
+  if (vaciarCarritoBtn) {
+    vaciarCarritoBtn.onclick = vaciarCarrito;
+  }
+}
 
 function updateCartCount() {
   const totalQty = state.cart.reduce((a, b) => a + b.qty, 0);
@@ -415,35 +445,53 @@ function show(id) {
 }
 }
 
-document.getElementById("btnPedidoDrawer").onclick = () => {
-  drawer.classList.remove("open");
-  const resumen = state.cart.map(p => `${p.qty}x ${p.name}`).join(" | ");
-  const subtotal = state.cart.reduce((a, b) => a + b.price * b.qty, 0);
-  document.getElementById("resumenProducto").textContent =
-    `🛍 ${resumen} — Subtotal: $${fmtCOP(subtotal)} + Domicilio: $${fmtCOP(state.domicilio)}`;
-  hideFabOnForm = true;
-  show("viewForm");
-};
+if (typeof document !== 'undefined') {
+  const btnPedidoDrawer = document.getElementById("btnPedidoDrawer");
+  const btnVolver = document.getElementById("btnVolver");
+  
+  if (btnPedidoDrawer) {
+    btnPedidoDrawer.onclick = () => {
+      const drawer = document.getElementById("drawerCarrito");
+      if (drawer) drawer.classList.remove("open");
+      const resumen = state.cart.map(p => `${p.qty}x ${p.name}`).join(" | ");
+      const subtotal = state.cart.reduce((a, b) => a + b.price * b.qty, 0);
+      const resumenProducto = document.getElementById("resumenProducto");
+      if (resumenProducto) {
+        resumenProducto.textContent =
+          `🛍 ${resumen} — Subtotal: $${fmtCOP(subtotal)} + Domicilio: $${fmtCOP(state.domicilio)}`;
+      }
+      hideFabOnForm = true;
+      show("viewForm");
+    };
+  }
 
-document.getElementById("btnVolver").addEventListener("click", () => show("viewCatalog"));
+  if (btnVolver) {
+    btnVolver.addEventListener("click", () => show("viewCatalog"));
+  }
+}
 
 // === DETECCIÓN Y AUTOCOMPLETADO DE CLIENTE EXISTENTE ===
 let lookupTimer = null;
 
-document.getElementById("identificacion").addEventListener("input", e => {
-  clearTimeout(lookupTimer);
-  const val = e.target.value.trim();
-  if (!val) {
-    setClienteBadge(null);
-    document.getElementById("telefono").value = "";
-    document.getElementById("primerNombre").value = "";
-    document.getElementById("primerApellido").value = "";
-    const emailInput = document.getElementById("email");
-    if (emailInput) emailInput.value = "";
-    return;
+if (typeof document !== 'undefined') {
+  const identificacionInput = document.getElementById("identificacion");
+  if (identificacionInput) {
+    identificacionInput.addEventListener("input", e => {
+      clearTimeout(lookupTimer);
+      const val = e.target.value.trim();
+      if (!val) {
+        setClienteBadge(null);
+        document.getElementById("telefono").value = "";
+        document.getElementById("primerNombre").value = "";
+        document.getElementById("primerApellido").value = "";
+        const emailInput = document.getElementById("email");
+        if (emailInput) emailInput.value = "";
+        return;
+      }
+      lookupTimer = setTimeout(() => buscarCliente(val), 300);
+    });
   }
-  lookupTimer = setTimeout(() => buscarCliente(val), 300);
-});
+}
 
 async function buscarCliente(ident) {
   try {
@@ -506,7 +554,10 @@ function extraerEmailDeData(data) {
   return "";
 }
 
-// prueba commit
+/**
+ * Actualiza el badge visual del estado de búsqueda de cliente
+ * @param {boolean|null} encontrado - true: cliente encontrado, false: no encontrado, null: sin búsqueda
+ */
 function setClienteBadge(encontrado) {
   const b = document.getElementById("badgeCliente");
   b.classList.remove("hidden", "ok", "warn");
@@ -537,7 +588,11 @@ function limpiarCliente(clearId) {
 }
 
 // === ENVÍO DEL FORMULARIO ===
-document.getElementById("pedidoForm").addEventListener("submit", async e => {
+// === FORMULARIO DE PEDIDO ===
+if (typeof document !== 'undefined') {
+  const pedidoForm = document.getElementById("pedidoForm");
+  if (pedidoForm) {
+    pedidoForm.addEventListener("submit", async e => {
   e.preventDefault();
 
   const btnSubmit = document.getElementById("btnSubmit");
@@ -685,38 +740,42 @@ document.getElementById("pedidoForm").addEventListener("submit", async e => {
     btnSubmit.textContent = "Confirmar pedido";
   }
   });
+  } // Cierre del if para pedidoForm
 
-// === ACTUALIZAR IVA AL CAMBIAR IDENTIFICACIÓN ===
-document.getElementById("tipoIdent").addEventListener("change", () => renderDrawerCart());
-
-// === BANDERAS DEL INDICATIVO (COMPATIBLE iPhone/Android) ===
-document.addEventListener("DOMContentLoaded", function () {
-  const select = document.getElementById("indicativo");
-  const flagIcon = document.getElementById("flagIcon");
-
-  if (!select || !flagIcon) return;
-
-  function countryFlagEmoji(code) {
-    return code
-      .toUpperCase()
-      .replace(/./g, char => String.fromCodePoint(127397 + char.charCodeAt()));
+  // === ACTUALIZAR IVA AL CAMBIAR IDENTIFICACIÓN ===
+  const tipoIdentSelect = document.getElementById("tipoIdent");
+  if (tipoIdentSelect) {
+    tipoIdentSelect.addEventListener("change", () => renderDrawerCart());
   }
 
-  function actualizarBandera() {
-    const opt = select.selectedOptions[0];
-    const flag = opt.dataset.flag || "co";
-    flagIcon.textContent = countryFlagEmoji(flag);
-  }
+  // === BANDERAS DEL INDICATIVO (COMPATIBLE iPhone/Android) ===
+  document.addEventListener("DOMContentLoaded", function () {
+    const select = document.getElementById("indicativo");
+    const flagIcon = document.getElementById("flagIcon");
 
-  select.addEventListener("change", actualizarBandera);
-  actualizarBandera(); 
-});
+    if (!select || !flagIcon) return;
 
-// === AUTO-RELLENO PARA "ENTREGA EN TIENDA" ===
-const tipoLugarSelect = document.getElementById("tipoLugar");
-if (tipoLugarSelect) {
-  tipoLugarSelect.addEventListener("change", () => {
-    const tipo = tipoLugarSelect.value;
+    function countryFlagEmoji(code) {
+      return code
+        .toUpperCase()
+        .replace(/./g, char => String.fromCodePoint(127397 + char.charCodeAt()));
+    }
+
+    function actualizarBandera() {
+      const opt = select.selectedOptions[0];
+      const flag = opt.dataset.flag || "co";
+      flagIcon.textContent = countryFlagEmoji(flag);
+    }
+
+    select.addEventListener("change", actualizarBandera);
+    actualizarBandera(); 
+  });
+
+  // === AUTO-RELLENO PARA "ENTREGA EN TIENDA" ===
+  const tipoLugarSelectEntrega = document.getElementById("tipoLugar");
+  if (tipoLugarSelectEntrega) {
+    tipoLugarSelectEntrega.addEventListener("change", () => {
+      const tipo = tipoLugarSelectEntrega.value;
 
     const destinatario = document.getElementById("destinatario");
     const telefonoDestino = document.getElementById("telefonoDestino");
@@ -789,48 +848,63 @@ if (tipoLugarSelect) {
       }
     }
   });
-}
+  }
 
-// Si el usuario edita manualmente, dejar de considerar auto-llenado
-const direccionInput = document.getElementById("direccion");
-if (direccionInput) {
-  direccionInput.addEventListener("input", () => {
-    if (direccionInput.dataset.autofilled === "true" && direccionInput.value !== "Entrega En Tienda") {
-      delete direccionInput.dataset.autofilled;
-    }
+  // Si el usuario edita manualmente, dejar de considerar auto-llenado
+  const direccionInput = document.getElementById("direccion");
+  if (direccionInput) {
+    direccionInput.addEventListener("input", () => {
+      if (direccionInput.dataset.autofilled === "true" && direccionInput.value !== "Entrega En Tienda") {
+        delete direccionInput.dataset.autofilled;
+      }
+    });
+  }
+
+  const barrioSelect = document.getElementById("barrio");
+  if (barrioSelect) {
+    barrioSelect.addEventListener("change", () => {
+      if (barrioSelect.dataset.autofilled === "true" && barrioSelect.value !== "Entrega En Tienda") {
+        delete barrioSelect.dataset.autofilled;
+      }
+    });
+  }
+
+  // === ACTIVAR ARREGLO PERSONALIZADO ===
+  const btnIrPersonalizado = document.getElementById("btnIrPersonalizado");
+  if (btnIrPersonalizado) {
+    btnIrPersonalizado.addEventListener("click", () => {
+      // vaciamos carrito para que no mezcle productos normales
+      state.cart = [{
+        name: "Arreglo Personalizado",
+        price: 0,
+        qty: 1
+      }];
+
+      updateCartCount();
+      renderDrawerCart();
+
+      // mostrar formulario
+      hideFabOnForm = false;
+      show("viewForm");
+
+      // activar la caja personalizada
+      const boxPersonalizado = document.getElementById("boxPersonalizado");
+      if (boxPersonalizado) boxPersonalizado.style.display = "block";
+    });
+  }
+
+  // === LLAMAR INIT AUTOMÁTICAMENTE ===
+  document.addEventListener("DOMContentLoaded", () => {
+    init();
   });
+} // Cierre del if (typeof document !== 'undefined')
+
+// === EXPORTS PARA TESTS ===
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = {
+    fmtCOP,
+    extraerEmailDeData,
+    SCRIPT_URL,
+    ORIGEN_CATALOGO
+  };
 }
-
-const barrioSelect = document.getElementById("barrio");
-if (barrioSelect) {
-  barrioSelect.addEventListener("change", () => {
-    if (barrioSelect.dataset.autofilled === "true" && barrioSelect.value !== "Entrega En Tienda") {
-      delete barrioSelect.dataset.autofilled;
-    }
-  });
-}
-
-// === ACTIVAR ARREGLO PERSONALIZADO ===
-document.getElementById("btnIrPersonalizado").addEventListener("click", () => {
-  // vaciamos carrito para que no mezcle productos normales
-  state.cart = [{
-    name: "Arreglo Personalizado",
-    price: 0,
-    qty: 1
-  }];
-
-  updateCartCount();
-  renderDrawerCart();
-
-  // mostrar formulario
-  hideFabOnForm = false;
-  show("viewForm");
-
-  // activar la caja personalizada
-  document.getElementById("boxPersonalizado").style.display = "block";
-});
-
-// === LLAMAR INIT AUTOMÁTICAMENTE ===
-document.addEventListener("DOMContentLoaded", () => {
-  init();
-});
