@@ -631,48 +631,44 @@ async function guardarFotoDomicilio(pedido, base64, btnElement) {
   try {
     btnElement.disabled = true;
     btnElement.textContent = "Guardando foto...";
-    
-    // Enviar base64 como JSON para evitar truncamiento
-    const res = await fetch(SCRIPT_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        accion: 'guardarFotoDomicilio',
-        hoja: 'Domicilios',
-        pedido: String(pedido),
-        imagenBase64: base64
-      })
-    });
-    
-    const { data } = await parseResponse(res);
-    
-    // Validar respuesta exitosa
-    const ok = isOkResponse(res, data, /ok|success|guardado|guardada|cargado|cargada/);
 
-    if (ok) {
-      // Apps Script retorna la URL pública de la imagen
-      const fotoURL = data?.url || data?.fotoURL || null;
-      
+    const formData = new FormData();
+    formData.append("accion", "guardarFotoDomicilio");
+    formData.append("hoja", "Domicilios");
+    formData.append("pedido", String(pedido));
+    formData.append("imagenBase64", base64);
+
+    const res = await fetch(SCRIPT_URL, {
+      method: "POST",
+      body: formData
+    });
+
+    const data = await res.json();
+
+    if (data?.status === "ok") {
+
+      const fotoURL = data.url || null;
+
       if (fotoURL) {
-        // Guardar URL pública en caché (no base64)
         actualizarEnCache(pedido, { foto: fotoURL, fotoURL });
-        mostrarToast('Foto guardada y sincronizada');
+        mostrarToast("Foto guardada y sincronizada");
         btnElement.textContent = "Guardar foto";
         return true;
       } else {
-        console.warn('Apps Script retornó éxito pero sin URL');
-        mostrarToast('Foto procesada pero sin URL pública');
+        console.warn("Apps Script retornó éxito pero sin URL");
+        mostrarToast("Foto procesada pero sin URL pública");
         btnElement.textContent = "Guardar foto";
         return false;
       }
     }
-    
-    mostrarToast(data?.message || 'Error al guardar foto');
+
+    mostrarToast(data?.message || "Error al guardar foto");
     btnElement.textContent = "Guardar foto";
     return false;
+
   } catch (e) {
     console.error(e);
-    mostrarToast('Error de conexión');
+    mostrarToast("Error de conexión");
     btnElement.textContent = "Guardar foto";
     return false;
   } finally {
