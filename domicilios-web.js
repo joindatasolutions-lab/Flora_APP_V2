@@ -454,15 +454,13 @@ function renderizarDomicilios(domicilios, options = {}) {
           <button class="btn-guardar-observacion" data-pedido="${num}">Guardar observación</button>
         </div>
         <div class="evidencia-box">
-          <input 
-            type="file" 
-            accept="image/*" 
-            capture="environment"
-            class="input-foto"
-            data-pedido="${num}"
-            aria-label="Subir foto de entrega">
-          <button class="btn-guardar-foto" data-pedido="${num}">Guardar foto</button>
-          ${pedido.fotoBase64 ? `<div class="preview-foto"><img src="data:image/jpeg;base64,${pedido.fotoBase64.substring(0, 100)}..." alt="Preview" title="Foto guardada"></div>` : ''}
+          <button class="btn-tomar-foto" data-pedido="${num}" ${pedido.fotoBase64 ? 'style="display:none;"' : ''}>Tomar foto</button>
+          <video class="camera-preview" autoplay playsinline style="display:none;" data-pedido="${num}"></video>
+          <canvas class="camera-canvas" style="display:none;" data-pedido="${num}"></canvas>
+          <img class="preview-foto" style="display:none;" data-pedido="${num}" alt="Vista previa de foto" />
+          <button class="btn-capturar-foto" style="display:none;" data-pedido="${num}">Capturar</button>
+          <button class="btn-guardar-foto" style="display:none;" data-pedido="${num}">Guardar foto</button>
+          ${pedido.fotoBase64 ? `<div class="foto-guardada"><img src="${pedido.fotoBase64}" alt="Foto guardada" /></div>` : ''}
         </div>
       `;
 
@@ -525,24 +523,29 @@ function renderizarDomicilios(domicilios, options = {}) {
         });
       }
 
-      // Listeners para bitácora - Foto
+      // Listeners para bitácora - Cámara
+      const btnTomarFoto = card.querySelector('.btn-tomar-foto');
+      const videoPreview = card.querySelector('.camera-preview');
+      const btnCapturar = card.querySelector('.btn-capturar-foto');
+      const imgPreview = card.querySelector('.preview-foto');
       const btnGuardarFoto = card.querySelector('.btn-guardar-foto');
-      const inputFoto = card.querySelector('.input-foto');
-      if (btnGuardarFoto && inputFoto) {
-        inputFoto.addEventListener('change', (e) => {
-          const archivo = e.target.files?.[0];
-          if (archivo) {
-            const reader = new FileReader();
-            reader.onload = async (event) => {
-              const base64 = event.target?.result;
-              await guardarFotoDomicilio(num, base64, btnGuardarFoto);
-            };
-            reader.readAsDataURL(archivo);
-          }
+      
+      if (btnTomarFoto) {
+        btnTomarFoto.addEventListener('click', async () => {
+          await iniciarCamara(num, card, btnTomarFoto, videoPreview, btnCapturar);
         });
+      }
 
-        btnGuardarFoto.addEventListener('click', () => {
-          inputFoto.click();
+      if (btnCapturar) {
+        btnCapturar.addEventListener('click', () => {
+          capturarFoto(num, card, videoPreview, btnCapturar, imgPreview, btnGuardarFoto);
+        });
+      }
+
+      if (btnGuardarFoto) {
+        btnGuardarFoto.addEventListener('click', async () => {
+          const base64 = imgPreview?.src;
+          await guardarFotoDomicilio(num, base64, btnGuardarFoto);
         });
       }
 
@@ -647,6 +650,109 @@ async function guardarFotoDomicilio(pedido, base64, btnElement) {
     return false;
   } finally {
     btnElement.disabled = false;
+  }
+}
+
+async function guardarFotoDomicilio(pedido, base64, btnElement) {
+  try {
+    btnElement.disabled = true;
+    btnElement.textContent = "Guardando foto...";
+    const body = new URLSearchParams({
+      accion: 'guardarFotoDomicilio',
+      hoja: 'Domicilios',
+      pedido: String(pedido),
+      imagen: base64
+    });
+    const res = await fetch(SCRIPT_URL, { method: 'POST', body });
+    const { data } = await parseResponse(res);
+    const ok = isOkResponse(res, data, /ok|success|guardado|guardada|cargado|cargada/);
+
+    if (ok) {
+      actualizarEnCache(pedido, { fotoBase64: base64 });
+      mostrarToast('Foto guardada');
+      btnElement.textContent = "Guardar foto";
+      return true;
+    }
+    mostrarToast(data?.message || 'Error al guardar foto');
+    btnElement.textContent = "Guardar foto";
+    return false;
+  } catch (e) {
+    console.error(e);
+    mostrarToast('Error de conexión');
+    btnElement.textContent = "Guardar foto";
+    return false;
+  } finally {
+    btnElement.disabled = false;
+  }
+}
+
+async function iniciarCamara(pedidoNum, card, btnTomarFoto, videoPreview, btnCapturar) {
+  try {
+    btnTomarFoto.disabled = true;
+    btnTomarFoto.textContent = "Iniciando cámara...";
+    
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: "environment" }
+    });
+    
+    videoPreview.srcObject = stream;
+    videoPreview.style.display = 'block';
+    btnCapturar.style.display = 'block';
+    btnTomarFoto.style.display = 'none';
+    
+    // Almacenar stream en el elemento para poder detenerlo después
+    card.dataset.cameraStream = JSON.stringify({ stream });
+    card._mediaStream = stream;
+    
+    mostrarToast('Cámara lista - Captura tu foto');
+  } catch (e) {
+    console.error(e);
+    if (e.name === 'NotAllowedError') {
+      mostrarToast('Permiso de cámara denegado');
+    } else if (e.name === 'NotFoundError') {
+      mostrarToast('No se encontró cámara en el dispositivo');
+    } else {
+      mostrarToast('Error al acceder a la cámara');
+    }
+    btnTomarFoto.disabled = false;
+    btnTomarFoto.textContent = "Tomar foto";
+  }
+}
+
+function capturarFoto(pedidoNum, card, videoPreview, btnCapturar, imgPreview, btnGuardarFoto) {
+  try {
+    const canvas = card.querySelector('.camera-canvas');
+    const ctx = canvas.getContext('2d');
+    
+    // Configurar canvas con el tamaño del video
+    canvas.width = videoPreview.videoWidth;
+    canvas.height = videoPreview.videoHeight;
+    
+    // Dibujar frame actual del video en el canvas
+    ctx.drawImage(videoPreview, 0, 0);
+    
+    // Convertir a base64
+    const base64 = canvas.toDataURL('image/jpeg', 0.9);
+    
+    // Mostrar preview
+    imgPreview.src = base64;
+    imgPreview.style.display = 'block';
+    
+    // Detener stream
+    if (card._mediaStream) {
+      card._mediaStream.getTracks().forEach(track => track.stop());
+      card._mediaStream = null;
+    }
+    
+    // Actualizar UI
+    videoPreview.style.display = 'none';
+    btnCapturar.style.display = 'none';
+    btnGuardarFoto.style.display = 'block';
+    
+    mostrarToast('Foto capturada - Presiona guardar');
+  } catch (e) {
+    console.error(e);
+    mostrarToast('Error al capturar foto');
   }
 }
 
