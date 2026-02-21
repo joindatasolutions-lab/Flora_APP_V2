@@ -885,6 +885,13 @@ textarea {
   margin-bottom: 12px;
 }
 
+/* Limitar tamaño máximo de tarjetas en desktop */
+@media (min-width: 768px) {
+  .catalogo-grid {
+    grid-template-columns: repeat(auto-fit, minmax(260px, 320px));
+  }
+}
+
 /* === ESTILOS PARA FILTRO DE CATEGORÍAS (PREMIUM) === */
 .filtro-categorias-container {
   /* Separación visual elegante del buscador */
