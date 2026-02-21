@@ -192,6 +192,7 @@ const filtrarData = data => {
         pedido.pedido,
         pedido.destinatario,
         pedido.barrio,
+        pedido.zona,
         pedido.producto,
         pedido.direccion,
         pedido.telefonoDestino,
@@ -441,8 +442,27 @@ function renderizarDomicilios(domicilios, options = {}) {
           <p><strong>Destinatario:</strong> ${pedido.destinatario || '—'}</p>
           <p><strong>Direccion:</strong> ${pedido.direccion || '—'}</p>
           <p><strong>Barrio:</strong> ${pedido.barrio || '—'}</p>
+          <p><strong>Zona:</strong> ${pedido.zona || '—'}</p>
           <p><strong>Telefono:</strong> ${pedido.telefonoDestino || pedido.telefono || '—'}</p>
           <p class="meta-row"><strong>Entrega:</strong> <span class="fecha-entrega">${fechaEntrega}</span></p>
+        </div>
+        <div class="observacion-box">
+          <textarea 
+            class="textarea-observacion" 
+            placeholder="Observaciones del domiciliario... (Ej: Se entrega a portería, cliente no responde, etc.)"
+            data-pedido="${num}">${pedido.observacion || ''}</textarea>
+          <button class="btn-guardar-observacion" data-pedido="${num}">Guardar observación</button>
+        </div>
+        <div class="evidencia-box">
+          <input 
+            type="file" 
+            accept="image/*" 
+            capture="environment"
+            class="input-foto"
+            data-pedido="${num}"
+            aria-label="Subir foto de entrega">
+          <button class="btn-guardar-foto" data-pedido="${num}">Guardar foto</button>
+          ${pedido.fotoBase64 ? `<div class="preview-foto"><img src="data:image/jpeg;base64,${pedido.fotoBase64.substring(0, 100)}..." alt="Preview" title="Foto guardada"></div>` : ''}
         </div>
       `;
 
@@ -495,6 +515,37 @@ function renderizarDomicilios(domicilios, options = {}) {
         card.appendChild(acciones);
       }
 
+      // Listeners para bitácora - Observaciones
+      const btnGuardarObs = card.querySelector('.btn-guardar-observacion');
+      if (btnGuardarObs) {
+        btnGuardarObs.addEventListener('click', async () => {
+          const textareaObs = card.querySelector('.textarea-observacion');
+          const observacion = textareaObs?.value?.trim() || '';
+          await guardarObservacion(num, observacion, btnGuardarObs);
+        });
+      }
+
+      // Listeners para bitácora - Foto
+      const btnGuardarFoto = card.querySelector('.btn-guardar-foto');
+      const inputFoto = card.querySelector('.input-foto');
+      if (btnGuardarFoto && inputFoto) {
+        inputFoto.addEventListener('change', (e) => {
+          const archivo = e.target.files?.[0];
+          if (archivo) {
+            const reader = new FileReader();
+            reader.onload = async (event) => {
+              const base64 = event.target?.result;
+              await guardarFotoDomicilio(num, base64, btnGuardarFoto);
+            };
+            reader.readAsDataURL(archivo);
+          }
+        });
+
+        btnGuardarFoto.addEventListener('click', () => {
+          inputFoto.click();
+        });
+      }
+
       contenedorGrupo.appendChild(card);
     });
 
@@ -530,6 +581,72 @@ async function actualizarEstado(pedido, nuevoEstado, boton, originalText) {
     mostrarToast('Error de conexion');
     boton.textContent = originalText;
     return false;
+  }
+}
+
+async function guardarObservacion(pedido, observacion, btnElement) {
+  try {
+    btnElement.disabled = true;
+    btnElement.textContent = "Guardando...";
+    const body = new URLSearchParams({
+      accion: 'guardarObservacion',
+      hoja: 'Domicilios',
+      pedido: String(pedido),
+      observacion: observacion
+    });
+    const res = await fetch(SCRIPT_URL, { method: 'POST', body });
+    const { data } = await parseResponse(res);
+    const ok = isOkResponse(res, data, /ok|success|guardado|guardada/);
+
+    if (ok) {
+      actualizarEnCache(pedido, { observacion });
+      mostrarToast('Observación guardada');
+      btnElement.textContent = "Guardar observación";
+      return true;
+    }
+    mostrarToast(data?.message || 'Error al guardar observación');
+    btnElement.textContent = "Guardar observación";
+    return false;
+  } catch (e) {
+    console.error(e);
+    mostrarToast('Error de conexión');
+    btnElement.textContent = "Guardar observación";
+    return false;
+  } finally {
+    btnElement.disabled = false;
+  }
+}
+
+async function guardarFotoDomicilio(pedido, base64, btnElement) {
+  try {
+    btnElement.disabled = true;
+    btnElement.textContent = "Guardando foto...";
+    const body = new URLSearchParams({
+      accion: 'guardarFotoDomicilio',
+      hoja: 'Domicilios',
+      pedido: String(pedido),
+      imagen: base64
+    });
+    const res = await fetch(SCRIPT_URL, { method: 'POST', body });
+    const { data } = await parseResponse(res);
+    const ok = isOkResponse(res, data, /ok|success|guardado|guardada|cargado|cargada/);
+
+    if (ok) {
+      actualizarEnCache(pedido, { fotoBase64: base64 });
+      mostrarToast('Foto guardada');
+      btnElement.textContent = "Guardar foto";
+      return true;
+    }
+    mostrarToast(data?.message || 'Error al guardar foto');
+    btnElement.textContent = "Guardar foto";
+    return false;
+  } catch (e) {
+    console.error(e);
+    mostrarToast('Error de conexión');
+    btnElement.textContent = "Guardar foto";
+    return false;
+  } finally {
+    btnElement.disabled = false;
   }
 }
 
