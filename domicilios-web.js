@@ -454,13 +454,13 @@ function renderizarDomicilios(domicilios, options = {}) {
           <button class="btn-guardar-observacion" data-pedido="${num}">Guardar observación</button>
         </div>
         <div class="evidencia-box">
-          <button class="btn-tomar-foto" data-pedido="${num}" ${pedido.fotoBase64 ? 'style="display:none;"' : ''}>Tomar foto</button>
+          <button class="btn-tomar-foto" data-pedido="${num}" ${pedido.foto || pedido.fotoURL ? 'style="display:none;"' : ''}>Tomar foto</button>
           <video class="camera-preview" autoplay playsinline style="display:none;" data-pedido="${num}"></video>
           <canvas class="camera-canvas" style="display:none;" data-pedido="${num}"></canvas>
           <img class="preview-foto" style="display:none;" data-pedido="${num}" alt="Vista previa de foto" />
           <button class="btn-capturar-foto" style="display:none;" data-pedido="${num}">Capturar</button>
           <button class="btn-guardar-foto" style="display:none;" data-pedido="${num}">Guardar foto</button>
-          ${pedido.fotoBase64 ? `<div class="foto-guardada"><img src="${pedido.fotoBase64}" alt="Foto guardada" /></div>` : ''}
+          ${pedido.foto || pedido.fotoURL ? `<div class="foto-guardada"><img src="${pedido.foto || pedido.fotoURL}" alt="Foto guardada" loading="lazy" /></div>` : ''}
         </div>
       `;
 
@@ -624,55 +624,39 @@ async function guardarFotoDomicilio(pedido, base64, btnElement) {
   try {
     btnElement.disabled = true;
     btnElement.textContent = "Guardando foto...";
+    
+    // Enviar base64 a Apps Script para procesamiento
     const body = new URLSearchParams({
       accion: 'guardarFotoDomicilio',
       hoja: 'Domicilios',
       pedido: String(pedido),
-      imagen: base64
+      imagenBase64: base64
     });
+    
     const res = await fetch(SCRIPT_URL, { method: 'POST', body });
     const { data } = await parseResponse(res);
+    
+    // Validar respuesta exitosa
     const ok = isOkResponse(res, data, /ok|success|guardado|guardada|cargado|cargada/);
 
     if (ok) {
-      actualizarEnCache(pedido, { fotoBase64: base64 });
-      mostrarToast('Foto guardada');
-      btnElement.textContent = "Guardar foto";
-      return true;
+      // Apps Script retorna la URL pública de la imagen
+      const fotoURL = data?.url || data?.fotoURL || null;
+      
+      if (fotoURL) {
+        // Guardar URL pública en caché (no base64)
+        actualizarEnCache(pedido, { foto: fotoURL, fotoURL });
+        mostrarToast('Foto guardada y sincronizada');
+        btnElement.textContent = "Guardar foto";
+        return true;
+      } else {
+        console.warn('Apps Script retornó éxito pero sin URL');
+        mostrarToast('Foto procesada pero sin URL pública');
+        btnElement.textContent = "Guardar foto";
+        return false;
+      }
     }
-    mostrarToast(data?.message || 'Error al guardar foto');
-    btnElement.textContent = "Guardar foto";
-    return false;
-  } catch (e) {
-    console.error(e);
-    mostrarToast('Error de conexión');
-    btnElement.textContent = "Guardar foto";
-    return false;
-  } finally {
-    btnElement.disabled = false;
-  }
-}
-
-async function guardarFotoDomicilio(pedido, base64, btnElement) {
-  try {
-    btnElement.disabled = true;
-    btnElement.textContent = "Guardando foto...";
-    const body = new URLSearchParams({
-      accion: 'guardarFotoDomicilio',
-      hoja: 'Domicilios',
-      pedido: String(pedido),
-      imagen: base64
-    });
-    const res = await fetch(SCRIPT_URL, { method: 'POST', body });
-    const { data } = await parseResponse(res);
-    const ok = isOkResponse(res, data, /ok|success|guardado|guardada|cargado|cargada/);
-
-    if (ok) {
-      actualizarEnCache(pedido, { fotoBase64: base64 });
-      mostrarToast('Foto guardada');
-      btnElement.textContent = "Guardar foto";
-      return true;
-    }
+    
     mostrarToast(data?.message || 'Error al guardar foto');
     btnElement.textContent = "Guardar foto";
     return false;
@@ -700,8 +684,7 @@ async function iniciarCamara(pedidoNum, card, btnTomarFoto, videoPreview, btnCap
     btnCapturar.style.display = 'block';
     btnTomarFoto.style.display = 'none';
     
-    // Almacenar stream en el elemento para poder detenerlo después
-    card.dataset.cameraStream = JSON.stringify({ stream });
+    // Almacenar stream para poder detenerlo después
     card._mediaStream = stream;
     
     mostrarToast('Cámara lista - Captura tu foto');
@@ -731,14 +714,14 @@ function capturarFoto(pedidoNum, card, videoPreview, btnCapturar, imgPreview, bt
     // Dibujar frame actual del video en el canvas
     ctx.drawImage(videoPreview, 0, 0);
     
-    // Convertir a base64
+    // Convertir a base64 (JPEG con calidad 0.9)
     const base64 = canvas.toDataURL('image/jpeg', 0.9);
     
     // Mostrar preview
     imgPreview.src = base64;
     imgPreview.style.display = 'block';
     
-    // Detener stream
+    // Detener stream y limpiar
     if (card._mediaStream) {
       card._mediaStream.getTracks().forEach(track => track.stop());
       card._mediaStream = null;
