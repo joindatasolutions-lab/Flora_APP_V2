@@ -625,15 +625,18 @@ async function guardarFotoDomicilio(pedido, base64, btnElement) {
     btnElement.disabled = true;
     btnElement.textContent = "Guardando foto...";
     
-    // Enviar base64 a Apps Script para procesamiento
-    const body = new URLSearchParams({
-      accion: 'guardarFotoDomicilio',
-      hoja: 'Domicilios',
-      pedido: String(pedido),
-      imagenBase64: base64
+    // Enviar base64 como JSON para evitar truncamiento
+    const res = await fetch(SCRIPT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        accion: 'guardarFotoDomicilio',
+        hoja: 'Domicilios',
+        pedido: String(pedido),
+        imagenBase64: base64
+      })
     });
     
-    const res = await fetch(SCRIPT_URL, { method: 'POST', body });
     const { data } = await parseResponse(res);
     
     // Validar respuesta exitosa
