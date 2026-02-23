@@ -417,3 +417,13 @@ footer {
   .toolbar-left, .toolbar-right { justify-content: center; }
   .buscador-input, .filtro { min-width: 200px; width: 100%; }
 }
+
+/* Deshabilitar temporalmente botón Tomar foto */
+.btn-tomar-foto,
+.btn-capturar-foto,
+.btn-guardar-foto,
+.camera-preview,
+.camera-canvas,
+.preview-foto {
+  display: none !important;
+}
