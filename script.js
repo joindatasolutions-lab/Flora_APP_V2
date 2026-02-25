@@ -897,7 +897,7 @@ if (typeof document !== 'undefined') {
   document.addEventListener("DOMContentLoaded", () => {
     init();
   });
-} // Cierre del if (typeof document !== 'undefined')
+} 
 
 // === EXPORTS PARA TESTS ===
 if (typeof module !== 'undefined' && module.exports) {
