@@ -31,6 +31,24 @@ const state = {
 const fmtCOP = v => Number(v || 0).toLocaleString('es-CO');
 
 /**
+ * Parsea respuesta de API tolerando JSON normal y JSON serializado como string.
+ * @param {Response} response - Respuesta fetch
+ * @returns {Promise<any>} Objeto parseado
+ */
+async function parseApiResponse(response) {
+  const raw = await response.text();
+  if (!raw) return {};
+
+  let parsed = JSON.parse(raw);
+
+  if (typeof parsed === "string") {
+    parsed = JSON.parse(parsed);
+  }
+
+  return parsed;
+}
+
+/**
  * Inicializa la aplicación cargando datos del servidor
  * @async
  * @returns {Promise<void>}
@@ -38,7 +56,7 @@ const fmtCOP = v => Number(v || 0).toLocaleString('es-CO');
 async function init() {
   try {
     const res = await fetch(SCRIPT_URL);
-    const data = await res.json();
+    const data = await parseApiResponse(res);
     state.catalogo = data.catalogo || [];
     state.catalogoEnriquecido = enriquecerCatalogoCategorias(state.catalogo);
     state.barrios = data.barrios || {};
@@ -496,7 +514,7 @@ if (typeof document !== 'undefined') {
 async function buscarCliente(ident) {
   try {
     const res = await fetch(`${SCRIPT_URL}?cliente=${encodeURIComponent(ident)}`);
-    const data = await res.json();
+    const data = await parseApiResponse(res);
 
     if (data && data.found) {
       setClienteBadge(true);
@@ -687,7 +705,7 @@ if (typeof document !== 'undefined') {
       method: "POST",
       body: formData
     });
-    const data = await response.json();
+    const data = await parseApiResponse(response);
 
     if (data.status === "success") {
 
