@@ -566,6 +566,60 @@ function obtenerTipoEntrega() {
   return seleccionado ? seleccionado.value : "DOMICILIO";
 }
 
+function guardarValoresManuales(destinatarioInput, telefonoDestinoInput) {
+  if (destinatarioInput.dataset.autoFilled !== "true") {
+    destinatarioInput.dataset.prevManual = destinatarioInput.value || "";
+  }
+  if (telefonoDestinoInput.dataset.autoFilled !== "true") {
+    telefonoDestinoInput.dataset.prevManual = telefonoDestinoInput.value || "";
+  }
+}
+
+function activarModoTienda(destinatarioInput, telefonoDestinoInput) {
+  sincronizarNombreCompleto();
+  const nombreCliente = document.getElementById("primerNombre")?.value || "";
+  const telefonoCliente = document.getElementById("telefono")?.value || "";
+
+  guardarValoresManuales(destinatarioInput, telefonoDestinoInput);
+
+  destinatarioInput.value = nombreCliente;
+  telefonoDestinoInput.value = telefonoCliente;
+  destinatarioInput.dataset.autoFilled = "true";
+  telefonoDestinoInput.dataset.autoFilled = "true";
+  destinatarioInput.disabled = true;
+  telefonoDestinoInput.disabled = true;
+}
+
+function activarModoDomicilio(destinatarioInput, telefonoDestinoInput) {
+  destinatarioInput.disabled = false;
+  telefonoDestinoInput.disabled = false;
+
+  if (destinatarioInput.dataset.autoFilled === "true") {
+    destinatarioInput.value = destinatarioInput.dataset.prevManual || destinatarioInput.value;
+  }
+  if (telefonoDestinoInput.dataset.autoFilled === "true") {
+    telefonoDestinoInput.value = telefonoDestinoInput.dataset.prevManual || telefonoDestinoInput.value;
+  }
+
+  delete destinatarioInput.dataset.autoFilled;
+  delete telefonoDestinoInput.dataset.autoFilled;
+  delete destinatarioInput.dataset.prevManual;
+  delete telefonoDestinoInput.dataset.prevManual;
+}
+
+function aplicarAutofillTipoEntrega(esTienda) {
+  const destinatarioInput = document.getElementById("destinatario");
+  const telefonoDestinoInput = document.getElementById("telefonoDestino");
+  if (!destinatarioInput || !telefonoDestinoInput) return;
+
+  if (esTienda) {
+    activarModoTienda(destinatarioInput, telefonoDestinoInput);
+    return;
+  }
+
+  activarModoDomicilio(destinatarioInput, telefonoDestinoInput);
+}
+
 function actualizarBloqueDireccion() {
   const tipoEntrega = obtenerTipoEntrega();
   const bloque = document.getElementById("bloqueDireccion");
@@ -576,6 +630,8 @@ function actualizarBloqueDireccion() {
 
   const esTienda = tipoEntrega === "TIENDA";
   bloque.classList.toggle("oculto", esTienda);
+
+  aplicarAutofillTipoEntrega(esTienda);
 
   if (esTienda) {
     direccion.removeAttribute("required");
@@ -748,7 +804,15 @@ function setupWizard() {
   if (nombreCompletoVisible) {
     nombreCompletoVisible.addEventListener("input", () => {
       sincronizarNombreCompleto();
+      if (obtenerTipoEntrega() === "TIENDA") actualizarBloqueDireccion();
       updateSubmitState();
+    });
+  }
+
+  const telefonoClienteInput = document.getElementById("telefono");
+  if (telefonoClienteInput) {
+    telefonoClienteInput.addEventListener("input", () => {
+      if (obtenerTipoEntrega() === "TIENDA") actualizarBloqueDireccion();
     });
   }
 

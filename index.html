@@ -161,13 +161,14 @@
 
       <div class="wizard-step" data-step="2" data-title="Información de entrega">
         <h3>Información de entrega</h3>
-        <div class="tipo-entrega-group" role="radiogroup" aria-label="Tipo de entrega">
-          <label class="tipo-entrega-option" for="tipoEntregaDomicilio">
-            <input type="radio" id="tipoEntregaDomicilio" name="tipoEntrega" value="DOMICILIO" checked>
+        <div class="delivery-toggle" role="radiogroup" aria-label="Tipo de entrega">
+          <label class="delivery-option">
+            <input type="radio" name="tipoEntrega" value="DOMICILIO" checked>
             <span>Domicilio</span>
           </label>
-          <label class="tipo-entrega-option" for="tipoEntregaTienda">
-            <input type="radio" id="tipoEntregaTienda" name="tipoEntrega" value="TIENDA">
+
+          <label class="delivery-option">
+            <input type="radio" name="tipoEntrega" value="TIENDA">
             <span>Recoger en tienda</span>
           </label>
         </div>

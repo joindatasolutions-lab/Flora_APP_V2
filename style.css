@@ -566,22 +566,48 @@ textarea {
   gap: 6px;
 }
 
-.tipo-entrega-group {
-  display: flex;
+.delivery-toggle {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 10px;
   margin-bottom: 14px;
 }
 
-.tipo-entrega-option {
-  display: inline-flex;
+.delivery-option {
+  display: flex;
+  justify-content: center;
   align-items: center;
-  gap: 8px;
-  padding: 9px 12px;
-  border: 1px solid #f2cbd4;
-  border-radius: 12px;
-  background: #fff;
-  color: #a34b6d;
+  padding: 14px;
+  border: 1.5px solid var(--rosa);
+  border-radius: 14px;
+  cursor: pointer;
+  text-align: center;
   font-weight: 600;
+  color: var(--rosa-osc);
+  background: #fff;
+  transition: all .25s ease;
+  min-height: 52px;
+  word-break: break-word;
+  overflow: hidden;
+}
+
+.delivery-option input {
+  display: none;
+}
+
+.delivery-option span {
+  display: block;
+  line-height: 1.2;
+}
+
+.delivery-option:has(input:checked) {
+  background: var(--rosa);
+  color: #fff;
+  border-color: var(--rosa-osc);
+}
+
+.delivery-option:hover {
+  background: #fdeef2;
 }
 
 .bloque-direccion {
@@ -597,6 +623,12 @@ textarea {
   opacity: 0;
   transform: translateY(-6px);
   pointer-events: none;
+}
+
+input[data-auto-filled="true"] {
+  background: #fdf2f6;
+  color: #b84c65;
+  font-weight: 600;
 }
 
 #buscarBarrio {
@@ -643,13 +675,21 @@ textarea {
 
 /* 📱 En móvil, se apilan verticalmente */
 @media (max-width: 600px) {
-  .tipo-entrega-group {
-    flex-direction: column;
-  }
-
   .entrega-fecha-hora {
     flex-direction: column;
     gap: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .delivery-toggle {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .delivery-option {
+    padding: 10px;
+    min-height: 48px;
+    overflow-wrap: anywhere;
   }
 }
 
