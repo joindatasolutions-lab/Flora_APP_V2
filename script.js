@@ -198,17 +198,27 @@ function filtrarCatalogo() {
 
 // === BARRIOS ===
 function fillBarrios() {
+  renderBarriosFiltrados("");
+  setupBusquedaBarrio();
+}
+
+function renderBarriosFiltrados(query = "") {
   const sel = document.getElementById("barrio");
   if (!sel) return;
+
   const barrioPrevio = sel.value;
-
-  sel.innerHTML = `<option value="">Selecciona un barrio...</option>`;
-
+  const termino = query.toLowerCase().trim();
   const barriosOrdenados = Object.keys(state.barrios).sort((a, b) =>
     a.localeCompare(b, 'es', { sensitivity: 'base' })
   );
 
-  barriosOrdenados.forEach(barrio => {
+  sel.innerHTML = `<option value="">Selecciona un barrio...</option>`;
+
+  const filtrados = termino
+    ? barriosOrdenados.filter(barrio => barrio.toLowerCase().includes(termino))
+    : barriosOrdenados;
+
+  filtrados.forEach(barrio => {
     const op = document.createElement("option");
     op.value = barrio;
     op.textContent = `${barrio} ($${fmtCOP(state.barrios[barrio])})`;
@@ -217,9 +227,10 @@ function fillBarrios() {
 
   if (barrioPrevio && [...sel.options].some(op => op.value === barrioPrevio)) {
     sel.value = barrioPrevio;
+  } else if (filtrados.length === 1) {
+    sel.value = filtrados[0];
   }
 
-  setupBusquedaBarrio();
   actualizarDomicilio();
 }
 
@@ -231,14 +242,12 @@ function setupBusquedaBarrio() {
   inputBusqueda.dataset.bound = "true";
 
   inputBusqueda.addEventListener("input", () => {
-    const query = inputBusqueda.value.toLowerCase().trim();
-    [...selectBarrio.options].forEach((op, idx) => {
-      if (idx === 0) {
-        op.hidden = false;
-        return;
-      }
-      op.hidden = query ? !op.value.toLowerCase().includes(query) : false;
-    });
+    renderBarriosFiltrados(inputBusqueda.value);
+  });
+
+  selectBarrio.addEventListener("change", () => {
+    const valor = selectBarrio.value;
+    if (valor) inputBusqueda.value = valor;
   });
 }
 
