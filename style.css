@@ -402,10 +402,14 @@ textarea {
   color: #8b6673;
 }
 #wizardStepText {
+  order: 1;
+  text-align: left;
   font-weight: 700;
   color: var(--rosa-osc);
 }
 #wizardStepLabel {
+  order: 2;
+  margin-left: auto;
   text-align: right;
   font-weight: 600;
 }
