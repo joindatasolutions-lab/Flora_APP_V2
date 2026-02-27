@@ -108,19 +108,17 @@
     <form id="pedidoForm" aria-label="Formulario de pedido">
       <div class="pedido-summary" id="resumenProducto" role="status" aria-live="polite">🛍 Tu pedido</div>
 
-      <div class="wizard-progress" aria-hidden="true">
-        <div class="wizard-progress-track">
-          <div id="wizardProgressBar" class="wizard-progress-fill"></div>
+      <div class="wizard-progress">
+        <div class="wizard-progress-head">
+          <span id="wizardStepText">Paso 1 de 4</span>
+          <span id="wizardStepLabel">Información del cliente</span>
         </div>
-        <div class="wizard-step-labels">
-          <span class="active" data-step-label="1">Cliente</span>
-          <span data-step-label="2">Entrega</span>
-          <span data-step-label="3">Tarjeta</span>
-          <span data-step-label="4">Confirmación</span>
+        <div class="wizard-progress-track">
+          <div id="wizardProgressFill" class="wizard-progress-fill"></div>
         </div>
       </div>
 
-      <div class="wizard-step active" data-step="1">
+      <div class="wizard-step active" data-step="1" data-title="Información del cliente">
         <h3>Información del cliente
           <span id="badgeCliente" class="badge warn" role="status">Nuevo cliente</span>
         </h3>
@@ -163,7 +161,7 @@
         </div>
       </div>
 
-      <div class="wizard-step" data-step="2">
+      <div class="wizard-step" data-step="2" data-title="Información de entrega">
         <h3>Información de entrega</h3>
         <div class="grid">
           <div>
@@ -200,7 +198,7 @@
         </div>
       </div>
 
-      <div class="wizard-step" data-step="3">
+      <div class="wizard-step" data-step="3" data-title="Mensaje para la tarjeta">
         <div class="section-card">
           <h3 class="section-title">Mensaje para la tarjeta</h3>
           <div class="grid">
@@ -240,7 +238,7 @@
         </div>
       </div>
 
-      <div class="wizard-step" data-step="4">
+      <div class="wizard-step" data-step="4" data-title="Confirmación">
         <h3>Resumen de confirmación</h3>
         <div id="confirmSummary" class="confirm-summary" aria-live="polite"></div>
         <div class="actions wizard-actions">

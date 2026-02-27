@@ -45,7 +45,7 @@ function extraerTelefonoLocal10(valor) {
 }
 
 function scrollSuaveAElemento(elemento, duracion = 380) {
-  if (!elemento || typeof window === "undefined") return;
+  if (!elemento || typeof globalThis.window === "undefined") return;
 
   const inicioY = window.scrollY || window.pageYOffset;
   const destinoY = elemento.getBoundingClientRect().top + inicioY - 16;
@@ -652,19 +652,19 @@ function actualizarUIWizard() {
     stepEl.classList.toggle("active", paso === wizardState.currentStep);
   });
 
-  const porcentaje = ((wizardState.currentStep - 1) / (wizardState.totalSteps - 1)) * 100;
-  const barra = document.getElementById("wizardProgressBar");
-  if (barra) barra.style.width = `${porcentaje}%`;
+  const porcentaje = (wizardState.currentStep / wizardState.totalSteps) * 100;
+  const barra = document.getElementById("wizardProgressFill");
+  const textoPaso = document.getElementById("wizardStepText");
+  const textoTitulo = document.getElementById("wizardStepLabel");
+  const pasoActivo = pasos.find(stepEl => Number(stepEl.dataset.step) === wizardState.currentStep);
 
-  document.querySelectorAll("[data-step-label]").forEach(el => {
-    const pasoLabel = Number(el.dataset.stepLabel);
-    el.classList.toggle("active", pasoLabel <= wizardState.currentStep);
-  });
+  if (barra) barra.style.width = `${porcentaje}%`;
+  if (textoPaso) textoPaso.textContent = `Paso ${wizardState.currentStep} de ${wizardState.totalSteps}`;
+  if (textoTitulo && pasoActivo) textoTitulo.textContent = pasoActivo.dataset.title || "";
 
   if (wizardState.currentStep === 4) actualizarResumenConfirmacion();
   updateSubmitState();
 
-  const pasoActivo = pasos.find(stepEl => Number(stepEl.dataset.step) === wizardState.currentStep);
   if (pasoActivo) {
     scrollSuaveAElemento(pasoActivo, 420);
   }

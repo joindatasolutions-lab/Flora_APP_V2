@@ -392,10 +392,27 @@ textarea {
 .wizard-progress {
   margin-bottom: 16px;
 }
+.wizard-progress-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+  font-size: .88rem;
+  color: #8b6673;
+}
+#wizardStepText {
+  font-weight: 700;
+  color: var(--rosa-osc);
+}
+#wizardStepLabel {
+  text-align: right;
+  font-weight: 600;
+}
 .wizard-progress-track {
   width: 100%;
-  height: 8px;
-  background: #f4e4ea;
+  height: 4px;
+  background: #f8e9ef;
   border-radius: 999px;
   overflow: hidden;
 }
@@ -403,22 +420,7 @@ textarea {
   height: 100%;
   width: 25%;
   background: var(--rosa);
-  transition: width .25s ease;
-}
-.wizard-step-labels {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 8px;
-  margin-top: 8px;
-  font-size: .78rem;
-  color: #9a6f7f;
-}
-.wizard-step-labels span {
-  text-align: center;
-  font-weight: 600;
-}
-.wizard-step-labels span.active {
-  color: var(--rosa-osc);
+  transition: width .32s ease;
 }
 .wizard-step {
   display: none;
@@ -434,6 +436,11 @@ textarea {
 @keyframes stepIn {
   from { opacity: 0; transform: translateX(10px); }
   to { opacity: 1; transform: translateX(0); }
+}
+@media (max-width: 600px) {
+  .wizard-progress-head {
+    font-size: .8rem;
+  }
 }
 .wizard-actions {
   margin-top: 22px;
