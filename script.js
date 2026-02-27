@@ -691,7 +691,7 @@ if (typeof document !== 'undefined') {
 
     if (data.status === "success") {
       //3013755838
-      const telefonoFlora = ("57" + "3332571225").replace(/\D/g, ""); // 📲 WhatsApp oficial Flora
+      const telefonoFlora = ("57" + "3013755838").replace(/\D/g, ""); // 📲 WhatsApp oficial Flora
       const mensaje = encodeURIComponent(
         "Hola 🌸 Ya realicé el registro de mi pedido en el formulario y quedo atento(a) para continuar con el proceso de pago."
       );
