@@ -28,20 +28,56 @@ const wizardState = {
   totalSteps: 4
 };
 
+const PHONE_FLAGS_BASE_PATH = "img/flags/4x3";
+const PHONE_DEFAULT_DIAL_CODE = "+57";
+
+function limpiarDigitosTelefono(valor) {
+  return String(valor || "").replaceAll(/\D/g, "");
+}
+
 function esTelefonoColombiaValido(valor) {
-  const limpio = String(valor || "").replaceAll(/\D/g, "");
+  const limpio = limpiarDigitosTelefono(valor);
   return /^3\d{9}$/.test(limpio);
 }
 
 function normalizarTelefonoColombia(valor) {
-  const limpio = String(valor || "").replaceAll(/\D/g, "");
+  const limpio = limpiarDigitosTelefono(valor);
   return limpio ? `+57${limpio}` : "";
 }
 
+function esTelefonoInternacionalValido(valor) {
+  const limpio = limpiarDigitosTelefono(valor);
+  return limpio.length >= 6 && limpio.length <= 15;
+}
+
+function normalizarTelefonoInternacional(valor, indicativo = PHONE_DEFAULT_DIAL_CODE) {
+  const limpio = limpiarDigitosTelefono(valor);
+  if (!limpio) return "";
+
+  const prefijo = String(indicativo || PHONE_DEFAULT_DIAL_CODE).replaceAll(/\D/g, "");
+  return prefijo ? `+${prefijo}${limpio}` : `+${limpio}`;
+}
+
 function extraerTelefonoLocal10(valor) {
-  const limpio = String(valor || "").replaceAll(/\D/g, "");
+  const limpio = limpiarDigitosTelefono(valor);
   if (!limpio) return "";
   return limpio.slice(-10);
+}
+
+function setupIndicativoConBandera(selectId, flagId) {
+  const select = document.getElementById(selectId);
+  const flag = document.getElementById(flagId);
+  if (!select || !flag || select.dataset.bound === "true") return;
+
+  const actualizarBandera = () => {
+    const option = select.options[select.selectedIndex];
+    const codigo = option?.dataset?.flag || "co";
+    flag.style.backgroundImage = `url('${PHONE_FLAGS_BASE_PATH}/${codigo}.svg')`;
+  };
+
+  select.dataset.bound = "true";
+  select.addEventListener("change", actualizarBandera);
+  actualizarBandera();
 }
 
 function scrollSuaveAElemento(elemento, duracion = 380) {
@@ -755,9 +791,17 @@ function validarCampoTelefonoPorId(fieldId, required = false) {
     return !required;
   }
 
-  const valido = esTelefonoColombiaValido(valor);
+  const esDestino = fieldId === "telefonoDestino";
+  const valido = esDestino
+    ? esTelefonoColombiaValido(valor)
+    : esTelefonoInternacionalValido(valor);
+
   input.setCustomValidity(
-    valido ? "" : "Ingresa un número válido de Colombia (10 dígitos, inicia por 3)."
+    valido
+      ? ""
+      : (esDestino
+        ? "Ingresa un número válido de Colombia (10 dígitos, inicia por 3)."
+        : "Ingresa un número válido (entre 6 y 15 dígitos).")
   );
   return valido;
 }
@@ -808,13 +852,14 @@ function actualizarResumenConfirmacion() {
 
   const subtotal = state.cart.reduce((acc, item) => acc + (item.price * item.qty), 0);
   const productos = state.cart.map(p => `${p.qty}x ${p.name}`).join(" | ") || "Sin productos";
-  const telefonoCliente = extraerTelefonoLocal10(document.getElementById("telefono")?.value || "");
+  const telefonoClienteRaw = limpiarDigitosTelefono(document.getElementById("telefono")?.value || "");
+  const indicativoCliente = document.getElementById("indicativoTelefono")?.value || PHONE_DEFAULT_DIAL_CODE;
   const telefonoDestino = extraerTelefonoLocal10(document.getElementById("telefonoDestino")?.value || "");
 
   contenedor.innerHTML = `
     <p><strong>Cliente:</strong> ${(document.getElementById("primerNombre")?.value || "").trim()} ${(document.getElementById("primerApellido")?.value || "").trim()}</p>
     <p><strong>Identificación:</strong> ${(document.getElementById("tipoIdent")?.value || "")} ${(document.getElementById("identificacion")?.value || "")}</p>
-    <p><strong>Teléfono cliente:</strong> ${telefonoCliente ? `+57 ${telefonoCliente}` : "-"}</p>
+    <p><strong>Teléfono cliente:</strong> ${telefonoClienteRaw ? `${indicativoCliente} ${telefonoClienteRaw}` : "-"}</p>
     <p><strong>Destinatario:</strong> ${(document.getElementById("destinatario")?.value || "").trim()}</p>
     <p><strong>Teléfono destino:</strong> ${telefonoDestino ? `+57 ${telefonoDestino}` : "-"}</p>
     <p><strong>Dirección completa:</strong> ${(document.getElementById("direccionCompleta")?.value || "").trim()}</p>
@@ -962,6 +1007,7 @@ function setupWizard() {
   });
 
   sincronizarNombreCompleto();
+  setupIndicativoConBandera("indicativoTelefono", "flagTelefono");
   actualizarBloqueDireccion();
   irAPaso(1);
 }
@@ -1194,13 +1240,14 @@ if (typeof document !== 'undefined') {
   }
 
   // ============================================================
-  // NORMALIZAR TELÉFONOS (+57 fijo)
+  // NORMALIZAR TELÉFONOS
   // ============================================================
   const telefonoClienteRaw = document.getElementById("telefono")?.value || "";
   const telefonoDestinoRaw = document.getElementById("telefonoDestino")?.value || "";
+  const indicativoCliente = document.getElementById("indicativoTelefono")?.value || PHONE_DEFAULT_DIAL_CODE;
 
-  if (!esTelefonoColombiaValido(telefonoClienteRaw)) {
-    Swal.fire("Teléfono inválido", "Ingresa un celular colombiano válido (10 dígitos).", "warning");
+  if (!esTelefonoInternacionalValido(telefonoClienteRaw)) {
+    Swal.fire("Teléfono inválido", "Ingresa un número válido de cliente (entre 6 y 15 dígitos).", "warning");
     btnSubmit.disabled = false;
     btnSubmit.textContent = "Confirmar pedido";
     return;
@@ -1213,7 +1260,7 @@ if (typeof document !== 'undefined') {
     return;
   }
 
-  formData.set("telefono", normalizarTelefonoColombia(telefonoClienteRaw));
+  formData.set("telefono", normalizarTelefonoInternacional(telefonoClienteRaw, indicativoCliente));
   if (telefonoDestinoRaw) formData.set("telefonoDestino", normalizarTelefonoColombia(telefonoDestinoRaw));
 
   // ============================================================
@@ -1223,8 +1270,12 @@ if (typeof document !== 'undefined') {
   const direccionCompleta = tipoEntrega === "TIENDA"
     ? "Entrega en Tienda"
     : (document.getElementById("direccionCompleta")?.value.trim() || "");
+  const barrioEntrega = tipoEntrega === "TIENDA"
+    ? "Entrega en Tienda"
+    : (document.getElementById("barrio")?.value.trim() || "");
   formData.set("direccion", direccionCompleta);
   formData.set("direccionCompleta", direccionCompleta);
+  formData.set("barrio", barrioEntrega);
 
   // ============================================================
   // Productos y totales

@@ -468,6 +468,33 @@ textarea {
   font-weight: 700;
   background: #fdf5f8;
 }
+.phone-country-select {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 10px;
+  border-right: 1px solid #e7e1e3;
+  background: #fdf5f8;
+  min-height: 44px;
+}
+.phone-flag-icon {
+  width: 22px;
+  height: 16px;
+  border-radius: 2px;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  flex-shrink: 0;
+}
+.phone-country-select select {
+  border: none;
+  background: transparent;
+  color: #7d5c67;
+  font-weight: 700;
+  outline: none;
+  appearance: none;
+  padding-right: 10px;
+}
 .phone-fixed-wrapper input {
   border: none;
   border-radius: 0;
