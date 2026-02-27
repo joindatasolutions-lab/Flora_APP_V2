@@ -28,7 +28,6 @@ const wizardState = {
   totalSteps: 4
 };
 
-const PHONE_FLAGS_BASE_PATH = "img/flags/4x3";
 const PHONE_DEFAULT_DIAL_CODE = "+57";
 
 function limpiarDigitosTelefono(valor) {
@@ -58,26 +57,16 @@ function normalizarTelefonoInternacional(valor, indicativo = PHONE_DEFAULT_DIAL_
   return prefijo ? `+${prefijo}${limpio}` : `+${limpio}`;
 }
 
+function normalizarIndicativo(valor) {
+  const digitos = limpiarDigitosTelefono(valor);
+  const base = digitos || PHONE_DEFAULT_DIAL_CODE.replaceAll(/\D/g, "");
+  return `+${base}`;
+}
+
 function extraerTelefonoLocal10(valor) {
   const limpio = limpiarDigitosTelefono(valor);
   if (!limpio) return "";
   return limpio.slice(-10);
-}
-
-function setupIndicativoConBandera(selectId, flagId) {
-  const select = document.getElementById(selectId);
-  const flag = document.getElementById(flagId);
-  if (!select || !flag || select.dataset.bound === "true") return;
-
-  const actualizarBandera = () => {
-    const option = select.options[select.selectedIndex];
-    const codigo = option?.dataset?.flag || "co";
-    flag.style.backgroundImage = `url('${PHONE_FLAGS_BASE_PATH}/${codigo}.svg')`;
-  };
-
-  select.dataset.bound = "true";
-  select.addEventListener("change", actualizarBandera);
-  actualizarBandera();
 }
 
 function scrollSuaveAElemento(elemento, duracion = 380) {
@@ -521,20 +510,32 @@ function vaciarCarrito() {
 
 // === DRAWER ===
 let hideFabOnForm = false;
+
+function toggleCartModal(show) {
+  const modal = document.getElementById("cartModal");
+  if (!modal) return;
+  modal.classList.toggle("hidden", !show);
+}
+
 if (typeof document !== 'undefined') {
-  const drawer = document.getElementById("drawerCarrito");
-  const btnDrawer = document.getElementById("btnDrawer");
+  const cartModal = document.getElementById("cartModal");
+  const btnCheckoutSticky = document.getElementById("btnCheckoutSticky");
   const cerrarDrawer = document.getElementById("cerrarDrawer");
   const vaciarCarritoBtn = document.getElementById("vaciarCarrito");
   
-  if (btnDrawer) {
-    btnDrawer.onclick = () => {
+  if (btnCheckoutSticky) {
+    btnCheckoutSticky.onclick = () => {
       renderDrawerCart();
-      if (drawer) drawer.classList.add("open");
+      toggleCartModal(true);
     };
   }
-  if (cerrarDrawer && drawer) {
-    cerrarDrawer.onclick = () => drawer.classList.remove("open");
+  if (cerrarDrawer) {
+    cerrarDrawer.onclick = () => toggleCartModal(false);
+  }
+  if (cartModal) {
+    cartModal.addEventListener("click", event => {
+      if (event.target === cartModal) toggleCartModal(false);
+    });
   }
   if (vaciarCarritoBtn) {
     vaciarCarritoBtn.onclick = vaciarCarrito;
@@ -543,7 +544,10 @@ if (typeof document !== 'undefined') {
 
 function updateCartCount() {
   const totalQty = state.cart.reduce((a, b) => a + b.qty, 0);
-  document.getElementById("cartCount").textContent = totalQty;
+  const cartCountEl = document.getElementById("cartCount");
+  if (cartCountEl) {
+    cartCountEl.textContent = `${totalQty} ${totalQty === 1 ? "producto" : "productos"}`;
+  }
 }
 
 function renderDrawerCart() {
@@ -577,6 +581,8 @@ function renderDrawerCart() {
 
   const domicilio = state.domicilio || 0;
   const total = subtotal + domicilio + state.iva;
+  const cartTotalEl = document.getElementById("cartTotal");
+  if (cartTotalEl) cartTotalEl.textContent = `$${fmtCOP(subtotal)}`;
 
   document.getElementById("subtotalDrawer").textContent = fmtCOP(subtotal);
   document.getElementById("ivaDrawer").textContent = fmtCOP(state.iva);
@@ -853,7 +859,7 @@ function actualizarResumenConfirmacion() {
   const subtotal = state.cart.reduce((acc, item) => acc + (item.price * item.qty), 0);
   const productos = state.cart.map(p => `${p.qty}x ${p.name}`).join(" | ") || "Sin productos";
   const telefonoClienteRaw = limpiarDigitosTelefono(document.getElementById("telefono")?.value || "");
-  const indicativoCliente = document.getElementById("indicativoTelefono")?.value || PHONE_DEFAULT_DIAL_CODE;
+  const indicativoCliente = normalizarIndicativo(document.getElementById("indicativo")?.value || PHONE_DEFAULT_DIAL_CODE);
   const telefonoDestino = extraerTelefonoLocal10(document.getElementById("telefonoDestino")?.value || "");
 
   contenedor.innerHTML = `
@@ -937,8 +943,29 @@ function setupWizard() {
 
   const telefonoClienteInput = document.getElementById("telefono");
   if (telefonoClienteInput) {
+    if (telefonoClienteInput.dataset.boundDigits !== "true") {
+      telefonoClienteInput.dataset.boundDigits = "true";
+      telefonoClienteInput.addEventListener("input", () => {
+        const limpio = limpiarDigitosTelefono(telefonoClienteInput.value);
+        if (telefonoClienteInput.value !== limpio) {
+          telefonoClienteInput.value = limpio;
+        }
+      });
+    }
     telefonoClienteInput.addEventListener("input", () => {
       if (obtenerTipoEntrega() === "TIENDA") actualizarBloqueDireccion();
+    });
+  }
+
+  const indicativoInput = document.getElementById("indicativo");
+  if (indicativoInput && indicativoInput.dataset.boundPrefix !== "true") {
+    indicativoInput.dataset.boundPrefix = "true";
+    indicativoInput.value = normalizarIndicativo(indicativoInput.value);
+    indicativoInput.addEventListener("input", () => {
+      indicativoInput.value = normalizarIndicativo(indicativoInput.value);
+    });
+    indicativoInput.addEventListener("blur", () => {
+      indicativoInput.value = normalizarIndicativo(indicativoInput.value);
     });
   }
 
@@ -1007,7 +1034,6 @@ function setupWizard() {
   });
 
   sincronizarNombreCompleto();
-  setupIndicativoConBandera("indicativoTelefono", "flagTelefono");
   actualizarBloqueDireccion();
   irAPaso(1);
 }
@@ -1018,8 +1044,7 @@ if (typeof document !== 'undefined') {
   
   if (btnPedidoDrawer) {
     btnPedidoDrawer.onclick = () => {
-      const drawer = document.getElementById("drawerCarrito");
-      if (drawer) drawer.classList.remove("open");
+      toggleCartModal(false);
       const resumen = state.cart.map(p => `${p.qty}x ${p.name}`).join(" | ");
       const subtotal = state.cart.reduce((a, b) => a + b.price * b.qty, 0);
       const resumenProducto = document.getElementById("resumenProducto");
@@ -1244,7 +1269,7 @@ if (typeof document !== 'undefined') {
   // ============================================================
   const telefonoClienteRaw = document.getElementById("telefono")?.value || "";
   const telefonoDestinoRaw = document.getElementById("telefonoDestino")?.value || "";
-  const indicativoCliente = document.getElementById("indicativoTelefono")?.value || PHONE_DEFAULT_DIAL_CODE;
+  const indicativoCliente = normalizarIndicativo(document.getElementById("indicativo")?.value || PHONE_DEFAULT_DIAL_CODE);
 
   if (!esTelefonoInternacionalValido(telefonoClienteRaw)) {
     Swal.fire("Teléfono inválido", "Ingresa un número válido de cliente (entre 6 y 15 dígitos).", "warning");
