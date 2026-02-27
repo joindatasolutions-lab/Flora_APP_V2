@@ -21,8 +21,50 @@ const state = {
   domicilio: 0,
   iva: 0,
   categoriaSeleccionada: null,
-  wizardStep: 1,
 };
+
+const wizardState = {
+  currentStep: 1,
+  totalSteps: 4
+};
+
+function esTelefonoColombiaValido(valor) {
+  const limpio = String(valor || "").replaceAll(/\D/g, "");
+  return /^3\d{9}$/.test(limpio);
+}
+
+function normalizarTelefonoColombia(valor) {
+  const limpio = String(valor || "").replaceAll(/\D/g, "");
+  return limpio ? `+57${limpio}` : "";
+}
+
+function extraerTelefonoLocal10(valor) {
+  const limpio = String(valor || "").replaceAll(/\D/g, "");
+  if (!limpio) return "";
+  return limpio.slice(-10);
+}
+
+function scrollSuaveAElemento(elemento, duracion = 380) {
+  if (!elemento || typeof window === "undefined") return;
+
+  const inicioY = window.scrollY || window.pageYOffset;
+  const destinoY = elemento.getBoundingClientRect().top + inicioY - 16;
+  const cambio = destinoY - inicioY;
+  if (Math.abs(cambio) < 6) return;
+
+  const inicioTiempo = performance.now();
+  const easeOutCubic = t => 1 - Math.pow(1 - t, 3);
+
+  const animar = tiempoActual => {
+    const transcurrido = tiempoActual - inicioTiempo;
+    const progreso = Math.min(transcurrido / duracion, 1);
+    const eased = easeOutCubic(progreso);
+    window.scrollTo(0, inicioY + cambio * eased);
+    if (progreso < 1) requestAnimationFrame(animar);
+  };
+
+  requestAnimationFrame(animar);
+}
 
 /**
  * Formatea un número como moneda colombiana (COP)
@@ -227,8 +269,8 @@ function renderBarriosFiltrados(query = "") {
 
   if (barrioPrevio && [...sel.options].some(op => op.value === barrioPrevio)) {
     sel.value = barrioPrevio;
-  } else if (filtrados.length === 1) {
-    sel.value = filtrados[0];
+  } else {
+    sel.value = "";
   }
 
   actualizarDomicilio();
@@ -243,6 +285,12 @@ function setupBusquedaBarrio() {
 
   inputBusqueda.addEventListener("input", () => {
     renderBarriosFiltrados(inputBusqueda.value);
+    const exacto = [...selectBarrio.options].find(op =>
+      op.value.toLowerCase() === inputBusqueda.value.toLowerCase().trim()
+    );
+    selectBarrio.value = exacto ? exacto.value : "";
+    actualizarDomicilio();
+    updateSubmitState();
   });
 
   selectBarrio.addEventListener("change", () => {
@@ -469,6 +517,11 @@ function renderDrawerCart() {
   if (domInput) domInput.value = domicilio;
   if (ivaInput) ivaInput.value = state.iva;
   if (totalInput) totalInput.value = total;
+
+  if (wizardState.currentStep === 4) {
+    actualizarResumenConfirmacion();
+  }
+  updateSubmitState();
 }
 
 // === NAVEGACIÓN ===
@@ -489,7 +542,7 @@ function show(id) {
   if (fechaInput && !fechaInput.value) {
     fechaInput.value = new Date().toISOString().split("T")[0];
   }
-  goToWizardStep(1);
+  irAPaso(1);
 }
 }
 
@@ -497,29 +550,37 @@ function getWizardSteps() {
   return [...document.querySelectorAll(".wizard-step")];
 }
 
-function validarTelefonoColombiano(idCampo, requerido = true, mostrarError = true) {
-  const input = document.getElementById(idCampo);
-  if (!input) return true;
+function updateSubmitState() {
+  const btnSubmit = document.getElementById("btnSubmit");
+  if (!btnSubmit) return;
 
+  const requeridos = ["tipoIdent", "identificacion", "telefono", "primerNombre", "destinatario", "direccionCompleta", "barrio"];
+  const camposCompletos = requeridos.every(id => {
+    const campo = document.getElementById(id);
+    return campo ? Boolean(String(campo.value || "").trim()) : true;
+  });
+
+  btnSubmit.disabled = state.cart.length === 0 || !camposCompletos;
+}
+
+function validarCampoTelefonoPorId(fieldId, required = false) {
+  const input = document.getElementById(fieldId);
+  if (!input) return true;
   const valor = input.value.trim();
+
   if (!valor) {
-    input.setCustomValidity(requerido ? "Este campo es obligatorio." : "");
-    if (requerido && mostrarError) input.reportValidity();
-    return !requerido;
+    input.setCustomValidity(required ? "Este campo es obligatorio." : "");
+    return !required;
   }
 
-  const soloDigitos = valor.replaceAll(/\D/g, "");
-  const valido = /^3\d{9}$/.test(soloDigitos);
+  const valido = esTelefonoColombiaValido(valor);
   input.setCustomValidity(
-    valido ? "" : "Ingresa un celular colombiano válido de 10 dígitos (ej: 3001234567)."
+    valido ? "" : "Ingresa un número válido de Colombia (10 dígitos, inicia por 3)."
   );
-
-  if (!valido && mostrarError) input.reportValidity();
   return valido;
 }
 
-function validarPaso(step, opciones = {}) {
-  const { mostrarError = true } = opciones;
+function validarPaso(step, showAlert = true) {
   const requeridosPorPaso = {
     1: ["tipoIdent", "identificacion", "telefono", "primerNombre"],
     2: ["destinatario", "direccionCompleta", "barrio"],
@@ -528,42 +589,42 @@ function validarPaso(step, opciones = {}) {
   };
 
   const requeridos = requeridosPorPaso[step] || [];
+  let invalido = false;
   for (const id of requeridos) {
     const campo = document.getElementById(id);
     if (!campo) continue;
-    if (!campo.checkValidity()) {
-      if (mostrarError) campo.reportValidity();
-      return false;
+    if (!String(campo.value || "").trim()) {
+      campo.setCustomValidity("Este campo es obligatorio.");
+      if (showAlert) campo.reportValidity();
+      invalido = true;
+      break;
     }
+    campo.setCustomValidity("");
   }
 
-  if (step === 1 && !validarTelefonoColombiano("telefono", true, mostrarError)) return false;
-  if (step === 2 && !validarTelefonoColombiano("telefonoDestino", false, mostrarError)) return false;
+  if (invalido) return false;
+
+  const telefonoValido = step === 1 ? validarCampoTelefonoPorId("telefono", true) : true;
+  const telefonoDestinoValido = step === 2 ? validarCampoTelefonoPorId("telefonoDestino", false) : true;
+
+  if (!telefonoValido || !telefonoDestinoValido) {
+    if (showAlert) {
+      Swal.fire("Campos pendientes", "Completa los campos requeridos antes de continuar.", "warning");
+    }
+    return false;
+  }
 
   return true;
 }
 
-function actualizarProgresoWizard() {
-  const totalPasos = 4;
-  const porcentaje = (state.wizardStep / totalPasos) * 100;
-  const barra = document.getElementById("wizardProgressBar");
-  if (barra) barra.style.width = `${porcentaje}%`;
-
-  document.querySelectorAll("[data-step-label]").forEach(el => {
-    const pasoLabel = Number(el.dataset.stepLabel);
-    el.classList.toggle("active", pasoLabel <= state.wizardStep);
-  });
-}
-
-function construirResumenConfirmacion() {
+function actualizarResumenConfirmacion() {
   const contenedor = document.getElementById("confirmSummary");
   if (!contenedor) return;
 
   const subtotal = state.cart.reduce((acc, item) => acc + (item.price * item.qty), 0);
   const productos = state.cart.map(p => `${p.qty}x ${p.name}`).join(" | ") || "Sin productos";
-
-  const telefonoCliente = (document.getElementById("telefono")?.value || "").replaceAll(/\D/g, "");
-  const telefonoDestino = (document.getElementById("telefonoDestino")?.value || "").replaceAll(/\D/g, "");
+  const telefonoCliente = extraerTelefonoLocal10(document.getElementById("telefono")?.value || "");
+  const telefonoDestino = extraerTelefonoLocal10(document.getElementById("telefonoDestino")?.value || "");
 
   contenedor.innerHTML = `
     <p><strong>Cliente:</strong> ${(document.getElementById("primerNombre")?.value || "").trim()} ${(document.getElementById("primerApellido")?.value || "").trim()}</p>
@@ -582,68 +643,65 @@ function construirResumenConfirmacion() {
   `;
 }
 
-function updateSubmitState() {
-  const btnSubmit = document.getElementById("btnSubmit");
-  if (!btnSubmit) return;
-
-  const camposValidos = validarPaso(1, { mostrarError: false })
-    && validarPaso(2, { mostrarError: false });
-
-  btnSubmit.disabled = state.cart.length === 0 || !camposValidos;
-}
-
-function goToWizardStep(targetStep) {
+function actualizarUIWizard() {
   const pasos = getWizardSteps();
   if (!pasos.length) return;
 
-  const totalPasos = pasos.length;
-  const stepNormalizado = Math.min(Math.max(targetStep, 1), totalPasos);
-  state.wizardStep = stepNormalizado;
-
   pasos.forEach(stepEl => {
     const paso = Number(stepEl.dataset.step);
-    stepEl.classList.toggle("active", paso === stepNormalizado);
+    stepEl.classList.toggle("active", paso === wizardState.currentStep);
   });
 
-  if (stepNormalizado === 4) {
-    construirResumenConfirmacion();
-  }
+  const porcentaje = ((wizardState.currentStep - 1) / (wizardState.totalSteps - 1)) * 100;
+  const barra = document.getElementById("wizardProgressBar");
+  if (barra) barra.style.width = `${porcentaje}%`;
 
-  actualizarProgresoWizard();
+  document.querySelectorAll("[data-step-label]").forEach(el => {
+    const pasoLabel = Number(el.dataset.stepLabel);
+    el.classList.toggle("active", pasoLabel <= wizardState.currentStep);
+  });
+
+  if (wizardState.currentStep === 4) actualizarResumenConfirmacion();
   updateSubmitState();
+
+  const pasoActivo = pasos.find(stepEl => Number(stepEl.dataset.step) === wizardState.currentStep);
+  if (pasoActivo) {
+    scrollSuaveAElemento(pasoActivo, 420);
+  }
+}
+
+function irAPaso(step) {
+  wizardState.currentStep = Math.min(Math.max(step, 1), wizardState.totalSteps);
+  actualizarUIWizard();
+}
+
+function avanzarPaso() {
+  if (!validarPaso(wizardState.currentStep, true)) return;
+  if (wizardState.currentStep < wizardState.totalSteps) {
+    irAPaso(wizardState.currentStep + 1);
+  }
+}
+
+function retrocederPaso() {
+  if (wizardState.currentStep > 1) {
+    irAPaso(wizardState.currentStep - 1);
+  }
 }
 
 function setupWizard() {
   const form = document.getElementById("pedidoForm");
   if (!form) return;
 
-  form.querySelectorAll("[data-wizard-next]").forEach(btn => {
-    btn.addEventListener("click", () => {
-      if (!validarPaso(state.wizardStep)) return;
-      goToWizardStep(state.wizardStep + 1);
-    });
-  });
-
-  form.querySelectorAll("[data-wizard-prev]").forEach(btn => {
-    btn.addEventListener("click", () => {
-      goToWizardStep(state.wizardStep - 1);
-    });
-  });
-
-  ["telefono", "telefonoDestino"].forEach(id => {
-    const input = document.getElementById(id);
-    if (!input) return;
-    input.addEventListener("input", () => {
-      input.value = input.value.replaceAll(/\D/g, "").slice(0, 10);
-      validarTelefonoColombiano(id, id === "telefono", false);
-      updateSubmitState();
-    });
-  });
+  form.querySelectorAll("[data-wizard-next]").forEach(btn => btn.addEventListener("click", avanzarPaso));
+  form.querySelectorAll("[data-wizard-prev]").forEach(btn => btn.addEventListener("click", retrocederPaso));
 
   form.addEventListener("input", () => updateSubmitState());
-  form.addEventListener("change", () => updateSubmitState());
+  form.addEventListener("change", () => {
+    if (wizardState.currentStep === 4) actualizarResumenConfirmacion();
+    updateSubmitState();
+  });
 
-  goToWizardStep(1);
+  irAPaso(1);
 }
 
 if (typeof document !== 'undefined') {
@@ -663,7 +721,7 @@ if (typeof document !== 'undefined') {
       }
       hideFabOnForm = true;
       show("viewForm");
-      goToWizardStep(1);
+      irAPaso(1);
       updateSubmitState();
     };
   }
@@ -706,7 +764,7 @@ async function buscarCliente(ident) {
 
       document.getElementById("primerNombre").value = data.primerNombre || "";
       document.getElementById("primerApellido").value = data.primerApellido || "";
-      document.getElementById("telefono").value = data.telefono || "";
+      document.getElementById("telefono").value = extraerTelefonoLocal10(data.telefono);
 
       // 🔥 ESTA LÍNEA ES LA QUE FALTA
       if (data.tipoIdent) {
@@ -799,8 +857,14 @@ if (typeof document !== 'undefined') {
   e.preventDefault();
 
   const btnSubmit = document.getElementById("btnSubmit");
-  if (!validarPaso(1) || !validarPaso(2)) {
-    goToWizardStep(1);
+  if (!validarPaso(1, true)) {
+    irAPaso(1);
+    updateSubmitState();
+    return;
+  }
+
+  if (!validarPaso(2, true)) {
+    irAPaso(2);
     updateSubmitState();
     return;
   }
@@ -853,25 +917,25 @@ if (typeof document !== 'undefined') {
   // ============================================================
   // NORMALIZAR TELÉFONOS (+57 fijo)
   // ============================================================
-  const telefonoCliente = (document.getElementById("telefono")?.value || "").replaceAll(/\D/g, "");
-  const telefonoDestino = (document.getElementById("telefonoDestino")?.value || "").replaceAll(/\D/g, "");
+  const telefonoClienteRaw = document.getElementById("telefono")?.value || "";
+  const telefonoDestinoRaw = document.getElementById("telefonoDestino")?.value || "";
 
-  if (!/^3\d{9}$/.test(telefonoCliente)) {
+  if (!esTelefonoColombiaValido(telefonoClienteRaw)) {
     Swal.fire("Teléfono inválido", "Ingresa un celular colombiano válido (10 dígitos).", "warning");
     btnSubmit.disabled = false;
     btnSubmit.textContent = "Confirmar pedido";
     return;
   }
 
-  if (telefonoDestino && !/^3\d{9}$/.test(telefonoDestino)) {
+  if (telefonoDestinoRaw && !esTelefonoColombiaValido(telefonoDestinoRaw)) {
     Swal.fire("Teléfono destino inválido", "Si completas el teléfono destino, debe ser un celular colombiano válido.", "warning");
     btnSubmit.disabled = false;
     btnSubmit.textContent = "Confirmar pedido";
     return;
   }
 
-  formData.set("telefono", `+57${telefonoCliente}`);
-  if (telefonoDestino) formData.set("telefonoDestino", `+57${telefonoDestino}`);
+  formData.set("telefono", normalizarTelefonoColombia(telefonoClienteRaw));
+  if (telefonoDestinoRaw) formData.set("telefonoDestino", normalizarTelefonoColombia(telefonoDestinoRaw));
 
   // ============================================================
   // Dirección final (direccionCompleta)
@@ -947,7 +1011,7 @@ if (typeof document !== 'undefined') {
       renderDrawerCart();
       show("viewCatalog");
       e.target.reset();
-      goToWizardStep(1);
+      irAPaso(1);
       updateSubmitState();
 
     } else {

@@ -33,6 +33,43 @@ body {
   line-height:1.4;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
+.drawer-body,
+.cart-list,
+form {
+  scrollbar-width: thin;
+  scrollbar-color: var(--rosa) #f6edf1;
+}
+
+.drawer-body::-webkit-scrollbar,
+.cart-list::-webkit-scrollbar,
+form::-webkit-scrollbar {
+  width: 8px;
+}
+
+.drawer-body::-webkit-scrollbar-track,
+.cart-list::-webkit-scrollbar-track,
+form::-webkit-scrollbar-track {
+  background: #f6edf1;
+  border-radius: 999px;
+}
+
+.drawer-body::-webkit-scrollbar-thumb,
+.cart-list::-webkit-scrollbar-thumb,
+form::-webkit-scrollbar-thumb {
+  background: var(--rosa);
+  border-radius: 999px;
+}
+
+.drawer-body::-webkit-scrollbar-thumb:hover,
+.cart-list::-webkit-scrollbar-thumb:hover,
+form::-webkit-scrollbar-thumb:hover {
+  background: var(--rosa-osc);
+}
+
 /* === HEADER === */
 header {
   text-align:center;
