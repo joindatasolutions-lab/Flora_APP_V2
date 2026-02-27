@@ -566,6 +566,39 @@ textarea {
   gap: 6px;
 }
 
+.tipo-entrega-group {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.tipo-entrega-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 12px;
+  border: 1px solid #f2cbd4;
+  border-radius: 12px;
+  background: #fff;
+  color: #a34b6d;
+  font-weight: 600;
+}
+
+.bloque-direccion {
+  overflow: hidden;
+  max-height: 560px;
+  opacity: 1;
+  transform: translateY(0);
+  transition: max-height .35s ease, opacity .25s ease, transform .25s ease;
+}
+
+.bloque-direccion.oculto {
+  max-height: 0;
+  opacity: 0;
+  transform: translateY(-6px);
+  pointer-events: none;
+}
+
 #buscarBarrio {
   padding: 10px 14px;
   border: 1px solid #ddd;
@@ -610,6 +643,10 @@ textarea {
 
 /* 📱 En móvil, se apilan verticalmente */
 @media (max-width: 600px) {
+  .tipo-entrega-group {
+    flex-direction: column;
+  }
+
   .entrega-fecha-hora {
     flex-direction: column;
     gap: 10px;

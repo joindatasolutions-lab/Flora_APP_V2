@@ -143,12 +143,10 @@
             </div>
           </div>
           <div>
-            <label for="primerNombre">Nombre</label>
-            <input id="primerNombre" name="primerNombre" type="text" required>
-          </div>
-          <div>
-            <label for="primerApellido">Apellido(s)</label>
-            <input id="primerApellido" name="primerApellido" type="text">
+            <label for="nombreCompletoVisible">Nombre completo</label>
+            <input id="nombreCompletoVisible" type="text" required>
+            <input type="hidden" id="primerNombre" name="primerNombre">
+            <input type="hidden" id="primerApellido" name="primerApellido">
           </div>
           <div>
             <label for="email">Email (opcional)</label>
@@ -163,6 +161,16 @@
 
       <div class="wizard-step" data-step="2" data-title="Información de entrega">
         <h3>Información de entrega</h3>
+        <div class="tipo-entrega-group" role="radiogroup" aria-label="Tipo de entrega">
+          <label class="tipo-entrega-option" for="tipoEntregaDomicilio">
+            <input type="radio" id="tipoEntregaDomicilio" name="tipoEntrega" value="DOMICILIO" checked>
+            <span>Domicilio</span>
+          </label>
+          <label class="tipo-entrega-option" for="tipoEntregaTienda">
+            <input type="radio" id="tipoEntregaTienda" name="tipoEntrega" value="TIENDA">
+            <span>Recoger en tienda</span>
+          </label>
+        </div>
         <div class="grid">
           <div>
             <label for="destinatario">Destinatario</label>
@@ -175,15 +183,19 @@
               <input id="telefonoDestino" name="telefonoDestino" type="tel" inputmode="numeric" pattern="3[0-9]{9}" placeholder="3001234567">
             </div>
           </div>
-          <div>
-            <label for="direccionCompleta">Dirección completa</label>
-            <input id="direccionCompleta" name="direccionCompleta" type="text" placeholder="Ej: Calle 10 #20-30 apto 502" required>
-          </div>
-          <div class="barrio-container">
-            <label for="buscarBarrio">Barrio</label>
-            <input id="buscarBarrio" type="search" placeholder="Busca y selecciona un barrio..." aria-label="Buscar barrio">
-            <select id="barrio" name="barrio" required onchange="actualizarDomicilio()" aria-label="Seleccionar barrio"></select>
-            <small id="barrioCostoInfo" class="help-text">Costo de domicilio: $0</small>
+          <div id="bloqueDireccion" class="bloque-direccion grid-1">
+            <div class="grid">
+              <div>
+                <label for="direccionCompleta">Dirección completa</label>
+                <input id="direccionCompleta" name="direccionCompleta" type="text" placeholder="Ej: Calle 10 #20-30 apto 502" required>
+              </div>
+              <div class="barrio-container">
+                <label for="buscarBarrio">Barrio</label>
+                <input id="buscarBarrio" type="search" placeholder="Busca y selecciona un barrio..." aria-label="Buscar barrio">
+                <select id="barrio" name="barrio" required onchange="actualizarDomicilio()" aria-label="Seleccionar barrio"></select>
+                <small id="barrioCostoInfo" class="help-text">Costo de domicilio: $0</small>
+              </div>
+            </div>
           </div>
         </div>
         <div class="entrega-fecha-hora">

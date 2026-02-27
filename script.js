@@ -45,7 +45,7 @@ function extraerTelefonoLocal10(valor) {
 }
 
 function scrollSuaveAElemento(elemento, duracion = 380) {
-  if (!elemento || typeof globalThis.window === "undefined") return;
+  if (!elemento) return;
 
   const inicioY = window.scrollY || window.pageYOffset;
   const destinoY = elemento.getBoundingClientRect().top + inicioY - 16;
@@ -550,11 +550,60 @@ function getWizardSteps() {
   return [...document.querySelectorAll(".wizard-step")];
 }
 
+function sincronizarNombreCompleto() {
+  const fullInput = document.getElementById("nombreCompletoVisible");
+  const primerNombre = document.getElementById("primerNombre");
+  const primerApellido = document.getElementById("primerApellido");
+  if (!fullInput || !primerNombre || !primerApellido) return;
+
+  const fullName = fullInput.value.trim();
+  primerNombre.value = fullName;
+  primerApellido.value = "";
+}
+
+function obtenerTipoEntrega() {
+  const seleccionado = document.querySelector('input[name="tipoEntrega"]:checked');
+  return seleccionado ? seleccionado.value : "DOMICILIO";
+}
+
+function actualizarBloqueDireccion() {
+  const tipoEntrega = obtenerTipoEntrega();
+  const bloque = document.getElementById("bloqueDireccion");
+  const direccion = document.getElementById("direccionCompleta");
+  const barrio = document.getElementById("barrio");
+  const buscarBarrio = document.getElementById("buscarBarrio");
+  if (!bloque || !direccion || !barrio) return;
+
+  const esTienda = tipoEntrega === "TIENDA";
+  bloque.classList.toggle("oculto", esTienda);
+
+  if (esTienda) {
+    direccion.removeAttribute("required");
+    barrio.removeAttribute("required");
+    direccion.value = "";
+    barrio.value = "";
+    if (buscarBarrio) buscarBarrio.value = "";
+    state.domicilio = 0;
+    actualizarDomicilio();
+  } else {
+    direccion.setAttribute("required", "required");
+    barrio.setAttribute("required", "required");
+    actualizarDomicilio();
+  }
+
+  updateSubmitState();
+}
+
 function updateSubmitState() {
   const btnSubmit = document.getElementById("btnSubmit");
   if (!btnSubmit) return;
 
-  const requeridos = ["tipoIdent", "identificacion", "telefono", "primerNombre", "destinatario", "direccionCompleta", "barrio"];
+  const tipoEntrega = obtenerTipoEntrega();
+  const requeridos = ["tipoIdent", "identificacion", "telefono", "nombreCompletoVisible", "destinatario"];
+  if (tipoEntrega !== "TIENDA") {
+    requeridos.push("direccionCompleta", "barrio");
+  }
+
   const camposCompletos = requeridos.every(id => {
     const campo = document.getElementById(id);
     return campo ? Boolean(String(campo.value || "").trim()) : true;
@@ -581,9 +630,12 @@ function validarCampoTelefonoPorId(fieldId, required = false) {
 }
 
 function validarPaso(step, showAlert = true) {
+  sincronizarNombreCompleto();
+  const tipoEntrega = obtenerTipoEntrega();
+
   const requeridosPorPaso = {
-    1: ["tipoIdent", "identificacion", "telefono", "primerNombre"],
-    2: ["destinatario", "direccionCompleta", "barrio"],
+    1: ["tipoIdent", "identificacion", "telefono", "nombreCompletoVisible"],
+    2: tipoEntrega === "TIENDA" ? ["destinatario"] : ["destinatario", "direccionCompleta", "barrio"],
     3: [],
     4: []
   };
@@ -692,6 +744,21 @@ function setupWizard() {
   const form = document.getElementById("pedidoForm");
   if (!form) return;
 
+  const nombreCompletoVisible = document.getElementById("nombreCompletoVisible");
+  if (nombreCompletoVisible) {
+    nombreCompletoVisible.addEventListener("input", () => {
+      sincronizarNombreCompleto();
+      updateSubmitState();
+    });
+  }
+
+  const radiosEntrega = document.querySelectorAll('input[name="tipoEntrega"]');
+  radiosEntrega.forEach(radio => {
+    radio.addEventListener("change", () => {
+      actualizarBloqueDireccion();
+    });
+  });
+
   form.querySelectorAll("[data-wizard-next]").forEach(btn => btn.addEventListener("click", avanzarPaso));
   form.querySelectorAll("[data-wizard-prev]").forEach(btn => btn.addEventListener("click", retrocederPaso));
 
@@ -701,6 +768,8 @@ function setupWizard() {
     updateSubmitState();
   });
 
+  sincronizarNombreCompleto();
+  actualizarBloqueDireccion();
   irAPaso(1);
 }
 
@@ -745,6 +814,8 @@ if (typeof document !== 'undefined') {
         document.getElementById("telefono").value = "";
         document.getElementById("primerNombre").value = "";
         document.getElementById("primerApellido").value = "";
+        const nombreCompletoVisible = document.getElementById("nombreCompletoVisible");
+        if (nombreCompletoVisible) nombreCompletoVisible.value = "";
         const emailInput = document.getElementById("email");
         if (emailInput) emailInput.value = "";
         return;
@@ -764,6 +835,10 @@ async function buscarCliente(ident) {
 
       document.getElementById("primerNombre").value = data.primerNombre || "";
       document.getElementById("primerApellido").value = data.primerApellido || "";
+      const nombreCompletoVisible = document.getElementById("nombreCompletoVisible");
+      if (nombreCompletoVisible) {
+        nombreCompletoVisible.value = [data.primerNombre || "", data.primerApellido || ""].filter(Boolean).join(" ").trim();
+      }
       document.getElementById("telefono").value = extraerTelefonoLocal10(data.telefono);
 
       // 🔥 ESTA LÍNEA ES LA QUE FALTA
@@ -838,6 +913,8 @@ function autofillCliente(c) {
   const apellidos = [c.PrimerApellido, c.SegundoApellido].filter(Boolean).join(" ").trim();
   document.getElementById("primerNombre").value = nombre || "";
   document.getElementById("primerApellido").value = apellidos || "";
+  const nombreCompletoVisible = document.getElementById("nombreCompletoVisible");
+  if (nombreCompletoVisible) nombreCompletoVisible.value = `${nombre} ${apellidos}`.trim();
   document.getElementById("telefono").value = c.Telefono || "";
 }
 
@@ -845,6 +922,8 @@ function limpiarCliente(clearId) {
   if (clearId) document.getElementById("identificacion").value = "";
   document.getElementById("primerNombre").value = "";
   document.getElementById("primerApellido").value = "";
+  const nombreCompletoVisible = document.getElementById("nombreCompletoVisible");
+  if (nombreCompletoVisible) nombreCompletoVisible.value = "";
   document.getElementById("telefono").value = "";
 }
 
@@ -857,6 +936,7 @@ if (typeof document !== 'undefined') {
   e.preventDefault();
 
   const btnSubmit = document.getElementById("btnSubmit");
+  sincronizarNombreCompleto();
   if (!validarPaso(1, true)) {
     irAPaso(1);
     updateSubmitState();
