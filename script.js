@@ -240,62 +240,97 @@ function filtrarCatalogo() {
 
 // === BARRIOS ===
 function fillBarrios() {
-  renderBarriosFiltrados("");
+  const inputBusqueda = document.getElementById("buscarBarrio");
+  const barrioHidden = document.getElementById("barrio");
+  if (inputBusqueda && !inputBusqueda.value.trim()) inputBusqueda.value = "";
+  if (barrioHidden && !barrioHidden.value.trim()) barrioHidden.value = "";
+  renderBarrioSuggestions("");
   setupBusquedaBarrio();
+  actualizarDomicilio();
 }
 
-function renderBarriosFiltrados(query = "") {
-  const sel = document.getElementById("barrio");
-  if (!sel) return;
+function renderBarrioSuggestions(query = "") {
+  const list = document.getElementById("barrioSuggestions");
+  if (!list) return;
 
-  const barrioPrevio = sel.value;
   const termino = query.toLowerCase().trim();
+  if (!termino) {
+    list.innerHTML = "";
+    list.style.display = "none";
+    return;
+  }
+
   const barriosOrdenados = Object.keys(state.barrios).sort((a, b) =>
     a.localeCompare(b, 'es', { sensitivity: 'base' })
   );
 
-  sel.innerHTML = `<option value="">Selecciona un barrio...</option>`;
+  const filtrados = barriosOrdenados
+    .filter(barrio => barrio.toLowerCase().includes(termino))
+    .slice(0, 6);
 
-  const filtrados = termino
-    ? barriosOrdenados.filter(barrio => barrio.toLowerCase().includes(termino))
-    : barriosOrdenados;
-
-  filtrados.forEach(barrio => {
-    const op = document.createElement("option");
-    op.value = barrio;
-    op.textContent = `${barrio} ($${fmtCOP(state.barrios[barrio])})`;
-    sel.appendChild(op);
-  });
-
-  if (barrioPrevio && [...sel.options].some(op => op.value === barrioPrevio)) {
-    sel.value = barrioPrevio;
-  } else {
-    sel.value = "";
+  if (!filtrados.length) {
+    list.innerHTML = "";
+    list.style.display = "none";
+    return;
   }
 
-  actualizarDomicilio();
+  list.innerHTML = filtrados.map(barrio => `
+    <div class="autocomplete-item" data-value="${barrio}">
+      ${barrio} ($${fmtCOP(state.barrios[barrio])})
+    </div>
+  `).join("");
+
+  list.style.display = "block";
 }
 
 function setupBusquedaBarrio() {
   const inputBusqueda = document.getElementById("buscarBarrio");
-  const selectBarrio = document.getElementById("barrio");
-  if (!inputBusqueda || !selectBarrio || inputBusqueda.dataset.bound === "true") return;
+  const barrioHidden = document.getElementById("barrio");
+  const suggestions = document.getElementById("barrioSuggestions");
+  if (!inputBusqueda || !barrioHidden || !suggestions || inputBusqueda.dataset.bound === "true") return;
 
   inputBusqueda.dataset.bound = "true";
 
   inputBusqueda.addEventListener("input", () => {
-    renderBarriosFiltrados(inputBusqueda.value);
-    const exacto = [...selectBarrio.options].find(op =>
-      op.value.toLowerCase() === inputBusqueda.value.toLowerCase().trim()
+    const valor = inputBusqueda.value.trim();
+    renderBarrioSuggestions(valor);
+
+    if (!valor) {
+      barrioHidden.value = "";
+      suggestions.style.display = "none";
+      actualizarDomicilio();
+      updateSubmitState();
+      return;
+    }
+
+    const exacto = Object.keys(state.barrios).find(barrio =>
+      barrio.toLowerCase() === valor.toLowerCase()
     );
-    selectBarrio.value = exacto ? exacto.value : "";
+    barrioHidden.value = exacto || "";
     actualizarDomicilio();
     updateSubmitState();
   });
 
-  selectBarrio.addEventListener("change", () => {
-    const valor = selectBarrio.value;
-    if (valor) inputBusqueda.value = valor;
+  inputBusqueda.addEventListener("focus", () => {
+    renderBarrioSuggestions(inputBusqueda.value);
+  });
+
+  suggestions.addEventListener("click", event => {
+    const item = event.target.closest(".autocomplete-item");
+    if (!item) return;
+    const barrio = item.dataset.value || "";
+    inputBusqueda.value = barrio;
+    barrioHidden.value = barrio;
+    suggestions.style.display = "none";
+    actualizarDomicilio();
+    updateSubmitState();
+    renderDrawerCart();
+  });
+
+  document.addEventListener("click", event => {
+    if (!event.target.closest(".autocomplete-wrapper")) {
+      suggestions.style.display = "none";
+    }
   });
 }
 
@@ -329,10 +364,10 @@ function fillFiltrosCategorias() {
 }
 
 function actualizarDomicilio() {
-  const barrioSelect = document.getElementById("barrio");
-  if (!barrioSelect) return;
+  const barrioInput = document.getElementById("barrio");
+  if (!barrioInput) return;
 
-  const barrioSel = barrioSelect.value;
+  const barrioSel = barrioInput.value;
 
   // 🧠 Si no hay barrio seleccionado, domicilio = 0
   if (!barrioSel || !state.barrios[barrioSel]) {
@@ -384,7 +419,8 @@ function addToCart(prod) {
     state.cart = [{
       name: "Arreglo Personalizado",
       price: 0,
-      qty: 1
+      qty: 1,
+      nota: ""
     }];
 
     updateCartCount();
@@ -408,8 +444,9 @@ function addToCart(prod) {
   const existing = state.cart.find(p => p.name === prod.name);
   if (existing) {
     existing.qty += 1;
+    if (typeof existing.nota !== "string") existing.nota = "";
   } else {
-    state.cart.push({ ...prod, qty: 1 });
+    state.cart.push({ ...prod, qty: 1, nota: "" });
   }
 
   updateCartCount();
@@ -518,10 +555,52 @@ function renderDrawerCart() {
   if (ivaInput) ivaInput.value = state.iva;
   if (totalInput) totalInput.value = total;
 
+  if (wizardState.currentStep === 3) {
+    renderNotasPersonalizadas();
+  }
+
   if (wizardState.currentStep === 4) {
     actualizarResumenConfirmacion();
   }
   updateSubmitState();
+}
+
+function renderNotasPersonalizadas() {
+  const contenedor = document.getElementById("notasPersonalizadasContainer");
+  if (!contenedor) return;
+
+  contenedor.innerHTML = "";
+
+  const personalizados = state.cart
+    .map((producto, index) => ({ producto, index }))
+    .filter(({ producto }) => producto.name === "Arreglo Personalizado");
+
+  personalizados.forEach(({ producto, index }, posicion) => {
+    const grupo = document.createElement("div");
+    grupo.className = "form-group";
+
+    const label = document.createElement("label");
+    const idTextarea = `notaPersonalizada-${index}`;
+    label.setAttribute("for", idTextarea);
+    label.textContent = personalizados.length > 1
+      ? `Instrucciones del arreglo personalizado #${posicion + 1}`
+      : "Instrucciones del arreglo personalizado";
+
+    const textarea = document.createElement("textarea");
+    textarea.id = idTextarea;
+    textarea.placeholder = "Describe colores, flores, estilo, presupuesto o cualquier detalle importante.";
+    textarea.value = typeof producto.nota === "string" ? producto.nota : "";
+
+    textarea.addEventListener("input", () => {
+      if (state.cart[index]) {
+        state.cart[index].nota = textarea.value;
+      }
+    });
+
+    grupo.appendChild(label);
+    grupo.appendChild(textarea);
+    contenedor.appendChild(grupo);
+  });
 }
 
 // === NAVEGACIÓN ===
@@ -566,21 +645,10 @@ function obtenerTipoEntrega() {
   return seleccionado ? seleccionado.value : "DOMICILIO";
 }
 
-function guardarValoresManuales(destinatarioInput, telefonoDestinoInput) {
-  if (destinatarioInput.dataset.autoFilled !== "true") {
-    destinatarioInput.dataset.prevManual = destinatarioInput.value || "";
-  }
-  if (telefonoDestinoInput.dataset.autoFilled !== "true") {
-    telefonoDestinoInput.dataset.prevManual = telefonoDestinoInput.value || "";
-  }
-}
-
 function activarModoTienda(destinatarioInput, telefonoDestinoInput) {
   sincronizarNombreCompleto();
   const nombreCliente = document.getElementById("primerNombre")?.value || "";
   const telefonoCliente = document.getElementById("telefono")?.value || "";
-
-  guardarValoresManuales(destinatarioInput, telefonoDestinoInput);
 
   destinatarioInput.value = nombreCliente;
   telefonoDestinoInput.value = telefonoCliente;
@@ -595,16 +663,13 @@ function activarModoDomicilio(destinatarioInput, telefonoDestinoInput) {
   telefonoDestinoInput.disabled = false;
 
   if (destinatarioInput.dataset.autoFilled === "true") {
-    destinatarioInput.value = destinatarioInput.dataset.prevManual || destinatarioInput.value;
+    destinatarioInput.value = "";
+    delete destinatarioInput.dataset.autoFilled;
   }
   if (telefonoDestinoInput.dataset.autoFilled === "true") {
-    telefonoDestinoInput.value = telefonoDestinoInput.dataset.prevManual || telefonoDestinoInput.value;
+    telefonoDestinoInput.value = "";
+    delete telefonoDestinoInput.dataset.autoFilled;
   }
-
-  delete destinatarioInput.dataset.autoFilled;
-  delete telefonoDestinoInput.dataset.autoFilled;
-  delete destinatarioInput.dataset.prevManual;
-  delete telefonoDestinoInput.dataset.prevManual;
 }
 
 function aplicarAutofillTipoEntrega(esTienda) {
@@ -622,28 +687,40 @@ function aplicarAutofillTipoEntrega(esTienda) {
 
 function actualizarBloqueDireccion() {
   const tipoEntrega = obtenerTipoEntrega();
-  const bloque = document.getElementById("bloqueDireccion");
   const direccion = document.getElementById("direccionCompleta");
   const barrio = document.getElementById("barrio");
   const buscarBarrio = document.getElementById("buscarBarrio");
-  if (!bloque || !direccion || !barrio) return;
+  if (!direccion || !barrio) return;
+
+  const grupoDireccion = direccion.closest(".form-group");
+  const grupoBarrio = buscarBarrio ? buscarBarrio.closest(".form-group") : null;
 
   const esTienda = tipoEntrega === "TIENDA";
-  bloque.classList.toggle("oculto", esTienda);
-
-  aplicarAutofillTipoEntrega(esTienda);
 
   if (esTienda) {
+    if (grupoDireccion) grupoDireccion.style.display = "none";
+    if (grupoBarrio) grupoBarrio.style.display = "none";
+
     direccion.removeAttribute("required");
     barrio.removeAttribute("required");
+
     direccion.value = "";
     barrio.value = "";
     if (buscarBarrio) buscarBarrio.value = "";
+
     state.domicilio = 0;
-    actualizarDomicilio();
+    const costoInfo = document.getElementById("barrioCostoInfo");
+    if (costoInfo) {
+      costoInfo.textContent = `Costo de domicilio: $${fmtCOP(state.domicilio)}`;
+    }
+    renderDrawerCart();
   } else {
+    if (grupoDireccion) grupoDireccion.style.display = "";
+    if (grupoBarrio) grupoBarrio.style.display = "";
+
     direccion.setAttribute("required", "required");
     barrio.setAttribute("required", "required");
+
     actualizarDomicilio();
   }
 
@@ -770,6 +847,10 @@ function actualizarUIWizard() {
   if (textoPaso) textoPaso.textContent = `Paso ${wizardState.currentStep} de ${wizardState.totalSteps}`;
   if (textoTitulo && pasoActivo) textoTitulo.textContent = pasoActivo.dataset.title || "";
 
+  if (wizardState.currentStep === 3) {
+    renderNotasPersonalizadas();
+  }
+
   if (wizardState.currentStep === 4) actualizarResumenConfirmacion();
   updateSubmitState();
 
@@ -820,8 +901,56 @@ function setupWizard() {
   radiosEntrega.forEach(radio => {
     radio.addEventListener("change", () => {
       actualizarBloqueDireccion();
+
+      const destinatario = document.getElementById("destinatario");
+      const telefonoDestino = document.getElementById("telefonoDestino");
+
+      if (!destinatario || !telefonoDestino) return;
+
+      if (radio.value === "TIENDA" && radio.checked) {
+        const nombre = document.getElementById("nombreCompletoVisible")?.value || "";
+        const telefono = document.getElementById("telefono")?.value || "";
+
+        destinatario.value = nombre;
+        telefonoDestino.value = telefono;
+
+        destinatario.dataset.autoFilled = "true";
+        telefonoDestino.dataset.autoFilled = "true";
+      }
+
+      if (radio.value === "DOMICILIO" && radio.checked) {
+        if (destinatario.dataset.autoFilled === "true") {
+          destinatario.value = "";
+          delete destinatario.dataset.autoFilled;
+        }
+
+        if (telefonoDestino.dataset.autoFilled === "true") {
+          telefonoDestino.value = "";
+          delete telefonoDestino.dataset.autoFilled;
+        }
+      }
     });
   });
+
+  const destinatarioInput = document.getElementById("destinatario");
+  if (destinatarioInput && destinatarioInput.dataset.manualBound !== "true") {
+    destinatarioInput.dataset.manualBound = "true";
+    destinatarioInput.addEventListener("input", () => {
+      if (destinatarioInput.dataset.autoFilled === "true") {
+        delete destinatarioInput.dataset.autoFilled;
+      }
+    });
+  }
+
+  const telefonoDestinoInput = document.getElementById("telefonoDestino");
+  if (telefonoDestinoInput && telefonoDestinoInput.dataset.manualBound !== "true") {
+    telefonoDestinoInput.dataset.manualBound = "true";
+    telefonoDestinoInput.addEventListener("input", () => {
+      if (telefonoDestinoInput.dataset.autoFilled === "true") {
+        delete telefonoDestinoInput.dataset.autoFilled;
+      }
+    });
+  }
 
   form.querySelectorAll("[data-wizard-next]").forEach(btn => btn.addEventListener("click", avanzarPaso));
   form.querySelectorAll("[data-wizard-prev]").forEach(btn => btn.addEventListener("click", retrocederPaso));
@@ -1033,15 +1162,21 @@ if (typeof document !== 'undefined') {
   formData.set("accion", "actualizarEmail");
 
   // ============================================================
-  // OBSERVACIONES + FIRMA (CAMPO ÚNICO / NO OBLIGATORIO)
+  // OBSERVACIONES + FIRMA (OBSERVACIÓN GENERAL + NOTAS POR PRODUCTO)
   // ============================================================
-  const obsInput = document.getElementById("observaciones");
+  const obsInput = document.getElementById("observacionGeneral");
   const observaciones = obsInput ? obsInput.value.trim() : "";
+  const notasPersonalizadas = state.cart
+    .filter(p => p.name === "Arreglo Personalizado")
+    .map((p, i) => `#${i + 1}: ${(p.nota || "").trim()}`)
+    .filter(Boolean)
+    .join(" | ");
 
   const firmaInput = document.getElementById("firma");
   const firma = firmaInput ? firmaInput.value.trim() : "";
 
   formData.set("observaciones", observaciones);
+  formData.set("notasPersonalizadas", notasPersonalizadas);
   formData.set("firma", firma);
 
   // ============================================================

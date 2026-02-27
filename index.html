@@ -5,20 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Flora - Catálogo de Arreglos Florales</title>
 
-  <!-- Fuentes externas -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   
-  <!-- Librerías de UI -->
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-  <!-- Estilos principales -->
   <link rel="stylesheet" href="style.css" />
 </head>
 
 <body>
-  <!-- ========================================
-       HEADER: Logo, título y controles
-       ======================================== -->
   <header class="catalog-header">
     <div class="logo-area">
       <img src="img/logo 2024 marca registrada-04.png" alt="Flora Logo">
@@ -29,7 +23,6 @@
     </div>
 
     <div class="controls-area">
-      <!-- Buscador -->
       <div class="search-box">
         <label for="searchInput" class="visually-hidden">Buscar productos</label>
         <input 
@@ -40,7 +33,6 @@
           aria-label="Buscar en el catálogo">
       </div>
 
-      <!-- Filtro de categoría (se llena dinámicamente) -->
       <div class="filtro-categorias-container">
         <label class="filtro-label" for="filtroCategorias">Categoría:</label>
         <select id="filtroCategorias" class="filtro-select">
@@ -50,28 +42,14 @@
     </div>
   </header>
 
-  <!-- ========================================
-       VISTA CATÁLOGO: Grid de productos
-       ======================================== -->
   <section id="viewCatalog" class="view active">
-    <!-- Botón para crear arreglo personalizado -->
     <div style="text-align:center; margin-bottom:20px;">
-      <button 
-        class="btn-primary" 
-        id="btnIrPersonalizado"
-        aria-label="Ir a crear arreglo personalizado">
-        🌸 Crear Arreglo Personalizado
-      </button>
+      <button class="btn-primary" id="btnIrPersonalizado">🌸 Crear Arreglo Personalizado</button>
     </div>
-    
-    <!-- Contenedor dinámico de productos -->
-    <div id="catalogo" class="catalogo" role="list" aria-label="Lista de productos"></div>
+    <div id="catalogo" class="catalogo" role="list"></div>
   </section>
 
-  <!-- ========================================
-       DRAWER CARRITO: Panel deslizable
-       ======================================== -->
-  <aside id="drawerCarrito" class="drawer" role="complementary" aria-label="Carrito de compras">
+  <aside id="drawerCarrito" class="drawer" role="complementary">
     <div class="drawer-header">
       <strong>🛍️ Tu carrito</strong>
       <button id="cerrarDrawer" class="icon-btn">✕</button>
@@ -86,27 +64,21 @@
           <h3><strong>Total:</strong> $<span id="totalDrawer">0</span></h3>
         </div>
         <div class="drawer-actions">
-          <button id="vaciarCarrito" class="btn-outline" aria-label="Vaciar carrito">Vaciar</button>
-          <button id="btnPedidoDrawer" class="btn-primary" aria-label="Continuar con el pedido">Continuar</button>
+          <button id="vaciarCarrito" class="btn-outline">Vaciar</button>
+          <button id="btnPedidoDrawer" class="btn-primary">Continuar</button>
         </div>
       </div>
     </div>
   </aside>
 
-  <!-- ========================================
-       BOTÓN FLOTANTE: Acceso rápido al carrito
-       ======================================== -->
-  <button id="btnDrawer" class="cart-fab" aria-label="Abrir carrito de compras">
+  <button id="btnDrawer" class="cart-fab">
     🛍️<span class="cart-text">Continuar</span>
-      <span id="cartCount" aria-live="polite">0</span>
+    <span id="cartCount">0</span>
   </button>
 
-  <!-- ========================================
-       VISTA FORMULARIO: Datos del pedido
-       ======================================== -->
   <section id="viewForm" class="view">
-    <form id="pedidoForm" aria-label="Formulario de pedido">
-      <div class="pedido-summary" id="resumenProducto" role="status" aria-live="polite">🛍 Tu pedido</div>
+    <form id="pedidoForm">
+      <div class="pedido-summary" id="resumenProducto">🛍 Tu pedido</div>
 
       <div class="wizard-progress">
         <div class="wizard-progress-head">
@@ -119,9 +91,7 @@
       </div>
 
       <div class="wizard-step active" data-step="1" data-title="Información del cliente">
-        <h3>Información del cliente
-          <span id="badgeCliente" class="badge warn" role="status">Nuevo cliente</span>
-        </h3>
+        <h3>Información del cliente <span id="badgeCliente" class="badge warn">Nuevo cliente</span></h3>
         <div class="grid">
           <div>
             <label for="tipoIdent">Tipo de identificación</label>
@@ -139,7 +109,7 @@
             <label for="telefono">Teléfono WhatsApp</label>
             <div class="phone-fixed-wrapper">
               <span class="phone-fixed-prefix">+57</span>
-              <input id="telefono" name="telefono" type="tel" inputmode="numeric" pattern="3[0-9]{9}" placeholder="3001234567" required>
+              <input id="telefono" name="telefono" type="tel" placeholder="3001234567" required>
             </div>
           </div>
           <div>
@@ -148,101 +118,100 @@
             <input type="hidden" id="primerNombre" name="primerNombre">
             <input type="hidden" id="primerApellido" name="primerApellido">
           </div>
-          <div>
-            <label for="email">Email (opcional)</label>
-            <input id="email" name="email" type="email" autocomplete="email">
+          <div class="form-group">
+            <label for="email">Correo electrónico (opcional)</label>
+            <input 
+              id="email"
+              name="email"
+              type="email"
+              placeholder="ejemplo@correo.com">
           </div>
         </div>
         <div class="actions wizard-actions">
-          <button type="button" class="btn-outline" id="btnVolver" aria-label="Regresar al catálogo">Regresar</button>
+          <button type="button" class="btn-outline" id="btnVolver">Regresar</button>
           <button type="button" class="btn-primary" data-wizard-next>Siguiente</button>
         </div>
       </div>
 
       <div class="wizard-step" data-step="2" data-title="Información de entrega">
         <h3>Información de entrega</h3>
-        <div class="delivery-toggle" role="radiogroup" aria-label="Tipo de entrega">
+        
+        <div class="delivery-toggle">
           <label class="delivery-option">
             <input type="radio" name="tipoEntrega" value="DOMICILIO" checked>
             <span>Domicilio</span>
           </label>
-
           <label class="delivery-option">
             <input type="radio" name="tipoEntrega" value="TIENDA">
             <span>Recoger en tienda</span>
           </label>
         </div>
-        <div class="grid">
-          <div>
-            <label for="destinatario">Destinatario</label>
-            <input id="destinatario" name="destinatario" type="text" required>
-          </div>
-          <div>
-            <label for="telefonoDestino">Teléfono destino (opcional)</label>
-            <div class="phone-fixed-wrapper">
-              <span class="phone-fixed-prefix">+57</span>
-              <input id="telefonoDestino" name="telefonoDestino" type="tel" inputmode="numeric" pattern="3[0-9]{9}" placeholder="3001234567">
+
+        <div id="bloqueDireccion" class="bloque-direccion">
+          <div class="grid"> <div class="form-group">
+              <label for="destinatario">Nombre del destinatario *</label>
+              <input id="destinatario" name="destinatario" type="text" required>
             </div>
-          </div>
-          <div id="bloqueDireccion" class="bloque-direccion grid-1">
-            <div class="grid">
+            
+            <div class="form-group">
+              <label for="telefonoDestino">Teléfono destino *</label>
+              <div class="phone-fixed-wrapper">
+                <span class="phone-fixed-prefix">+57</span>
+                <input id="telefonoDestino" name="telefonoDestino" type="tel" placeholder="3001234567" required>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="direccionCompleta">Dirección completa *</label>
+              <input id="direccionCompleta" name="direccionCompleta" type="text" placeholder="Calle, Carrera, Apto..." required>
+            </div>
+
+            <div class="form-group">
+              <label for="buscarBarrio">Barrio de entrega *</label>
+              <div class="autocomplete-wrapper">
+                <input type="text" id="buscarBarrio" placeholder="Busca tu barrio..." autocomplete="off">
+                <div id="barrioSuggestions" class="autocomplete-list"></div>
+              </div>
+              <input type="hidden" id="barrio" name="barrio" required>
+              <small id="barrioCostoInfo" class="help-text">Costo: $0</small>
+            </div>
+
+          </div> </div>
+
+        <div class="entrega-fecha-hora section-card" style="margin-top: 15px;">
+           <div class="grid">
               <div>
-                <label for="direccionCompleta">Dirección completa</label>
-                <input id="direccionCompleta" name="direccionCompleta" type="text" placeholder="Ej: Calle 10 #20-30 apto 502" required>
+                <label for="fechaEntrega">Fecha de entrega</label>
+                <input id="fechaEntrega" name="fechaEntrega" type="date" required>
               </div>
-              <div class="barrio-container">
-                <label for="buscarBarrio">Barrio</label>
-                <input id="buscarBarrio" type="search" placeholder="Busca y selecciona un barrio..." aria-label="Buscar barrio">
-                <select id="barrio" name="barrio" required onchange="actualizarDomicilio()" aria-label="Seleccionar barrio"></select>
-                <small id="barrioCostoInfo" class="help-text">Costo de domicilio: $0</small>
+              <div>
+                <label for="rangoHora">Rango de hora</label>
+                <select id="rangoHora" name="rangoHora" required>
+                   <option value="">Seleccione...</option>
+                   <option value="Mañana (8am - 12pm)">Mañana (8am - 12pm)</option>
+                   <option value="Tarde (2pm - 6pm)">Tarde (2pm - 6pm)</option>
+                </select>
               </div>
-            </div>
-          </div>
+           </div>
         </div>
-        <div class="entrega-fecha-hora">
-          <div>
-            <label for="fechaEntrega">Fecha de entrega</label>
-            <input id="fechaEntrega" name="fechaEntrega" type="date">
-          </div>
-        </div>
+
         <div class="actions wizard-actions">
           <button type="button" class="btn-outline" data-wizard-prev>Anterior</button>
           <button type="button" class="btn-primary" data-wizard-next>Siguiente</button>
         </div>
       </div>
 
-      <div class="wizard-step" data-step="3" data-title="Mensaje para la tarjeta">
+      <div class="wizard-step" data-step="3" data-title="Mensaje">
         <div class="section-card">
           <h3 class="section-title">Mensaje para la tarjeta</h3>
-          <div class="grid">
-            <div class="grid-1">
-              <label for="mensaje">Mensaje</label>
-              <textarea id="mensaje" name="mensaje" placeholder="Ej: Te mando un abrazo enorme en tu dia especial."></textarea>
-              <p class="help-text">Esto es lo que aparecerá impreso en la tarjeta del arreglo.</p>
-            </div>
-          </div>
+          <textarea id="mensaje" name="mensaje" placeholder="Escribe tu mensaje aquí..."></textarea>
+          <label for="firma" style="margin-top:10px; display:block;">Firma</label>
+          <input type="text" id="firma" name="firma" placeholder="Ej: Con amor, tu familia">
         </div>
 
         <div class="section-card">
-          <h3 class="section-title">Firma del mensaje</h3>
-          <div class="grid">
-            <div>
-              <label for="firma">Firma</label>
-              <input type="text" id="firma" name="firma" placeholder="Ej: Con carino, Laura y Carlos">
-              <p class="help-text">Indica quien envia el mensaje.</p>
-            </div>
-          </div>
-        </div>
-
-        <div class="section-card observaciones-card" id="observacionesCard">
-          <h3 class="section-title observaciones-title">OBSERVACIONES / ARREGLO PERSONALIZADO</h3>
-          <div class="grid">
-            <div class="grid-1">
-              <label for="observaciones">Observaciones</label>
-              <textarea id="observaciones" name="observaciones" placeholder="Ej: Colores pastel, rosas y lirios, estilo romantico, tamano mediano."></textarea>
-              <p class="help-text">Instrucciones para el florista (colores, flores, tamano, estilo, detalles especiales).</p>
-            </div>
-          </div>
+          <h3>Observaciones Especiales</h3>
+          <textarea id="observacionGeneral" name="observacionGeneral" placeholder="Notas adicionales para el pedido (opcional)."></textarea>
         </div>
 
         <div class="actions wizard-actions">
@@ -253,10 +222,10 @@
 
       <div class="wizard-step" data-step="4" data-title="Confirmación">
         <h3>Resumen de confirmación</h3>
-        <div id="confirmSummary" class="confirm-summary" aria-live="polite"></div>
+        <div id="confirmSummary" class="confirm-summary"></div>
         <div class="actions wizard-actions">
           <button type="button" class="btn-outline" data-wizard-prev>Anterior</button>
-          <button type="submit" class="btn-primary" id="btnSubmit" aria-label="Confirmar y enviar pedido" disabled>Confirmar pedido</button>
+          <button type="submit" class="btn-primary" id="btnSubmit" disabled>Confirmar pedido</button>
         </div>
       </div>
 
@@ -266,9 +235,6 @@
     </form>
   </section>
 
-  <!-- ========================================
-       SCRIPTS: Lógica de la aplicación
-       ======================================== -->
   <script src="categorias.js"></script>
   <script src="script.js?v=20260201"></script>
 </body>

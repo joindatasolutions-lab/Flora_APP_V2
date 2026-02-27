@@ -380,6 +380,10 @@ textarea {
   gap:16px;
   grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
 }
+
+.wizard-step[data-step="2"] > .grid {
+  grid-template-columns: 1fr;
+}
 .pedido-summary {
   background:#fff3f6;
   border:1px solid var(--borde);
@@ -566,6 +570,46 @@ textarea {
   gap: 6px;
 }
 
+.row-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  width: 100%;
+}
+
+.full-width {
+  grid-column: 1 / -1;
+}
+
+.align-col-2 {
+  grid-column: 2 / 3;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.row-grid .form-group {
+  width: 100%;
+}
+
+.row-grid input,
+.row-grid .autocomplete-wrapper {
+  width: 100%;
+}
+
+.phone-fixed-wrapper,
+.autocomplete-wrapper {
+  width: 100%;
+}
+
+.row-grid .form-group > input,
+.row-grid .form-group .autocomplete-wrapper > input {
+  min-height: 44px;
+}
+
 .delivery-toggle {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -611,7 +655,7 @@ textarea {
 }
 
 .bloque-direccion {
-  overflow: hidden;
+  overflow: visible;
   max-height: 560px;
   opacity: 1;
   transform: translateY(0);
@@ -646,15 +690,32 @@ input[data-auto-filled="true"] {
   outline: none;
 }
 
-#barrio {
-  background:#fff;
-  border:1px solid #ddd;
-  border-radius:10px;
-  padding:10px 14px;
-  font-size:.95rem;
-  color:#333;
-  max-height:220px;
-  overflow-y:auto;
+.autocomplete-wrapper {
+  position: relative;
+  z-index: 100;
+}
+
+.autocomplete-list {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: #fff;
+  border: 1px solid #f2cbd4;
+  border-radius: 10px;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 9999;
+  display: none;
+}
+
+.autocomplete-item {
+  padding: 10px 12px;
+  cursor: pointer;
+}
+
+.autocomplete-item:hover {
+  background: #fdeef2;
 }
 /* === FECHA Y HORA EN UNA SOLA LÍNEA === */
 .entrega-fecha-hora {
@@ -678,6 +739,21 @@ input[data-auto-filled="true"] {
   .entrega-fecha-hora {
     flex-direction: column;
     gap: 10px;
+  }
+}
+
+@media (max-width: 768px) {
+  .wizard-step[data-step="2"] > .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .row-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .full-width,
+  .align-col-2 {
+    grid-column: auto;
   }
 }
 
