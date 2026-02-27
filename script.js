@@ -21,6 +21,7 @@ const state = {
   domicilio: 0,
   iva: 0,
   categoriaSeleccionada: null,
+  wizardStep: 1,
 };
 
 /**
@@ -199,6 +200,7 @@ function filtrarCatalogo() {
 function fillBarrios() {
   const sel = document.getElementById("barrio");
   if (!sel) return;
+  const barrioPrevio = sel.value;
 
   sel.innerHTML = `<option value="">Selecciona un barrio...</option>`;
 
@@ -211,6 +213,32 @@ function fillBarrios() {
     op.value = barrio;
     op.textContent = `${barrio} ($${fmtCOP(state.barrios[barrio])})`;
     sel.appendChild(op);
+  });
+
+  if (barrioPrevio && [...sel.options].some(op => op.value === barrioPrevio)) {
+    sel.value = barrioPrevio;
+  }
+
+  setupBusquedaBarrio();
+  actualizarDomicilio();
+}
+
+function setupBusquedaBarrio() {
+  const inputBusqueda = document.getElementById("buscarBarrio");
+  const selectBarrio = document.getElementById("barrio");
+  if (!inputBusqueda || !selectBarrio || inputBusqueda.dataset.bound === "true") return;
+
+  inputBusqueda.dataset.bound = "true";
+
+  inputBusqueda.addEventListener("input", () => {
+    const query = inputBusqueda.value.toLowerCase().trim();
+    [...selectBarrio.options].forEach((op, idx) => {
+      if (idx === 0) {
+        op.hidden = false;
+        return;
+      }
+      op.hidden = query ? !op.value.toLowerCase().includes(query) : false;
+    });
   });
 }
 
@@ -227,7 +255,7 @@ function fillFiltrosCategorias() {
   
   // Agregar nuevas opciones si no existen
   categorias.forEach(cat => {
-    if (![...options].find(o => o.value === cat)) {
+    if (![...options].some(o => o.value === cat)) {
       const op = document.createElement("option");
       op.value = cat;
       op.textContent = cat;
@@ -244,7 +272,10 @@ function fillFiltrosCategorias() {
 }
 
 function actualizarDomicilio() {
-  const barrioSel = document.getElementById("barrio").value;
+  const barrioSelect = document.getElementById("barrio");
+  if (!barrioSelect) return;
+
+  const barrioSel = barrioSelect.value;
 
   // 🧠 Si no hay barrio seleccionado, domicilio = 0
   if (!barrioSel || !state.barrios[barrioSel]) {
@@ -253,7 +284,14 @@ function actualizarDomicilio() {
     state.domicilio = state.barrios[barrioSel];
   }
 
+  const costoInfo = document.getElementById("barrioCostoInfo");
+  if (costoInfo) {
+    const textoBarrio = barrioSel ? ` (${barrioSel})` : "";
+    costoInfo.textContent = `Costo de domicilio${textoBarrio}: $${fmtCOP(state.domicilio)}`;
+  }
+
   renderDrawerCart();
+  updateSubmitState();
 }
 
 // === VALIDAR HORA DE ENTREGA ===
@@ -442,7 +480,161 @@ function show(id) {
   if (fechaInput && !fechaInput.value) {
     fechaInput.value = new Date().toISOString().split("T")[0];
   }
+  goToWizardStep(1);
 }
+}
+
+function getWizardSteps() {
+  return [...document.querySelectorAll(".wizard-step")];
+}
+
+function validarTelefonoColombiano(idCampo, requerido = true, mostrarError = true) {
+  const input = document.getElementById(idCampo);
+  if (!input) return true;
+
+  const valor = input.value.trim();
+  if (!valor) {
+    input.setCustomValidity(requerido ? "Este campo es obligatorio." : "");
+    if (requerido && mostrarError) input.reportValidity();
+    return !requerido;
+  }
+
+  const soloDigitos = valor.replaceAll(/\D/g, "");
+  const valido = /^3\d{9}$/.test(soloDigitos);
+  input.setCustomValidity(
+    valido ? "" : "Ingresa un celular colombiano válido de 10 dígitos (ej: 3001234567)."
+  );
+
+  if (!valido && mostrarError) input.reportValidity();
+  return valido;
+}
+
+function validarPaso(step, opciones = {}) {
+  const { mostrarError = true } = opciones;
+  const requeridosPorPaso = {
+    1: ["tipoIdent", "identificacion", "telefono", "primerNombre"],
+    2: ["destinatario", "direccionCompleta", "barrio"],
+    3: [],
+    4: []
+  };
+
+  const requeridos = requeridosPorPaso[step] || [];
+  for (const id of requeridos) {
+    const campo = document.getElementById(id);
+    if (!campo) continue;
+    if (!campo.checkValidity()) {
+      if (mostrarError) campo.reportValidity();
+      return false;
+    }
+  }
+
+  if (step === 1 && !validarTelefonoColombiano("telefono", true, mostrarError)) return false;
+  if (step === 2 && !validarTelefonoColombiano("telefonoDestino", false, mostrarError)) return false;
+
+  return true;
+}
+
+function actualizarProgresoWizard() {
+  const totalPasos = 4;
+  const porcentaje = (state.wizardStep / totalPasos) * 100;
+  const barra = document.getElementById("wizardProgressBar");
+  if (barra) barra.style.width = `${porcentaje}%`;
+
+  document.querySelectorAll("[data-step-label]").forEach(el => {
+    const pasoLabel = Number(el.dataset.stepLabel);
+    el.classList.toggle("active", pasoLabel <= state.wizardStep);
+  });
+}
+
+function construirResumenConfirmacion() {
+  const contenedor = document.getElementById("confirmSummary");
+  if (!contenedor) return;
+
+  const subtotal = state.cart.reduce((acc, item) => acc + (item.price * item.qty), 0);
+  const productos = state.cart.map(p => `${p.qty}x ${p.name}`).join(" | ") || "Sin productos";
+
+  const telefonoCliente = (document.getElementById("telefono")?.value || "").replaceAll(/\D/g, "");
+  const telefonoDestino = (document.getElementById("telefonoDestino")?.value || "").replaceAll(/\D/g, "");
+
+  contenedor.innerHTML = `
+    <p><strong>Cliente:</strong> ${(document.getElementById("primerNombre")?.value || "").trim()} ${(document.getElementById("primerApellido")?.value || "").trim()}</p>
+    <p><strong>Identificación:</strong> ${(document.getElementById("tipoIdent")?.value || "")} ${(document.getElementById("identificacion")?.value || "")}</p>
+    <p><strong>Teléfono cliente:</strong> ${telefonoCliente ? `+57 ${telefonoCliente}` : "-"}</p>
+    <p><strong>Destinatario:</strong> ${(document.getElementById("destinatario")?.value || "").trim()}</p>
+    <p><strong>Teléfono destino:</strong> ${telefonoDestino ? `+57 ${telefonoDestino}` : "-"}</p>
+    <p><strong>Dirección completa:</strong> ${(document.getElementById("direccionCompleta")?.value || "").trim()}</p>
+    <p><strong>Barrio:</strong> ${(document.getElementById("barrio")?.value || "")}</p>
+    <p><strong>Fecha de entrega:</strong> ${(document.getElementById("fechaEntrega")?.value || "")}</p>
+    <p><strong>Productos:</strong> ${productos}</p>
+    <p><strong>Subtotal:</strong> $${fmtCOP(subtotal)}</p>
+    <p><strong>IVA:</strong> $${fmtCOP(state.iva || 0)}</p>
+    <p><strong>Domicilio:</strong> $${fmtCOP(state.domicilio || 0)}</p>
+    <p><strong>Total:</strong> $${fmtCOP(subtotal + (state.iva || 0) + (state.domicilio || 0))}</p>
+  `;
+}
+
+function updateSubmitState() {
+  const btnSubmit = document.getElementById("btnSubmit");
+  if (!btnSubmit) return;
+
+  const camposValidos = validarPaso(1, { mostrarError: false })
+    && validarPaso(2, { mostrarError: false });
+
+  btnSubmit.disabled = state.cart.length === 0 || !camposValidos;
+}
+
+function goToWizardStep(targetStep) {
+  const pasos = getWizardSteps();
+  if (!pasos.length) return;
+
+  const totalPasos = pasos.length;
+  const stepNormalizado = Math.min(Math.max(targetStep, 1), totalPasos);
+  state.wizardStep = stepNormalizado;
+
+  pasos.forEach(stepEl => {
+    const paso = Number(stepEl.dataset.step);
+    stepEl.classList.toggle("active", paso === stepNormalizado);
+  });
+
+  if (stepNormalizado === 4) {
+    construirResumenConfirmacion();
+  }
+
+  actualizarProgresoWizard();
+  updateSubmitState();
+}
+
+function setupWizard() {
+  const form = document.getElementById("pedidoForm");
+  if (!form) return;
+
+  form.querySelectorAll("[data-wizard-next]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      if (!validarPaso(state.wizardStep)) return;
+      goToWizardStep(state.wizardStep + 1);
+    });
+  });
+
+  form.querySelectorAll("[data-wizard-prev]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      goToWizardStep(state.wizardStep - 1);
+    });
+  });
+
+  ["telefono", "telefonoDestino"].forEach(id => {
+    const input = document.getElementById(id);
+    if (!input) return;
+    input.addEventListener("input", () => {
+      input.value = input.value.replaceAll(/\D/g, "").slice(0, 10);
+      validarTelefonoColombiano(id, id === "telefono", false);
+      updateSubmitState();
+    });
+  });
+
+  form.addEventListener("input", () => updateSubmitState());
+  form.addEventListener("change", () => updateSubmitState());
+
+  goToWizardStep(1);
 }
 
 if (typeof document !== 'undefined') {
@@ -462,6 +654,8 @@ if (typeof document !== 'undefined') {
       }
       hideFabOnForm = true;
       show("viewForm");
+      goToWizardStep(1);
+      updateSubmitState();
     };
   }
 
@@ -498,7 +692,7 @@ async function buscarCliente(ident) {
     const res = await fetch(`${SCRIPT_URL}?cliente=${encodeURIComponent(ident)}`);
     const data = await res.json();
 
-    if (data && data.found) {
+    if (data?.found) {
       setClienteBadge(true);
 
       document.getElementById("primerNombre").value = data.primerNombre || "";
@@ -596,6 +790,12 @@ if (typeof document !== 'undefined') {
   e.preventDefault();
 
   const btnSubmit = document.getElementById("btnSubmit");
+  if (!validarPaso(1) || !validarPaso(2)) {
+    goToWizardStep(1);
+    updateSubmitState();
+    return;
+  }
+
   btnSubmit.disabled = true;
   btnSubmit.textContent = "Procesando pedido...";
 
@@ -642,24 +842,34 @@ if (typeof document !== 'undefined') {
   }
 
   // ============================================================
-  // NORMALIZAR TELÉFONO
+  // NORMALIZAR TELÉFONOS (+57 fijo)
   // ============================================================
-  const indicativo = document.getElementById("indicativo")?.value || "+57";
-  let telefonoCliente = document.getElementById("telefono").value.trim();
+  const telefonoCliente = (document.getElementById("telefono")?.value || "").replaceAll(/\D/g, "");
+  const telefonoDestino = (document.getElementById("telefonoDestino")?.value || "").replaceAll(/\D/g, "");
 
-  if (telefonoCliente && !telefonoCliente.startsWith("+")) {
-    telefonoCliente = indicativo + telefonoCliente;
+  if (!/^3\d{9}$/.test(telefonoCliente)) {
+    Swal.fire("Teléfono inválido", "Ingresa un celular colombiano válido (10 dígitos).", "warning");
+    btnSubmit.disabled = false;
+    btnSubmit.textContent = "Confirmar pedido";
+    return;
   }
-  formData.set("telefono", telefonoCliente);
+
+  if (telefonoDestino && !/^3\d{9}$/.test(telefonoDestino)) {
+    Swal.fire("Teléfono destino inválido", "Si completas el teléfono destino, debe ser un celular colombiano válido.", "warning");
+    btnSubmit.disabled = false;
+    btnSubmit.textContent = "Confirmar pedido";
+    return;
+  }
+
+  formData.set("telefono", `+57${telefonoCliente}`);
+  if (telefonoDestino) formData.set("telefonoDestino", `+57${telefonoDestino}`);
 
   // ============================================================
-  // Dirección final (dirección + tipoLugar)
+  // Dirección final (direccionCompleta)
   // ============================================================
-  const direccion = document.getElementById("direccion")?.value.trim() || "";
-  const tipoLugar = document.getElementById("tipoLugar")?.value || "";
-  const direccionFinal = tipoLugar ? `${direccion} - ${tipoLugar}` : direccion;
-
-  formData.set("direccion", direccionFinal);
+  const direccionCompleta = document.getElementById("direccionCompleta")?.value.trim() || "";
+  formData.set("direccion", direccionCompleta);
+  formData.set("direccionCompleta", direccionCompleta);
 
   // ============================================================
   // Productos y totales
@@ -691,7 +901,7 @@ if (typeof document !== 'undefined') {
 
     if (data.status === "success") {
       //3013755838
-      const telefonoFlora = ("57" + "3013755838").replace(/\D/g, ""); // 📲 WhatsApp oficial Flora
+      const telefonoFlora = ("57" + "3013755838").replaceAll(/\D/g, ""); // 📲 WhatsApp oficial Flora
       const mensaje = encodeURIComponent(
         "Hola 🌸 Ya realicé el registro de mi pedido en el formulario y quedo atento(a) para continuar con el proceso de pago."
       );
@@ -728,6 +938,8 @@ if (typeof document !== 'undefined') {
       renderDrawerCart();
       show("viewCatalog");
       e.target.reset();
+      goToWizardStep(1);
+      updateSubmitState();
 
     } else {
       Swal.fire("Error", "No se pudo registrar el pedido correctamente.", "error");
@@ -736,7 +948,7 @@ if (typeof document !== 'undefined') {
     console.error("❌ Error al enviar pedido:", error);
     Swal.fire("Error", "Hubo un problema al enviar el pedido.", "error");
   } finally {
-    btnSubmit.disabled = false;
+    updateSubmitState();
     btnSubmit.textContent = "Confirmar pedido";
   }
   });
@@ -748,126 +960,7 @@ if (typeof document !== 'undefined') {
     tipoIdentSelect.addEventListener("change", () => renderDrawerCart());
   }
 
-  // === BANDERAS DEL INDICATIVO (COMPATIBLE iPhone/Android) ===
-  document.addEventListener("DOMContentLoaded", function () {
-    const select = document.getElementById("indicativo");
-    const flagIcon = document.getElementById("flagIcon");
-
-    if (!select || !flagIcon) return;
-
-    function countryFlagEmoji(code) {
-      return code
-        .toUpperCase()
-        .replace(/./g, char => String.fromCodePoint(127397 + char.charCodeAt()));
-    }
-
-    function actualizarBandera() {
-      const opt = select.selectedOptions[0];
-      const flag = opt.dataset.flag || "co";
-      flagIcon.textContent = countryFlagEmoji(flag);
-    }
-
-    select.addEventListener("change", actualizarBandera);
-    actualizarBandera(); 
-  });
-
-  // === AUTO-RELLENO PARA "ENTREGA EN TIENDA" ===
-  const tipoLugarSelectEntrega = document.getElementById("tipoLugar");
-  if (tipoLugarSelectEntrega) {
-    tipoLugarSelectEntrega.addEventListener("change", () => {
-      const tipo = tipoLugarSelectEntrega.value;
-
-    const destinatario = document.getElementById("destinatario");
-    const telefonoDestino = document.getElementById("telefonoDestino");
-    const direccion = document.getElementById("direccion");
-    const barrioSel = document.getElementById("barrio");
-
-    // 🔥 Valor estandarizado único
-    const VALOR_TIENDA = "Entrega En Tienda";
-
-    if (tipo === VALOR_TIENDA) {
-      // Obtener datos del cliente
-      const nombre = document.getElementById("primerNombre").value.trim();
-      const apellido = document.getElementById("primerApellido").value.trim();
-      const telefono = document.getElementById("telefono").value.trim();
-
-      // Autollenar destinatario y telefono destino
-      destinatario.value = `${nombre} ${apellido}`.trim();
-      destinatario.dataset.autofilled = "true";
-      telefonoDestino.value = telefono;
-      telefonoDestino.dataset.autofilled = "true";
-
-      // Asignar direccion para Entrega En Tienda
-      direccion.value = VALOR_TIENDA;
-      direccion.dataset.autofilled = "true";
-
-      // Si no existe el option → lo creamos
-      if (![...barrioSel.options].some(o => o.value === VALOR_TIENDA)) {
-        const opt = document.createElement("option");
-        opt.value = VALOR_TIENDA;
-        opt.textContent = VALOR_TIENDA;
-        barrioSel.insertBefore(opt, barrioSel.firstChild);
-      }
-
-      // Seleccionarlo SIEMPRE
-      barrioSel.value = VALOR_TIENDA;
-      barrioSel.dataset.autofilled = "true";
-
-      // Domicilio = 0
-      state.domicilio = 0;
-      renderDrawerCart();
-
-      // Habilitar / deshabilitar campos
-      destinatario.disabled = false;
-      telefonoDestino.disabled = false;
-      direccion.disabled = false;
-      barrioSel.disabled = false;
-
-    } else {
-      // Si NO es tienda → resetear
-      destinatario.disabled = false;
-      telefonoDestino.disabled = false;
-      direccion.disabled = false;
-      barrioSel.disabled = false;
-
-      if (destinatario.dataset.autofilled === "true") {
-        destinatario.value = "";
-        delete destinatario.dataset.autofilled;
-      }
-      if (telefonoDestino.dataset.autofilled === "true") {
-        telefonoDestino.value = "";
-        delete telefonoDestino.dataset.autofilled;
-      }
-      if (direccion.dataset.autofilled === "true" && direccion.value === VALOR_TIENDA) {
-        direccion.value = "";
-        delete direccion.dataset.autofilled;
-      }
-      if (barrioSel.dataset.autofilled === "true" && barrioSel.value === VALOR_TIENDA) {
-        barrioSel.value = "";
-        delete barrioSel.dataset.autofilled;
-      }
-    }
-  });
-  }
-
-  // Si el usuario edita manualmente, dejar de considerar auto-llenado
-  const direccionInput = document.getElementById("direccion");
-  if (direccionInput) {
-    direccionInput.addEventListener("input", () => {
-      if (direccionInput.dataset.autofilled === "true" && direccionInput.value !== "Entrega En Tienda") {
-        delete direccionInput.dataset.autofilled;
-      }
-    });
-  }
-
-  const barrioSelect = document.getElementById("barrio");
-  if (barrioSelect) {
-    barrioSelect.addEventListener("change", () => {
-      if (barrioSelect.dataset.autofilled === "true" && barrioSelect.value !== "Entrega En Tienda") {
-        delete barrioSelect.dataset.autofilled;
-      }
-    });
-  }
+  setupWizard();
 
   // === ACTIVAR ARREGLO PERSONALIZADO ===
   const btnIrPersonalizado = document.getElementById("btnIrPersonalizado");
