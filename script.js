@@ -1219,7 +1219,10 @@ if (typeof document !== 'undefined') {
   // ============================================================
   // Dirección final (direccionCompleta)
   // ============================================================
-  const direccionCompleta = document.getElementById("direccionCompleta")?.value.trim() || "";
+  const tipoEntrega = obtenerTipoEntrega();
+  const direccionCompleta = tipoEntrega === "TIENDA"
+    ? "Entrega en Tienda"
+    : (document.getElementById("direccionCompleta")?.value.trim() || "");
   formData.set("direccion", direccionCompleta);
   formData.set("direccionCompleta", direccionCompleta);
 
