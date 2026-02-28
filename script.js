@@ -770,21 +770,7 @@ function actualizarBloqueDireccion() {
 }
 
 function updateSubmitState() {
-  const btnSubmit = document.getElementById("btnSubmit");
-  if (!btnSubmit) return;
-
-  const tipoEntrega = obtenerTipoEntrega();
-  const requeridos = ["tipoIdent", "identificacion", "telefono", "nombreCompletoVisible", "destinatario"];
-  if (tipoEntrega !== "TIENDA") {
-    requeridos.push("direccionCompleta", "barrio");
-  }
-
-  const camposCompletos = requeridos.every(id => {
-    const campo = document.getElementById(id);
-    return campo ? Boolean(String(campo.value || "").trim()) : true;
-  });
-
-  btnSubmit.disabled = state.cart.length === 0 || !camposCompletos;
+  return;
 }
 
 function validarCampoTelefonoPorId(fieldId, required = false) {
@@ -931,6 +917,170 @@ function retrocederPaso() {
 function setupWizard() {
   const form = document.getElementById("pedidoForm");
   if (!form) return;
+
+  if (form.dataset.submitBound !== "true") {
+    form.dataset.submitBound = "true";
+    form.addEventListener("submit", async e => {
+      e.preventDefault();
+
+      const btnSubmit = document.getElementById("btnSubmit");
+      sincronizarNombreCompleto();
+
+      if (state.cart.length === 0) {
+        Swal.fire(
+          "Carrito vacío",
+          "Agrega al menos un producto antes de confirmar el pedido.",
+          "warning"
+        );
+        return;
+      }
+
+      if (!validarPaso(1, false)) {
+        irAPaso(1);
+        Swal.fire(
+          "Campos incompletos",
+          "Completa los campos obligatorios del Paso 1 antes de confirmar el pedido.",
+          "warning"
+        );
+        return;
+      }
+
+      if (!validarPaso(2, false)) {
+        irAPaso(2);
+        const mensajePaso2 = obtenerTipoEntrega() === "TIENDA"
+          ? "Completa los campos obligatorios del Paso 2 antes de confirmar el pedido."
+          : "Completa destinatario, dirección y barrio en el Paso 2 antes de confirmar el pedido.";
+        Swal.fire("Campos incompletos", mensajePaso2, "warning");
+        return;
+      }
+
+      if (btnSubmit) btnSubmit.textContent = "Procesando pedido...";
+
+      const formData = new FormData(e.target);
+
+      formData.set("origenCatalogo", ORIGEN_CATALOGO);
+      formData.set("Hora de Entrega", "00:00:00");
+      formData.set("accion", "actualizarEmail");
+
+      const obsInput = document.getElementById("observacionGeneral");
+      const observaciones = obsInput ? obsInput.value.trim() : "";
+      const notasPersonalizadas = state.cart
+        .filter(p => p.name === "Arreglo Personalizado")
+        .map((p, i) => `#${i + 1}: ${(p.nota || "").trim()}`)
+        .filter(Boolean)
+        .join(" | ");
+
+      const firmaInput = document.getElementById("firma");
+      const firma = firmaInput ? firmaInput.value.trim() : "";
+
+      formData.set("observaciones", observaciones);
+      formData.set("notasPersonalizadas", notasPersonalizadas);
+      formData.set("firma", firma);
+
+      const telefonoClienteRaw = document.getElementById("telefono")?.value || "";
+      const telefonoDestinoRaw = document.getElementById("telefonoDestino")?.value || "";
+      const indicativoCliente = normalizarIndicativo(document.getElementById("indicativo")?.value || PHONE_DEFAULT_DIAL_CODE);
+
+      if (!esTelefonoInternacionalValido(telefonoClienteRaw)) {
+        Swal.fire("Teléfono inválido", "Ingresa un número válido de cliente (entre 6 y 15 dígitos).", "warning");
+        if (btnSubmit) btnSubmit.textContent = "Confirmar pedido";
+        return;
+      }
+
+      if (telefonoDestinoRaw && !esTelefonoColombiaValido(telefonoDestinoRaw)) {
+        Swal.fire("Teléfono destino inválido", "Si completas el teléfono destino, debe ser un celular colombiano válido.", "warning");
+        if (btnSubmit) btnSubmit.textContent = "Confirmar pedido";
+        return;
+      }
+
+      formData.set("telefono", normalizarTelefonoInternacional(telefonoClienteRaw, indicativoCliente));
+      if (telefonoDestinoRaw) formData.set("telefonoDestino", normalizarTelefonoColombia(telefonoDestinoRaw));
+
+      const tipoEntrega = obtenerTipoEntrega();
+      const direccionCompleta = tipoEntrega === "TIENDA"
+        ? "Entrega en Tienda"
+        : (document.getElementById("direccionCompleta")?.value.trim() || "");
+      const barrioEntrega = tipoEntrega === "TIENDA"
+        ? "Entrega en Tienda"
+        : (document.getElementById("barrio")?.value.trim() || "");
+      formData.set("direccion", direccionCompleta);
+      formData.set("direccionCompleta", direccionCompleta);
+      formData.set("barrio", barrioEntrega);
+
+      const productos = state.cart.map(p => `${p.qty}× ${p.name}`).join(" | ");
+      const cantidad = state.cart.reduce((a, p) => a + p.qty, 0);
+      const subtotal = state.cart.reduce((a, p) => a + p.price * p.qty, 0);
+      const iva = state.iva || 0;
+      const domicilio = state.domicilio || 0;
+      const total = subtotal + iva + domicilio;
+
+      formData.set("tipoIdent", document.getElementById("tipoIdent").value);
+      formData.set("producto", productos);
+      formData.set("cantidad", cantidad);
+      formData.set("precio", subtotal);
+      formData.set("iva", iva);
+      formData.set("domicilio", domicilio);
+      formData.set("total", total);
+
+      try {
+        const response = await fetch(SCRIPT_URL, {
+          method: "POST",
+          body: formData
+        });
+        const data = await response.json();
+
+        if (data.status === "success") {
+          const telefonoFlora = ("57" + "3013755838").replaceAll(/\D/g, "");
+          const mensaje = encodeURIComponent(
+            "Hola 🌸 Ya realicé el registro de mi pedido en el formulario y quedo atento(a) para continuar con el proceso de pago."
+          );
+          const whatsappLink = `https://wa.me/${telefonoFlora}?text=${mensaje}`;
+
+          Swal.fire({
+            icon: "success",
+            title: "Pedido recibido 🌸",
+            html: `
+          <p style="margin-bottom:10px;">
+            Tu solicitud fue registrada correctamente.
+          </p>
+          <p style="margin-bottom:10px;">
+            📲 Para continuar con el proceso de pago,
+            <strong>escríbenos ahora mismo por WhatsApp</strong>.
+          </p>
+          <p style="font-size:14px;color:#666;">
+            Una persona del equipo Flora te responderá para confirmar el pedido
+            y brindarte las instrucciones de pago.
+          </p>
+        `,
+            confirmButtonText: "Continuar por WhatsApp",
+            confirmButtonColor: "#25D366",
+            showCancelButton: false,
+            allowOutsideClick: false,
+            allowEscapeKey: false
+          }).then(() => {
+            window.open(whatsappLink, "_blank");
+          });
+
+          state.cart = [];
+          updateCartCount();
+          renderDrawerCart();
+          show("viewCatalog");
+          e.target.reset();
+          irAPaso(1);
+          updateSubmitState();
+
+        } else {
+          Swal.fire("Error", "No se pudo registrar el pedido correctamente.", "error");
+        }
+      } catch (error) {
+        console.error("❌ Error al enviar pedido:", error);
+        Swal.fire("Error", "Hubo un problema al enviar el pedido.", "error");
+      } finally {
+        updateSubmitState();
+        if (btnSubmit) btnSubmit.textContent = "Confirmar pedido";
+      }
+    });
+  }
 
   const nombreCompletoVisible = document.getElementById("nombreCompletoVisible");
   if (nombreCompletoVisible) {
@@ -1191,200 +1341,7 @@ function limpiarCliente(clearId) {
   document.getElementById("telefono").value = "";
 }
 
-// === ENVÍO DEL FORMULARIO ===
-// === FORMULARIO DE PEDIDO ===
 if (typeof document !== 'undefined') {
-  const pedidoForm = document.getElementById("pedidoForm");
-  if (pedidoForm) {
-    pedidoForm.addEventListener("submit", async e => {
-  e.preventDefault();
-
-  const btnSubmit = document.getElementById("btnSubmit");
-  sincronizarNombreCompleto();
-  if (!validarPaso(1, true)) {
-    irAPaso(1);
-    updateSubmitState();
-    return;
-  }
-
-  if (!validarPaso(2, true)) {
-    irAPaso(2);
-    updateSubmitState();
-    return;
-  }
-
-  btnSubmit.disabled = true;
-  btnSubmit.textContent = "Procesando pedido...";
-
-  // 📌 Crear FormData
-  const formData = new FormData(e.target);
-
-  // 🟢 BANDERA: origen del catálogo
-  formData.set("origenCatalogo", ORIGEN_CATALOGO);
-
-  // ===============================
-  // HORA DE ENTREGA FIJA
-  // ===============================
-  formData.set("Hora de Entrega", "00:00:00");
-
-  // ==================================
-  // 🔑 ACCIÓN PARA ACTUALIZAR EMAIL
-  // ==================================
-  formData.set("accion", "actualizarEmail");
-
-  // ============================================================
-  // OBSERVACIONES + FIRMA (OBSERVACIÓN GENERAL + NOTAS POR PRODUCTO)
-  // ============================================================
-  const obsInput = document.getElementById("observacionGeneral");
-  const observaciones = obsInput ? obsInput.value.trim() : "";
-  const notasPersonalizadas = state.cart
-    .filter(p => p.name === "Arreglo Personalizado")
-    .map((p, i) => `#${i + 1}: ${(p.nota || "").trim()}`)
-    .filter(Boolean)
-    .join(" | ");
-
-  const firmaInput = document.getElementById("firma");
-  const firma = firmaInput ? firmaInput.value.trim() : "";
-
-  formData.set("observaciones", observaciones);
-  formData.set("notasPersonalizadas", notasPersonalizadas);
-  formData.set("firma", firma);
-
-  // ============================================================
-  // Validación: carrito vacío
-  // ============================================================
-  if (state.cart.length === 0) {
-    Swal.fire(
-      "Carrito vacío",
-      "Agrega al menos un producto antes de enviar el pedido.",
-      "warning"
-    );
-    btnSubmit.disabled = false;
-    btnSubmit.textContent = "Confirmar pedido";
-    return;
-  }
-
-  // ============================================================
-  // NORMALIZAR TELÉFONOS
-  // ============================================================
-  const telefonoClienteRaw = document.getElementById("telefono")?.value || "";
-  const telefonoDestinoRaw = document.getElementById("telefonoDestino")?.value || "";
-  const indicativoCliente = normalizarIndicativo(document.getElementById("indicativo")?.value || PHONE_DEFAULT_DIAL_CODE);
-
-  if (!esTelefonoInternacionalValido(telefonoClienteRaw)) {
-    Swal.fire("Teléfono inválido", "Ingresa un número válido de cliente (entre 6 y 15 dígitos).", "warning");
-    btnSubmit.disabled = false;
-    btnSubmit.textContent = "Confirmar pedido";
-    return;
-  }
-
-  if (telefonoDestinoRaw && !esTelefonoColombiaValido(telefonoDestinoRaw)) {
-    Swal.fire("Teléfono destino inválido", "Si completas el teléfono destino, debe ser un celular colombiano válido.", "warning");
-    btnSubmit.disabled = false;
-    btnSubmit.textContent = "Confirmar pedido";
-    return;
-  }
-
-  formData.set("telefono", normalizarTelefonoInternacional(telefonoClienteRaw, indicativoCliente));
-  if (telefonoDestinoRaw) formData.set("telefonoDestino", normalizarTelefonoColombia(telefonoDestinoRaw));
-
-  // ============================================================
-  // Dirección final (direccionCompleta)
-  // ============================================================
-  const tipoEntrega = obtenerTipoEntrega();
-  const direccionCompleta = tipoEntrega === "TIENDA"
-    ? "Entrega en Tienda"
-    : (document.getElementById("direccionCompleta")?.value.trim() || "");
-  const barrioEntrega = tipoEntrega === "TIENDA"
-    ? "Entrega en Tienda"
-    : (document.getElementById("barrio")?.value.trim() || "");
-  formData.set("direccion", direccionCompleta);
-  formData.set("direccionCompleta", direccionCompleta);
-  formData.set("barrio", barrioEntrega);
-
-  // ============================================================
-  // Productos y totales
-  // ============================================================
-  const productos = state.cart.map(p => `${p.qty}× ${p.name}`).join(" | ");
-  const cantidad = state.cart.reduce((a, p) => a + p.qty, 0);
-  const subtotal = state.cart.reduce((a, p) => a + p.price * p.qty, 0);
-  const iva = state.iva || 0;
-  const domicilio = state.domicilio || 0;
-  const total = subtotal + iva + domicilio;
-
-  formData.set("tipoIdent", document.getElementById("tipoIdent").value);
-  formData.set("producto", productos);
-  formData.set("cantidad", cantidad);
-  formData.set("precio", subtotal);
-  formData.set("iva", iva);
-  formData.set("domicilio", domicilio);
-  formData.set("total", total);
-
-  // ============================================================
-  // Enviar pedido a Apps Script
-  // ============================================================
-  try {
-    const response = await fetch(SCRIPT_URL, {
-      method: "POST",
-      body: formData
-    });
-    const data = await response.json();
-
-    if (data.status === "success") {
-      //3013755838
-      const telefonoFlora = ("57" + "3013755838").replaceAll(/\D/g, ""); // 📲 WhatsApp oficial Flora
-      const mensaje = encodeURIComponent(
-        "Hola 🌸 Ya realicé el registro de mi pedido en el formulario y quedo atento(a) para continuar con el proceso de pago."
-      );
-      const whatsappLink = `https://wa.me/${telefonoFlora}?text=${mensaje}`;
-
-      Swal.fire({
-        icon: "success",
-        title: "Pedido recibido 🌸",
-        html: `
-          <p style="margin-bottom:10px;">
-            Tu solicitud fue registrada correctamente.
-          </p>
-          <p style="margin-bottom:10px;">
-            📲 Para continuar con el proceso de pago,
-            <strong>escríbenos ahora mismo por WhatsApp</strong>.
-          </p>
-          <p style="font-size:14px;color:#666;">
-            Una persona del equipo Flora te responderá para confirmar el pedido
-            y brindarte las instrucciones de pago.
-          </p>
-        `,
-        confirmButtonText: "Continuar por WhatsApp",
-        confirmButtonColor: "#25D366", // 🟢 WhatsApp
-        showCancelButton: false,       // ❌ sin “Entendido”
-        allowOutsideClick: false,      // 🔒 no cerrar clic afuera
-        allowEscapeKey: false          // 🔒 no cerrar con ESC
-      }).then(() => {
-        window.open(whatsappLink, "_blank");
-      });
-
-      // 🔄 Reset normal del flujo
-      state.cart = [];
-      updateCartCount();
-      renderDrawerCart();
-      show("viewCatalog");
-      e.target.reset();
-      irAPaso(1);
-      updateSubmitState();
-
-    } else {
-      Swal.fire("Error", "No se pudo registrar el pedido correctamente.", "error");
-    }
-  } catch (error) {
-    console.error("❌ Error al enviar pedido:", error);
-    Swal.fire("Error", "Hubo un problema al enviar el pedido.", "error");
-  } finally {
-    updateSubmitState();
-    btnSubmit.textContent = "Confirmar pedido";
-  }
-  });
-  } // Cierre del if para pedidoForm
-
   // === ACTUALIZAR IVA AL CAMBIAR IDENTIFICACIÓN ===
   const tipoIdentSelect = document.getElementById("tipoIdent");
   if (tipoIdentSelect) {
