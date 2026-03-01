@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Flora Admin - Gestión de Catálogo</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link rel="stylesheet" href="style.css" />
+
+  <style>
+    .admin-view {
+      display: block;
+      padding: 16px;
+    }
+
+    .admin-shell {
+      max-width: 1100px;
+      margin: 0 auto;
+      background: #fff;
+      border: 1px solid var(--borde);
+      border-radius: 18px;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, .06);
+      padding: 18px;
+    }
+
+    .admin-toolbar {
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    .admin-toolbar .btn-outline,
+    .admin-toolbar .btn-primary {
+      width: auto;
+      min-width: 150px;
+    }
+
+    .admin-table-wrap {
+      width: 100%;
+      overflow-x: auto;
+      border: 1px solid var(--borde);
+      border-radius: 14px;
+      background: #fff;
+    }
+
+    .admin-table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 760px;
+    }
+
+    .admin-table thead th {
+      background: var(--rosa);
+      color: #fff;
+      font-weight: 700;
+      text-align: left;
+      padding: 12px;
+      border-bottom: 1px solid var(--borde);
+    }
+
+    .admin-table tbody td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--borde);
+      vertical-align: middle;
+      height: 84px;
+    }
+
+    .admin-table tbody tr {
+      height: 84px;
+    }
+
+    .admin-table tbody tr:hover {
+      background: var(--bg);
+    }
+
+    .admin-id {
+      font-weight: 700;
+      color: var(--rosa-osc);
+    }
+
+    .precio-input {
+      min-width: 130px;
+      max-width: 150px;
+    }
+
+    .estado-cell {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 10px;
+      flex-wrap: nowrap;
+      min-height: 84px;
+    }
+
+    .estado-pill,
+    .estado-pill-lg,
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      height: 32px;
+      border-radius: 999px;
+      padding: 0 12px;
+      font-size: .85rem;
+      line-height: 1;
+      white-space: nowrap;
+      margin: 0;
+    }
+
+    .admin-actions {
+      margin-top: 16px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .admin-actions .btn-primary {
+      width: auto;
+      min-width: 230px;
+    }
+
+    .admin-status {
+      margin-top: 12px;
+      color: var(--gris);
+      text-align: center;
+      font-weight: 600;
+    }
+
+    @media (max-width: 767px) {
+      .admin-toolbar {
+        grid-template-columns: 1fr;
+      }
+
+      .admin-toolbar .btn-outline,
+      .admin-toolbar .btn-primary {
+        width: 100%;
+      }
+
+      .admin-actions .btn-primary {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="catalog-header">
+    <div class="logo-area">
+      <img src="img/logo 2024 marca registrada-04.png" alt="Flora Logo" />
+    </div>
+
+    <div class="title-area">
+      <h2>Panel de Administración Flora</h2>
+    </div>
+
+    <div class="controls-area">
+      <button id="btnRecargar" class="btn-outline" type="button">Recargar productos</button>
+    </div>
+  </header>
+
+  <section class="admin-view">
+    <div class="admin-shell">
+      <div class="admin-toolbar">
+        <input
+          id="searchAdmin"
+          type="text"
+          placeholder="Buscar por ID o nombre..."
+          aria-label="Buscar productos por ID o nombre"
+        />
+        <button id="btnActivarTodos" class="btn-outline" type="button">Activar todos</button>
+        <button id="btnDesactivarTodos" class="btn-outline" type="button">Desactivar todos</button>
+      </div>
+
+      <div class="admin-table-wrap">
+        <table class="admin-table" aria-label="Tabla de administración de productos">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Imagen</th>
+              <th>Nombre</th>
+              <th>Precio</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody id="tbodyProductos"></tbody>
+        </table>
+      </div>
+
+      <div class="admin-save-sticky">
+        <p id="pendingCounter" class="pending-counter">0 cambios pendientes</p>
+        <div class="admin-actions">
+          <button id="btnGuardar" class="btn-primary" type="button" disabled>Guardar Cambios</button>
+        </div>
+      </div>
+
+      <p id="estadoMsg" class="admin-status" aria-live="polite"></p>
+    </div>
+  </section>
+
+  <script src="admin-flora.js"></script>
+</body>
+</html>

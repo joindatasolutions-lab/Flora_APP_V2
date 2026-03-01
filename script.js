@@ -108,7 +108,7 @@ async function init() {
     const res = await fetch(SCRIPT_URL);
     const data = await res.json();
     state.catalogo = data.catalogo || [];
-    state.catalogoEnriquecido = enriquecerCatalogoCategorias(state.catalogo);
+    state.catalogoEnriquecido = state.catalogo;
     state.barrios = data.barrios || {};
     renderCatalogoPorCategorias();
     fillBarrios();
@@ -124,10 +124,20 @@ function renderCatalogoPorCategorias() {
   const cont = document.getElementById("catalogo");
   cont.innerHTML = "";
 
+  // Mostrar solo productos activos (si no existe la propiedad, se asume activo)
+  const catalogoActivo = state.catalogoEnriquecido.filter(prod => {
+    const valorActivo = prod.activo ?? prod.ACTIVO;
+
+    if (typeof valorActivo === "boolean") return valorActivo;
+
+    const normalizado = String(valorActivo ?? "true").trim().toLowerCase();
+    return !["false", "0", "no", "inactivo"].includes(normalizado);
+  });
+
   // Filtrar por categoría si está seleccionada
   const catalogoParaMostrar = state.categoriaSeleccionada
-    ? filtrarPorCategoria(state.catalogoEnriquecido, state.categoriaSeleccionada)
-    : state.catalogoEnriquecido;
+    ? filtrarPorCategoria(catalogoActivo, state.categoriaSeleccionada)
+    : catalogoActivo;
 
   // Agrupar por categoría
   const grupos = agruparPorCategoria(catalogoParaMostrar);
@@ -366,18 +376,17 @@ function fillFiltrosCategorias() {
   
   if (!filtroSelect) return;
 
-  // Llenar opciones
-  const categorias = obtenerTodasLasCategorias();
-  const options = filtroSelect.querySelectorAll("option");
-  
-  // Agregar nuevas opciones si no existen
+  const categorias = [...new Set(
+    state.catalogoEnriquecido.map(prod => prod.Categoria || prod.categoria || "Sin categoría")
+  )];
+
+  filtroSelect.innerHTML = '<option value="">Todas las categorías</option>';
+
   categorias.forEach(cat => {
-    if (![...options].some(o => o.value === cat)) {
-      const op = document.createElement("option");
-      op.value = cat;
-      op.textContent = cat;
-      filtroSelect.appendChild(op);
-    }
+    const op = document.createElement("option");
+    op.value = cat;
+    op.textContent = cat;
+    filtroSelect.appendChild(op);
   });
 
   // Evento de cambio
