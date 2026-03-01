@@ -320,26 +320,24 @@ async function guardarCambios() {
       return;
     }
 
-    const payload = {
-      accion: "actualizarProductos",
-      productos: adminState.productos.map((p) => ({
-        id: p.id,
-        name: p.name,
-        price: Number(p.price || 0),
-        img: p.img,
-        categoria: p.categoria,
-        activo: Boolean(p.activo)
-      }))
-    };
+    const productos = adminState.productos.map((p) => ({
+      id: p.id,
+      name: p.name,
+      price: Number(p.price || 0),
+      img: p.img,
+      categoria: p.categoria,
+      activo: Boolean(p.activo)
+    }));
+
+    const body = new URLSearchParams();
+    body.append("accion", "actualizarProductos");
+    body.append("productos", JSON.stringify(productos));
 
     estadoMsg.textContent = "Guardando cambios...";
 
     const res = await fetch(SCRIPT_URL, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(payload)
+      body
     });
 
     const data = await res.json();
