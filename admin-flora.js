@@ -85,7 +85,7 @@ async function cargarProductos() {
   try {
     estadoMsg.textContent = "Cargando catálogo...";
 
-    const res = await fetch(SCRIPT_URL, { method: "GET" });
+    const res = await fetch(SCRIPT_URL + "?admin=true", { method: "GET" });
     if (!res.ok) {
       throw new Error(`Error HTTP ${res.status}`);
     }
