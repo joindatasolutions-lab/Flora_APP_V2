@@ -78,6 +78,14 @@ function refrescarIndicadoresGuardado() {
   const pendientes = contarCambiosPendientes();
   pendingCounter.textContent = `${pendientes} cambio${pendientes === 1 ? "" : "s"} pendiente${pendientes === 1 ? "" : "s"}`;
   btnGuardar.disabled = pendientes === 0;
+
+  if (pendientes === 0) {
+    pendingCounter.style.transition = "transform 0.2s ease";
+    pendingCounter.style.transform = "scale(1.05)";
+    setTimeout(() => {
+      pendingCounter.style.transform = "scale(1)";
+    }, 150);
+  }
 }
 
 // Carga catálogo desde Apps Script (GET)
@@ -315,10 +323,19 @@ async function desactivarTodos() {
 // Guarda todos los cambios en un solo POST
 async function guardarCambios() {
   try {
-    if (contarCambiosPendientes() === 0) {
+    const pendientes = contarCambiosPendientes();
+
+    if (pendientes === 0) {
       Swal.fire("Atención", "No hay cambios pendientes por guardar.", "info");
       return;
     }
+
+    btnGuardar.disabled = true;
+    btnGuardar.classList.add("btn-loading");
+
+    btnGuardar.textContent = "Guardando...";
+
+    estadoMsg.textContent = "Procesando cambios...";
 
     const productos = adminState.productos.map((p) => ({
       id: p.id,
@@ -333,8 +350,6 @@ async function guardarCambios() {
     body.append("accion", "actualizarProductos");
     body.append("productos", JSON.stringify(productos));
 
-    estadoMsg.textContent = "Guardando cambios...";
-
     const res = await fetch(SCRIPT_URL, {
       method: "POST",
       body
@@ -346,15 +361,26 @@ async function guardarCambios() {
       throw new Error(data.error || `Error HTTP ${res.status}`);
     }
 
-    Swal.fire("Éxito", "Cambios guardados correctamente.", "success");
-    estadoMsg.textContent = "Cambios guardados correctamente.";
+    Swal.fire({
+      icon: "success",
+      title: "Cambios guardados",
+      timer: 1500,
+      showConfirmButton: false
+    });
 
-    // Recarga para refrescar snapshot y limpiar cambios pendientes
+    estadoMsg.textContent = "Catálogo actualizado correctamente.";
+
     await cargarProductos();
   } catch (error) {
+
     console.error("Error guardando cambios:", error);
     Swal.fire("Error", "Falló la actualización de productos.", "error");
     estadoMsg.textContent = "Error guardando cambios.";
+  } finally {
+
+    btnGuardar.classList.remove("btn-loading");
+    btnGuardar.textContent = "Guardar Cambios";
+    refrescarIndicadoresGuardado();
   }
 }
 
