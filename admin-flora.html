@@ -71,7 +71,6 @@
 
     .admin-table tbody tr {
       height: 84px;
-      transition: background 0.2s ease;
     }
 
     .admin-table tbody tr:hover {
@@ -143,117 +142,6 @@
       .admin-actions .btn-primary {
         width: 100%;
       }
-
-      .admin-save-sticky {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 10px;
-        padding: 12px;
-      }
-
-      .save-right {
-        width: 100%;
-      }
-
-      .save-right .btn-large {
-        width: 100%;
-        min-width: 0;
-      }
-    }
-
-    /* ============================
-       Sticky Save Bar
-    ============================ */
-
-    .admin-save-sticky {
-      position: sticky;
-      bottom: 0;
-      background: #ffffff;
-      border-top: 1px solid var(--borde);
-      padding: 16px 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      box-shadow: 0 -6px 16px rgba(0,0,0,0.06);
-      border-radius: 0 0 18px 18px;
-      z-index: 10;
-    }
-
-    .pending-counter {
-      font-weight: 700;
-      font-size: 0.95rem;
-      color: var(--rosa-osc);
-    }
-
-    .btn-large {
-      min-width: 260px;
-      font-size: 1rem;
-      font-weight: 700;
-      padding: 14px 24px;
-      border-radius: 12px;
-      transition: all .2s ease;
-      box-shadow: 0 6px 14px rgba(0,0,0,0.08);
-    }
-
-    .btn-large:hover {
-      transform: translateY(-2px);
-    }
-
-    .btn-loading {
-      opacity: 0.7;
-      pointer-events: none;
-      position: relative;
-    }
-
-    .btn-loading::after {
-      content: "";
-      width: 16px;
-      height: 16px;
-      border: 2px solid white;
-      border-top: 2px solid transparent;
-      border-radius: 50%;
-      position: absolute;
-      right: 14px;
-      top: 50%;
-      transform: translateY(-50%);
-      animation: spin 0.7s linear infinite;
-    }
-
-    @keyframes spin {
-      from { transform: translateY(-50%) rotate(0deg); }
-      to { transform: translateY(-50%) rotate(360deg); }
-    }
-
-    /* ============================
-       Tabla Mejorada
-    ============================ */
-
-    .admin-table tbody tr:nth-child(even) {
-      background: #fafafa;
-    }
-
-    .row-dirty {
-      background: rgba(255, 182, 193, 0.15);
-      transition: background 0.3s ease;
-    }
-
-    .admin-img {
-      width: 70px;
-      height: 70px;
-      object-fit: cover;
-      border-radius: 10px;
-      border: 1px solid var(--borde);
-    }
-
-    /* ============================
-       Header mejorado
-    ============================ */
-
-    .catalog-header {
-      background: #ffffff;
-      border-bottom: 1px solid var(--borde);
-      padding: 18px 24px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.04);
     }
   </style>
 </head>
@@ -301,15 +189,9 @@
       </div>
 
       <div class="admin-save-sticky">
-        <div class="save-left">
-          <span id="pendingCounter" class="pending-counter">
-            0 cambios pendientes
-          </span>
-        </div>
-        <div class="save-right">
-          <button id="btnGuardar" class="btn-primary btn-large" type="button" disabled>
-            Guardar Cambios
-          </button>
+        <p id="pendingCounter" class="pending-counter">0 cambios pendientes</p>
+        <div class="admin-actions">
+          <button id="btnGuardar" class="btn-primary" type="button" disabled>Guardar Cambios</button>
         </div>
       </div>
 
