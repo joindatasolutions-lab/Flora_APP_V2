@@ -770,7 +770,7 @@ function actualizarBloqueDireccion() {
     if (grupoBarrio) grupoBarrio.style.display = "";
 
     direccion.setAttribute("required", "required");
-    barrio.setAttribute("required", "required");
+    barrio.removeAttribute("required");
 
     actualizarDomicilio();
   }
@@ -811,7 +811,7 @@ function obtenerCampoObligatorioFaltante(step) {
   const tipoEntrega = obtenerTipoEntrega();
   const requeridosPorPaso = {
     1: ["tipoIdent", "identificacion", "telefono", "nombreCompletoVisible"],
-    2: tipoEntrega === "TIENDA" ? ["destinatario"] : ["destinatario", "direccionCompleta", "barrio"],
+    2: tipoEntrega === "TIENDA" ? ["destinatario"] : ["destinatario", "direccionCompleta"],
     3: [],
     4: []
   };
@@ -836,7 +836,7 @@ function validarPaso(step, showAlert = true) {
 
   const requeridosPorPaso = {
     1: ["tipoIdent", "identificacion", "telefono", "nombreCompletoVisible"],
-    2: tipoEntrega === "TIENDA" ? ["destinatario"] : ["destinatario", "direccionCompleta", "barrio"],
+    2: tipoEntrega === "TIENDA" ? ["destinatario"] : ["destinatario", "direccionCompleta"],
     3: [],
     4: []
   };
@@ -987,7 +987,7 @@ function setupWizard() {
           ? `Falta completar el campo obligatorio: ${campoFaltante}.`
           : (obtenerTipoEntrega() === "TIENDA"
             ? "Completa los campos obligatorios del Paso 2 antes de confirmar el pedido."
-            : "Completa destinatario, dirección y barrio en el Paso 2 antes de confirmar el pedido.");
+            : "Completa destinatario y dirección en el Paso 2 antes de confirmar el pedido.");
         Swal.fire("Campos incompletos", mensajePaso2, "warning");
         return;
       }
