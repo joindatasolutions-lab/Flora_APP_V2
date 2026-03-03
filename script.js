@@ -1063,7 +1063,7 @@ function setupWizard() {
       try {
         const response = await fetch(SCRIPT_URL, {
           method: "POST",
-          body: formData
+          body: new URLSearchParams(formData)
         });
         const data = await response.json();
 
