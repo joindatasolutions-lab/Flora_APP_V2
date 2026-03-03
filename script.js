@@ -807,6 +807,29 @@ function validarCampoTelefonoPorId(fieldId, required = false) {
   return valido;
 }
 
+function obtenerCampoObligatorioFaltante(step) {
+  const tipoEntrega = obtenerTipoEntrega();
+  const requeridosPorPaso = {
+    1: ["tipoIdent", "identificacion", "telefono", "nombreCompletoVisible"],
+    2: tipoEntrega === "TIENDA" ? ["destinatario"] : ["destinatario", "direccionCompleta", "barrio"],
+    3: [],
+    4: []
+  };
+
+  const requeridos = requeridosPorPaso[step] || [];
+  for (const id of requeridos) {
+    const campo = document.getElementById(id);
+    if (!campo) continue;
+    if (!String(campo.value || "").trim()) {
+      if (id === "barrio") return "Barrio de entrega";
+      const label = document.querySelector(`label[for="${id}"]`);
+      return label ? label.textContent.replace("*", "").trim() : id;
+    }
+  }
+
+  return "";
+}
+
 function validarPaso(step, showAlert = true) {
   sincronizarNombreCompleto();
   const tipoEntrega = obtenerTipoEntrega();
@@ -946,9 +969,12 @@ function setupWizard() {
 
       if (!validarPaso(1, false)) {
         irAPaso(1);
+        const campoFaltante = obtenerCampoObligatorioFaltante(1);
         Swal.fire(
           "Campos incompletos",
-          "Completa los campos obligatorios del Paso 1 antes de confirmar el pedido.",
+          campoFaltante
+            ? `Falta completar el campo obligatorio: ${campoFaltante}.`
+            : "Completa los campos obligatorios del Paso 1 antes de confirmar el pedido.",
           "warning"
         );
         return;
@@ -956,9 +982,12 @@ function setupWizard() {
 
       if (!validarPaso(2, false)) {
         irAPaso(2);
-        const mensajePaso2 = obtenerTipoEntrega() === "TIENDA"
-          ? "Completa los campos obligatorios del Paso 2 antes de confirmar el pedido."
-          : "Completa destinatario, dirección y barrio en el Paso 2 antes de confirmar el pedido.";
+        const campoFaltante = obtenerCampoObligatorioFaltante(2);
+        const mensajePaso2 = campoFaltante
+          ? `Falta completar el campo obligatorio: ${campoFaltante}.`
+          : (obtenerTipoEntrega() === "TIENDA"
+            ? "Completa los campos obligatorios del Paso 2 antes de confirmar el pedido."
+            : "Completa destinatario, dirección y barrio en el Paso 2 antes de confirmar el pedido.");
         Swal.fire("Campos incompletos", mensajePaso2, "warning");
         return;
       }
