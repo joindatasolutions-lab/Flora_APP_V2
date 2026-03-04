@@ -755,9 +755,9 @@ function actualizarBloqueDireccion() {
     direccion.removeAttribute("required");
     barrio.removeAttribute("required");
 
-    direccion.value = "";
-    barrio.value = "";
-    if (buscarBarrio) buscarBarrio.value = "";
+    direccion.value = "Recoger en Tienda";
+    barrio.value = "Recoger en Tienda";
+    if (buscarBarrio) buscarBarrio.value = "Recoger en Tienda";
 
     state.domicilio = 0;
     const costoInfo = document.getElementById("barrioCostoInfo");
@@ -770,7 +770,11 @@ function actualizarBloqueDireccion() {
     if (grupoBarrio) grupoBarrio.style.display = "";
 
     direccion.setAttribute("required", "required");
-    barrio.removeAttribute("required");
+    barrio.setAttribute("required", "required");
+
+    if (direccion.value === "Recoger en Tienda") direccion.value = "";
+    if (barrio.value === "Recoger en Tienda") barrio.value = "";
+    if (buscarBarrio && buscarBarrio.value === "Recoger en Tienda") buscarBarrio.value = "";
 
     actualizarDomicilio();
   }
@@ -811,7 +815,7 @@ function obtenerCampoObligatorioFaltante(step) {
   const tipoEntrega = obtenerTipoEntrega();
   const requeridosPorPaso = {
     1: ["tipoIdent", "identificacion", "telefono", "nombreCompletoVisible"],
-    2: tipoEntrega === "TIENDA" ? ["destinatario"] : ["destinatario", "direccionCompleta"],
+    2: tipoEntrega === "TIENDA" ? ["destinatario"] : ["destinatario", "direccionCompleta", "barrio"],
     3: [],
     4: []
   };
@@ -836,7 +840,7 @@ function validarPaso(step, showAlert = true) {
 
   const requeridosPorPaso = {
     1: ["tipoIdent", "identificacion", "telefono", "nombreCompletoVisible"],
-    2: tipoEntrega === "TIENDA" ? ["destinatario"] : ["destinatario", "direccionCompleta"],
+    2: tipoEntrega === "TIENDA" ? ["destinatario"] : ["destinatario", "direccionCompleta", "barrio"],
     3: [],
     4: []
   };
@@ -1036,10 +1040,10 @@ function setupWizard() {
 
       const tipoEntrega = obtenerTipoEntrega();
       const direccionCompleta = tipoEntrega === "TIENDA"
-        ? "Entrega en Tienda"
+        ? "Recoger en Tienda"
         : (document.getElementById("direccionCompleta")?.value.trim() || "");
       const barrioEntrega = tipoEntrega === "TIENDA"
-        ? "Entrega en Tienda"
+        ? "Recoger en Tienda"
         : (document.getElementById("barrio")?.value.trim() || "");
       formData.set("direccion", direccionCompleta);
       formData.set("direccionCompleta", direccionCompleta);
