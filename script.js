@@ -328,6 +328,7 @@ function setupBusquedaBarrio() {
 
   inputBusqueda.addEventListener("input", () => {
     const valor = inputBusqueda.value.trim();
+    inputBusqueda.setCustomValidity("");
     renderBarrioSuggestions(valor);
 
     if (!valor) {
@@ -355,6 +356,7 @@ function setupBusquedaBarrio() {
     if (!item) return;
     const barrio = item.dataset.value || "";
     inputBusqueda.value = barrio;
+    inputBusqueda.setCustomValidity("");
     barrioHidden.value = barrio;
     suggestions.style.display = "none";
     actualizarDomicilio();
@@ -754,6 +756,7 @@ function actualizarBloqueDireccion() {
 
     direccion.removeAttribute("required");
     barrio.removeAttribute("required");
+    if (buscarBarrio) buscarBarrio.removeAttribute("required");
 
     direccion.value = "Recoger en Tienda";
     barrio.value = "Recoger en Tienda";
@@ -771,6 +774,7 @@ function actualizarBloqueDireccion() {
 
     direccion.setAttribute("required", "required");
     barrio.setAttribute("required", "required");
+    if (buscarBarrio) buscarBarrio.setAttribute("required", "required");
 
     if (direccion.value === "Recoger en Tienda") direccion.value = "";
     if (barrio.value === "Recoger en Tienda") barrio.value = "";
@@ -850,6 +854,25 @@ function validarPaso(step, showAlert = true) {
   for (const id of requeridos) {
     const campo = document.getElementById(id);
     if (!campo) continue;
+
+    if (id === "barrio") {
+      const inputBarrioVisible = document.getElementById("buscarBarrio");
+      const tieneBarrio = String(campo.value || "").trim().length > 0;
+      if (!tieneBarrio) {
+        if (inputBarrioVisible) {
+          inputBarrioVisible.setCustomValidity("Este campo es obligatorio.");
+          if (showAlert) {
+            inputBarrioVisible.reportValidity();
+            inputBarrioVisible.focus();
+          }
+        }
+        invalido = true;
+        break;
+      }
+      if (inputBarrioVisible) inputBarrioVisible.setCustomValidity("");
+      continue;
+    }
+
     if (!String(campo.value || "").trim()) {
       campo.setCustomValidity("Este campo es obligatorio.");
       if (showAlert) campo.reportValidity();
