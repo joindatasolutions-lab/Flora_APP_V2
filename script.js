@@ -29,6 +29,7 @@ const wizardState = {
 };
 
 const PHONE_DEFAULT_DIAL_CODE = "+57";
+const CATEGORIA_CAMPANA_DIA_MUJER = "FLORA MUJER";
 
 function limpiarDigitosTelefono(valor) {
   return String(valor || "").replaceAll(/\D/g, "");
@@ -113,6 +114,7 @@ async function init() {
     renderCatalogoPorCategorias();
     fillBarrios();
     fillFiltrosCategorias();
+    setupCatalogActions();
   } catch (error) {
     console.error("Error al cargar datos:", error);
     Swal.fire("Error", "No se pudieron cargar los datos del catálogo", "error");
@@ -204,8 +206,14 @@ function filtrarCatalogo() {
     .toLowerCase()
     .trim();
 
+  const categoriaSeleccionada = document.getElementById("filtroCategorias")?.value || "";
+
   // Aplicar búsqueda y filtro de categoría
   let productosFiltrados = state.catalogoEnriquecido;
+
+  if (categoriaSeleccionada) {
+    productosFiltrados = filtrarPorCategoria(productosFiltrados, categoriaSeleccionada);
+  }
   
   // Filtrar por búsqueda si hay query
   if (query) {
@@ -216,9 +224,8 @@ function filtrarCatalogo() {
     });
   }
 
-  // Limpiar la búsqueda y renderizar
-  state.categoriaSeleccionada = null;
-  document.getElementById("filtroCategorias").value = "";
+  // Mantener estado de categoría sincronizado
+  state.categoriaSeleccionada = categoriaSeleccionada || null;
   
   // Renderizar con el nuevo set de productos
   const cont = document.getElementById("catalogo");
@@ -271,6 +278,47 @@ function filtrarCatalogo() {
     seccionDiv.appendChild(gridDiv);
     cont.appendChild(seccionDiv);
   });
+}
+
+function obtenerCategoriaDiaMujer() {
+  const categorias = [...new Set(
+    state.catalogoEnriquecido.map(prod => (prod.Categoria || prod.categoria || "Sin categoría").trim())
+  )];
+
+  const exacta = categorias.find(cat => cat.toLowerCase() === CATEGORIA_CAMPANA_DIA_MUJER.toLowerCase());
+  if (exacta) return exacta;
+
+  const aproximada = categorias.find(cat => {
+    const valor = cat.toLowerCase();
+    return valor.includes("dia de la mujer") || valor.includes("mujer");
+  });
+
+  return aproximada || CATEGORIA_CAMPANA_DIA_MUJER;
+}
+
+function setupCatalogActions() {
+  const btnDiaMujer = document.getElementById("btnDiaMujer");
+  const btnCatalogoGeneral = document.getElementById("btnCatalogoGeneral");
+  const filtro = document.getElementById("filtroCategorias");
+  const searchInput = document.getElementById("searchInput");
+
+  if (btnDiaMujer && filtro && btnDiaMujer.dataset.bound !== "true") {
+    btnDiaMujer.dataset.bound = "true";
+    btnDiaMujer.addEventListener("click", () => {
+      filtro.value = obtenerCategoriaDiaMujer();
+      if (searchInput) searchInput.value = "";
+      filtrarCatalogo();
+    });
+  }
+
+  if (btnCatalogoGeneral && filtro && btnCatalogoGeneral.dataset.bound !== "true") {
+    btnCatalogoGeneral.dataset.bound = "true";
+    btnCatalogoGeneral.addEventListener("click", () => {
+      filtro.value = "";
+      if (searchInput) searchInput.value = "";
+      filtrarCatalogo();
+    });
+  }
 }
 
 // === BARRIOS ===
@@ -740,25 +788,31 @@ function aplicarAutofillTipoEntrega(esTienda) {
 
 function actualizarBloqueDireccion() {
   const tipoEntrega = obtenerTipoEntrega();
-  const direccion = document.getElementById("direccionCompleta");
+  const direccionPrincipal = document.getElementById("direccionPrincipal");
+  const direccionComplemento = document.getElementById("direccionComplemento");
   const barrio = document.getElementById("barrio");
   const buscarBarrio = document.getElementById("buscarBarrio");
-  if (!direccion || !barrio) return;
+  if (!direccionPrincipal || !barrio) return;
 
-  const grupoDireccion = direccion.closest(".form-group");
+  const grupoDireccionPrincipal = direccionPrincipal.closest(".form-group");
+  const grupoDireccionComplemento = direccionComplemento
+    ? direccionComplemento.closest(".form-group")
+    : null;
   const grupoBarrio = buscarBarrio ? buscarBarrio.closest(".form-group") : null;
 
   const esTienda = tipoEntrega === "TIENDA";
 
   if (esTienda) {
-    if (grupoDireccion) grupoDireccion.style.display = "none";
+    if (grupoDireccionPrincipal) grupoDireccionPrincipal.style.display = "none";
+    if (grupoDireccionComplemento) grupoDireccionComplemento.style.display = "none";
     if (grupoBarrio) grupoBarrio.style.display = "none";
 
-    direccion.removeAttribute("required");
+    direccionPrincipal.removeAttribute("required");
     barrio.removeAttribute("required");
     if (buscarBarrio) buscarBarrio.removeAttribute("required");
 
-    direccion.value = "Recoger en Tienda";
+    direccionPrincipal.value = "Recoger en Tienda";
+    if (direccionComplemento) direccionComplemento.value = "";
     barrio.value = "Recoger en Tienda";
     if (buscarBarrio) buscarBarrio.value = "Recoger en Tienda";
 
@@ -769,14 +823,15 @@ function actualizarBloqueDireccion() {
     }
     renderDrawerCart();
   } else {
-    if (grupoDireccion) grupoDireccion.style.display = "";
+    if (grupoDireccionPrincipal) grupoDireccionPrincipal.style.display = "";
+    if (grupoDireccionComplemento) grupoDireccionComplemento.style.display = "";
     if (grupoBarrio) grupoBarrio.style.display = "";
 
-    direccion.setAttribute("required", "required");
+    direccionPrincipal.setAttribute("required", "required");
     barrio.setAttribute("required", "required");
     if (buscarBarrio) buscarBarrio.setAttribute("required", "required");
 
-    if (direccion.value === "Recoger en Tienda") direccion.value = "";
+    if (direccionPrincipal.value === "Recoger en Tienda") direccionPrincipal.value = "";
     if (barrio.value === "Recoger en Tienda") barrio.value = "";
     if (buscarBarrio && buscarBarrio.value === "Recoger en Tienda") buscarBarrio.value = "";
 
@@ -819,7 +874,7 @@ function obtenerCampoObligatorioFaltante(step) {
   const tipoEntrega = obtenerTipoEntrega();
   const requeridosPorPaso = {
     1: ["tipoIdent", "identificacion", "telefono", "nombreCompletoVisible"],
-    2: tipoEntrega === "TIENDA" ? ["destinatario"] : ["destinatario", "direccionCompleta", "barrio"],
+    2: tipoEntrega === "TIENDA" ? ["destinatario"] : ["destinatario", "direccionPrincipal", "barrio"],
     3: [],
     4: []
   };
@@ -844,7 +899,7 @@ function validarPaso(step, showAlert = true) {
 
   const requeridosPorPaso = {
     1: ["tipoIdent", "identificacion", "telefono", "nombreCompletoVisible"],
-    2: tipoEntrega === "TIENDA" ? ["destinatario"] : ["destinatario", "direccionCompleta", "barrio"],
+    2: tipoEntrega === "TIENDA" ? ["destinatario"] : ["destinatario", "direccionPrincipal", "barrio"],
     3: [],
     4: []
   };
@@ -913,7 +968,10 @@ function actualizarResumenConfirmacion() {
     <p><strong>Teléfono cliente:</strong> ${telefonoClienteRaw ? `${indicativoCliente} ${telefonoClienteRaw}` : "-"}</p>
     <p><strong>Destinatario:</strong> ${(document.getElementById("destinatario")?.value || "").trim()}</p>
     <p><strong>Teléfono destino:</strong> ${telefonoDestino ? `+57 ${telefonoDestino}` : "-"}</p>
-    <p><strong>Dirección completa:</strong> ${(document.getElementById("direccionCompleta")?.value || "").trim()}</p>
+    <p><strong>Dirección completa:</strong> ${[
+      (document.getElementById("direccionPrincipal")?.value || "").trim(),
+      (document.getElementById("direccionComplemento")?.value || "").trim()
+    ].filter(Boolean).join(" - ")}</p>
     <p><strong>Barrio:</strong> ${(document.getElementById("barrio")?.value || "")}</p>
     <p><strong>Fecha de entrega:</strong> ${(document.getElementById("fechaEntrega")?.value || "")}</p>
     <p><strong>Productos:</strong> ${productos}</p>
@@ -1062,14 +1120,20 @@ function setupWizard() {
       if (telefonoDestinoRaw) formData.set("telefonoDestino", normalizarTelefonoColombia(telefonoDestinoRaw));
 
       const tipoEntrega = obtenerTipoEntrega();
-      const direccionCompleta = tipoEntrega === "TIENDA"
+      const direccionPrincipal = (document.getElementById("direccionPrincipal")?.value || "").trim();
+      const direccionComplemento = (document.getElementById("direccionComplemento")?.value || "").trim();
+      const direccionFinal = tipoEntrega === "TIENDA"
         ? "Recoger en Tienda"
-        : (document.getElementById("direccionCompleta")?.value.trim() || "");
+        : (direccionComplemento
+          ? `${direccionPrincipal} - ${direccionComplemento}`
+          : direccionPrincipal);
       const barrioEntrega = tipoEntrega === "TIENDA"
         ? "Recoger en Tienda"
         : (document.getElementById("barrio")?.value.trim() || "");
-      formData.set("direccion", direccionCompleta);
-      formData.set("direccionCompleta", direccionCompleta);
+      formData.set("direccion", direccionFinal);
+      formData.set("direccionCompleta", direccionFinal);
+      formData.set("direccionPrincipal", tipoEntrega === "TIENDA" ? "" : direccionPrincipal);
+      formData.set("direccionComplemento", tipoEntrega === "TIENDA" ? "" : direccionComplemento);
       formData.set("barrio", barrioEntrega);
 
       const productos = state.cart.map(p => `${p.qty}× ${p.name}`).join(" | ");
