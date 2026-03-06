@@ -111,14 +111,30 @@ async function init() {
     state.catalogo = data.catalogo || [];
     state.catalogoEnriquecido = state.catalogo;
     state.barrios = data.barrios || {};
+
+    fillFiltrosCategorias();
+    aplicarCategoriaInicialDiaMujer();
     renderCatalogoPorCategorias();
     fillBarrios();
-    fillFiltrosCategorias();
     setupCatalogActions();
   } catch (error) {
     console.error("Error al cargar datos:", error);
     Swal.fire("Error", "No se pudieron cargar los datos del catálogo", "error");
   }
+}
+
+function aplicarCategoriaInicialDiaMujer() {
+  const filtroSelect = document.getElementById("filtroCategorias");
+  const categoriaInicial = obtenerCategoriaDiaMujer();
+  if (!filtroSelect || !categoriaInicial) return;
+
+  const categoriaDisponible = Array.from(filtroSelect.options)
+    .some(option => option.value === categoriaInicial);
+
+  if (!categoriaDisponible) return;
+
+  state.categoriaSeleccionada = categoriaInicial;
+  filtroSelect.value = categoriaInicial;
 }
 
 // === RENDERIZAR CATÁLOGO POR CATEGORÍAS ===
