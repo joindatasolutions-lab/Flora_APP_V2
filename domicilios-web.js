@@ -479,6 +479,7 @@ function renderizarDomicilios(domicilios, options = {}) {
             <option ${valorActualNorm === normalizarTexto('Asignar domiciliario') ? 'selected' : ''}>Asignar domiciliario</option>
             <option ${valorActualNorm === normalizarTexto('Elvis') ? 'selected' : ''}>Elvis</option>
             <option ${valorActualNorm === normalizarTexto('Oscar') ? 'selected' : ''}>Oscar</option>
+            <option ${valorActualNorm === normalizarTexto('EXT - Javier ') ? 'selected' : ''}>EXT - Javier </option>
             <option ${valorActualNorm === normalizarTexto('EXT - William Osorio') ? 'selected' : ''}>EXT - William Osorio</option>
             <option ${valorActualNorm === normalizarTexto('EXT - Antonio Orozco') ? 'selected' : ''}>EXT - Antonio Orozco</option>
             <option ${valorActualNorm === normalizarTexto('EXT - Omar Hernandez') ? 'selected' : ''}>EXT - Omar Hernandez</option>
