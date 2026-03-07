@@ -28,6 +28,8 @@ const wizardState = {
   totalSteps: 4
 };
 
+let isSubmittingPedido = false;
+
 const PHONE_DEFAULT_DIAL_CODE = "+57";
 const CATEGORIA_CAMPANA_DIA_MUJER = "FLORA MUJER";
 
@@ -1057,6 +1059,20 @@ function setupWizard() {
       e.preventDefault();
 
       const btnSubmit = document.getElementById("btnSubmit");
+
+      // Evita doble envío por doble clic o submit repetido mientras el request está en curso.
+      if (isSubmittingPedido) return;
+
+      isSubmittingPedido = true;
+      if (btnSubmit) btnSubmit.disabled = true;
+
+      const liberarEnvio = () => {
+        isSubmittingPedido = false;
+        if (btnSubmit) btnSubmit.disabled = false;
+      };
+
+      let envioExitoso = false;
+
       sincronizarNombreCompleto();
 
       if (state.cart.length === 0) {
@@ -1065,6 +1081,7 @@ function setupWizard() {
           "Agrega al menos un producto antes de confirmar el pedido.",
           "warning"
         );
+        liberarEnvio();
         return;
       }
 
@@ -1078,6 +1095,7 @@ function setupWizard() {
             : "Completa los campos obligatorios del Paso 1 antes de confirmar el pedido.",
           "warning"
         );
+        liberarEnvio();
         return;
       }
 
@@ -1090,6 +1108,7 @@ function setupWizard() {
             ? "Completa los campos obligatorios del Paso 2 antes de confirmar el pedido."
             : "Completa destinatario y dirección en el Paso 2 antes de confirmar el pedido.");
         Swal.fire("Campos incompletos", mensajePaso2, "warning");
+        liberarEnvio();
         return;
       }
 
@@ -1123,12 +1142,14 @@ function setupWizard() {
       if (!esTelefonoInternacionalValido(telefonoClienteRaw)) {
         Swal.fire("Teléfono inválido", "Ingresa un número válido de cliente (entre 6 y 15 dígitos).", "warning");
         if (btnSubmit) btnSubmit.textContent = "Confirmar pedido";
+        liberarEnvio();
         return;
       }
 
       if (telefonoDestinoRaw && !esTelefonoColombiaValido(telefonoDestinoRaw)) {
         Swal.fire("Teléfono destino inválido", "Si completas el teléfono destino, debe ser un celular colombiano válido.", "warning");
         if (btnSubmit) btnSubmit.textContent = "Confirmar pedido";
+        liberarEnvio();
         return;
       }
 
@@ -1175,6 +1196,7 @@ function setupWizard() {
         const data = await response.json();
 
         if (data.status === "success") {
+          envioExitoso = true;
           const telefonoFlora = ("57" + "3013755838").replaceAll(/\D/g, "");
           const mensaje = encodeURIComponent(
             "Hola 🌸 Ya realicé el registro de mi pedido en el formulario y quedo atento(a) para continuar con el proceso de pago."
@@ -1222,7 +1244,16 @@ function setupWizard() {
         Swal.fire("Error", "Hubo un problema al enviar el pedido.", "error");
       } finally {
         updateSubmitState();
-        if (btnSubmit) btnSubmit.textContent = "Confirmar pedido";
+        if (envioExitoso) {
+          isSubmittingPedido = true;
+          if (btnSubmit) {
+            btnSubmit.disabled = true;
+            btnSubmit.textContent = "Pedido confirmado";
+          }
+        } else {
+          if (btnSubmit) btnSubmit.textContent = "Confirmar pedido";
+          liberarEnvio();
+        }
       }
     });
   }
