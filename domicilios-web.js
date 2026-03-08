@@ -488,7 +488,7 @@ function renderizarDomicilios(domicilios, options = {}) {
             <option ${valorActualNorm === normalizarTexto('EXT - Fausto') ? 'selected' : ''}>EXT - Fausto</option>
             <option ${valorActualNorm === normalizarTexto('EXT - Moni') ? 'selected' : ''}>EXT - Moni</option>
             <option ${valorActualNorm === normalizarTexto('EXT - Mandados') ? 'selected' : ''}>EXT - Mandados</option>
-            <option ${valorActualNorm === normalizarTexto('Externo') ? 'selected' : ''}>Externo>
+            <option ${valorActualNorm === normalizarTexto('Externo') ? 'selected' : ''}>Externo</option>
           </select>
           <button class="${btnClass}">${btnTxt}</button>
         `;
