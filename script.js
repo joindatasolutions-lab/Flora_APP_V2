@@ -31,7 +31,6 @@ const wizardState = {
 let isSubmittingPedido = false;
 
 const PHONE_DEFAULT_DIAL_CODE = "+57";
-const CATEGORIA_CAMPANA_DIA_MUJER = "FLORA MUJER";
 
 function limpiarDigitosTelefono(valor) {
   return String(valor || "").replaceAll(/\D/g, "");
@@ -115,28 +114,12 @@ async function init() {
     state.barrios = data.barrios || {};
 
     fillFiltrosCategorias();
-    aplicarCategoriaInicialDiaMujer();
     renderCatalogoPorCategorias();
     fillBarrios();
-    setupCatalogActions();
   } catch (error) {
     console.error("Error al cargar datos:", error);
     Swal.fire("Error", "No se pudieron cargar los datos del catálogo", "error");
   }
-}
-
-function aplicarCategoriaInicialDiaMujer() {
-  const filtroSelect = document.getElementById("filtroCategorias");
-  const categoriaInicial = obtenerCategoriaDiaMujer();
-  if (!filtroSelect || !categoriaInicial) return;
-
-  const categoriaDisponible = Array.from(filtroSelect.options)
-    .some(option => option.value === categoriaInicial);
-
-  if (!categoriaDisponible) return;
-
-  state.categoriaSeleccionada = categoriaInicial;
-  filtroSelect.value = categoriaInicial;
 }
 
 // === RENDERIZAR CATÁLOGO POR CATEGORÍAS ===
@@ -296,47 +279,6 @@ function filtrarCatalogo() {
     seccionDiv.appendChild(gridDiv);
     cont.appendChild(seccionDiv);
   });
-}
-
-function obtenerCategoriaDiaMujer() {
-  const categorias = [...new Set(
-    state.catalogoEnriquecido.map(prod => (prod.Categoria || prod.categoria || "Sin categoría").trim())
-  )];
-
-  const exacta = categorias.find(cat => cat.toLowerCase() === CATEGORIA_CAMPANA_DIA_MUJER.toLowerCase());
-  if (exacta) return exacta;
-
-  const aproximada = categorias.find(cat => {
-    const valor = cat.toLowerCase();
-    return valor.includes("dia de la mujer") || valor.includes("mujer");
-  });
-
-  return aproximada || CATEGORIA_CAMPANA_DIA_MUJER;
-}
-
-function setupCatalogActions() {
-  const btnDiaMujer = document.getElementById("btnDiaMujer");
-  const btnCatalogoGeneral = document.getElementById("btnCatalogoGeneral");
-  const filtro = document.getElementById("filtroCategorias");
-  const searchInput = document.getElementById("searchInput");
-
-  if (btnDiaMujer && filtro && btnDiaMujer.dataset.bound !== "true") {
-    btnDiaMujer.dataset.bound = "true";
-    btnDiaMujer.addEventListener("click", () => {
-      filtro.value = obtenerCategoriaDiaMujer();
-      if (searchInput) searchInput.value = "";
-      filtrarCatalogo();
-    });
-  }
-
-  if (btnCatalogoGeneral && filtro && btnCatalogoGeneral.dataset.bound !== "true") {
-    btnCatalogoGeneral.dataset.bound = "true";
-    btnCatalogoGeneral.addEventListener("click", () => {
-      filtro.value = "";
-      if (searchInput) searchInput.value = "";
-      filtrarCatalogo();
-    });
-  }
 }
 
 // === BARRIOS ===
