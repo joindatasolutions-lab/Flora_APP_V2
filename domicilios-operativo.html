@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Domicilios Operativo</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Manrope:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="domicilios-operativo.css" />
+</head>
+<body>
+  <header class="hero">
+    <div class="hero-inner">
+      <h1>Panel Operativo de Domicilios</h1>
+      <p>Vista compacta para despachar rapido, con menos scroll y acciones inmediatas.</p>
+    </div>
+  </header>
+
+  <section class="toolbar">
+    <div class="toolbar-filters">
+      <label class="field">
+        <span>Buscar</span>
+        <input id="buscarPedido" type="search" placeholder="Pedido, cliente, barrio, direccion" />
+      </label>
+      <label class="field">
+        <span>Estado</span>
+        <select id="filtroEstado">
+          <option value="Todos">Todos los estados</option>
+        </select>
+      </label>
+      <label class="field">
+        <span>Domiciliario</span>
+        <select id="filtroDomiciliario">
+          <option value="Todos">Todos los domiciliarios</option>
+        </select>
+      </label>
+      <button id="btnOptimizeRoute" type="button" class="btn btn-optimize">Optimize Route</button>
+      <button id="btnRefresh" type="button" class="btn btn-refresh">Actualizar</button>
+    </div>
+
+    <div class="toolbar-views" role="tablist" aria-label="Cambiar vista">
+      <button id="btnViewTable" class="btn btn-view active" data-view="table" type="button">Tabla</button>
+      <button id="btnViewRoute" class="btn btn-view" data-view="route" type="button">Ruta</button>
+      <button id="btnViewMap" class="btn btn-view" data-view="map" type="button">Mapa</button>
+    </div>
+
+    <div class="toolbar-meta">
+      <div class="stat">
+        <strong id="statsCount">0</strong>
+        <span>visibles</span>
+      </div>
+      <small id="statsInfo"></small>
+      <small id="lastUpdate">Actualizado: --</small>
+    </div>
+  </section>
+
+  <main id="viewContainer" class="view-container" aria-live="polite"></main>
+
+  <output id="toast" class="toast" aria-live="polite"></output>
+
+  <script>
+    globalThis.GOOGLE_MAPS_API_KEY = globalThis.GOOGLE_MAPS_API_KEY || '';
+    globalThis.STORE_COORDS = globalThis.STORE_COORDS || { lat: 10.998455, lng: -74.806981 };
+  </script>
+  <script src="domicilios-operativo.js"></script>
+</body>
+</html>

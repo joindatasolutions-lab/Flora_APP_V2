@@ -56,6 +56,27 @@ const normalizarTexto = value => {
     .replace(/[\u0300-\u036f]/g, "");
 };
 
+const limpiarTelefono = telefono => (telefono || '').toString().replace(/\D/g, '');
+
+const telefonoTelHref = telefono => {
+  const raw = (telefono || '').toString().trim();
+  if (!raw) return '';
+  const tel = raw.startsWith('+')
+    ? `+${limpiarTelefono(raw)}`
+    : limpiarTelefono(raw);
+  return tel ? `tel:${tel}` : '';
+};
+
+const telefonoWhatsAppHref = telefono => {
+  const limpio = limpiarTelefono(telefono);
+  return limpio ? `https://wa.me/${limpio}` : '';
+};
+
+const mapsHref = direccion => {
+  const dir = (direccion || '').toString().trim();
+  return dir ? `https://maps.google.com/?q=${encodeURIComponent(dir)}` : '';
+};
+
 const obtenerNombreExterno = pedido => {
   if (!pedido) return '';
   const posiblesCampos = [
@@ -111,6 +132,26 @@ const formatearFechaEntrega = pedido => {
   }
   return texto;
 };
+
+function esFechaHoy(fecha) {
+  if (!fecha) return false;
+
+  let texto = fecha.toString().trim();
+
+  // eliminar separador incorrecto
+  texto = texto.replace(" - ", " ");
+
+  const f = new Date(texto);
+  const hoy = new Date();
+
+  if (Number.isNaN(f.getTime())) return false;
+
+  return (
+    f.getFullYear() === hoy.getFullYear() &&
+    f.getMonth() === hoy.getMonth() &&
+    f.getDate() === hoy.getDate()
+  );
+}
 
 const ordenarUnicos = valores => {
   return Array.from(new Set(valores)).sort((a, b) =>
@@ -181,6 +222,11 @@ const filtrarData = data => {
   filtrados = filtrados.filter(p => {
     const estado = (p.estado || '').toString().trim();
     return !/entregado/i.test(estado);
+  });
+
+  filtrados = filtrados.filter(p => {
+    const zona = (p.zona || '').toString().toLowerCase();
+    return !zona.includes('recoger');
   });
   
   const estado = dom.filtroEstado?.value || 'Todos';
@@ -254,6 +300,17 @@ async function cargarDomicilios(){
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
     state.cache = Array.isArray(data) ? data : [];
+    state.cache = state.cache.filter(p => {
+      const fecha =
+        p.fechaEntrega ||
+        p.fecha_entrega ||
+        p.fecha ||
+        p["FechaEntrega"] ||
+        p["Fecha Entrega"] ||
+        p["Fecha de entrega"];
+
+      return esFechaHoy(fecha);
+    });
     actualizarFiltros(state.cache);
     aplicarFiltros();
     actualizarUltimaActualizacion();
@@ -300,9 +357,9 @@ async function asignarDomiciliario(pedido, domiciliario){
   }
 }
 
-function abrirModalExterno(pedido, select) {
+function abrirModalExterno(pedido, select, valorRetorno = 'Asignar domiciliario') {
   if (!dom.modal) return;
-  const valorPrevio = select?.value || 'Asignar domiciliario';
+  const valorPrevio = valorRetorno || 'Asignar domiciliario';
   const estabaDeshabilitado = Boolean(select?.disabled);
   const backgroundPrevio = select?.style?.background || '';
   const cursorPrevio = select?.style?.cursor || '';
@@ -344,6 +401,7 @@ function abrirModalExterno(pedido, select) {
       if (ok) {
         mostrarToast(`Externo asignado: ${nombre}`);
         select.value = "Externo";
+        select.dataset.prevValue = 'Externo';
         select.title = `${nombre} (${tel})`;
         select.disabled = true;
         select.style.background = "#f5f5f5";
@@ -370,6 +428,7 @@ function abrirModalExterno(pedido, select) {
     dom.modal.style.display = "none";
     dom.modal.setAttribute('aria-hidden', 'true');
     select.value = valorPrevio;
+    select.dataset.prevValue = valorPrevio;
     select.disabled = estabaDeshabilitado;
     select.style.background = backgroundPrevio;
     select.style.cursor = cursorPrevio;
@@ -424,15 +483,30 @@ function renderizarDomicilios(domicilios, options = {}) {
       const num = pedido["N°Pedido"] || pedido.pedido;
       const est = pedido.estado || 'Pendiente';
       const estClase = est.toLowerCase().replace(/\s+/g, '_');
-      const btnTxt = est === 'Pendiente' ? 'En Ruta' : est === 'En Ruta' ? 'Entregado' : 'Entregado';
+      let btnTxt = 'Entregado';
+      if (est === 'Pendiente') btnTxt = 'Marcar En Ruta';
+      else if (est === 'En Ruta') btnTxt = 'Marcar Entregado';
       const btnClass = /entregado/i.test(est) ? 'btn-estado entregado' : 'btn-estado';
       const domi = (pedido.domiciliario || '').trim();
       const valorActual = domi || 'Asignar domiciliario';
       const valorActualNorm = normalizarTexto(valorActual);
 
-      const imgSrc = pedido.imagen || IMG_FALLBACK;
       const producto = pedido.producto || 'Producto';
       const fechaEntrega = formatearFechaEntrega(pedido);
+      const direccion = pedido.direccion || '—';
+      const destinatario = pedido.destinatario || '—';
+      const telefono = pedido.telefonoDestino || '—';
+      const imgSrc = pedido.imagen || pedido.foto || pedido.fotoURL || IMG_FALLBACK;
+      const rutaHref = mapsHref(pedido.direccion);
+      const llamarHref = telefonoTelHref(telefono);
+      const whatsappHref = telefonoWhatsAppHref(telefono);
+
+      const crearBotonRapido = (label, href, extraClass = '') => {
+        if (!href) {
+          return `<span class="btn-accion-rapida disabled ${extraClass}" aria-disabled="true">${label}</span>`;
+        }
+        return `<a class="btn-accion-rapida ${extraClass}" href="${href}" target="_blank" rel="noopener noreferrer">${label}</a>`;
+      };
 
       const card = document.createElement('div');
       card.className = 'card';
@@ -441,22 +515,23 @@ function renderizarDomicilios(domicilios, options = {}) {
           <div class="pedido-num">Pedido #${num}</div>
           <div class="estado ${estClase}">${est}</div>
         </div>
-        <div class="img-wrap">
-          <img src="${imgSrc}" class="img-card" alt="${producto}" loading="lazy">
-        </div>
         <div class="detalle">
-          <h3>${producto}</h3>
-          <p><strong>Destinatario:</strong> ${pedido.destinatario || '—'}</p>
-          <p><strong>Direccion:</strong> ${pedido.direccion || '—'}</p>
-          <p><strong>Barrio:</strong> ${pedido.barrio || '—'}</p>
-          <p><strong>Zona:</strong> ${pedido.zona || '—'}</p>
-          <p><strong>Telefono:</strong> ${pedido.telefonoDestino || pedido.telefono || '—'}</p>
-          <p class="meta-row"><strong>Entrega:</strong> <span class="fecha-entrega">${fechaEntrega}</span></p>
+          <p class="direccion-principal">${direccion}</p>
+          <p><strong>Destinatario:</strong> ${destinatario}</p>
+          <p><strong>Telefono:</strong> ${telefono}</p>
+          <p><strong>Producto:</strong> ${producto}</p>
+          <button class="btn-ver-arreglo" data-img="${imgSrc}" type="button">Ver arreglo</button>
+          <p class="meta-row"><strong>Hora de entrega:</strong> <span class="fecha-entrega">${fechaEntrega}</span></p>
+        </div>
+        <div class="acciones-rapidas">
+          ${crearBotonRapido('Ver ruta', rutaHref, 'ruta')}
+          ${crearBotonRapido('Llamar', llamarHref, 'llamar')}
+          ${crearBotonRapido('WhatsApp', whatsappHref, 'whatsapp')}
         </div>
         <div class="observacion-box">
           <textarea 
             class="textarea-observacion" 
-            placeholder="Observaciones del domiciliario... (Ej: Se entrega a portería, cliente no responde, etc.)"
+            placeholder="Observación breve"
             data-pedido="${num}">${pedido.observacion || ''}</textarea>
           <button class="btn-guardar-observacion" data-pedido="${num}">Guardar observación</button>
         </div>
@@ -477,24 +552,30 @@ function renderizarDomicilios(domicilios, options = {}) {
         acciones.innerHTML = `
           <select>
             <option ${valorActualNorm === normalizarTexto('Asignar domiciliario') ? 'selected' : ''}>Asignar domiciliario</option>
-            <option ${valorActualNorm === normalizarTexto('Elvis') ? 'selected' : ''}>Elvis</option>
-            <option ${valorActualNorm === normalizarTexto('Oscar') ? 'selected' : ''}>Oscar</option>
-            <option ${valorActualNorm === normalizarTexto('EXT - Javier ') ? 'selected' : ''}>EXT - Javier </option>
-            <option ${valorActualNorm === normalizarTexto('EXT - William Osorio') ? 'selected' : ''}>EXT - William Osorio</option>
-            <option ${valorActualNorm === normalizarTexto('EXT - Antonio Orozco') ? 'selected' : ''}>EXT - Antonio Orozco</option>
-            <option ${valorActualNorm === normalizarTexto('EXT - Omar Hernandez') ? 'selected' : ''}>EXT - Omar Hernandez</option>
-            <option ${valorActualNorm === normalizarTexto('EXT - Juan David') ? 'selected' : ''}>EXT - Juan David</option>
-            <option ${valorActualNorm === normalizarTexto('EXT - Andrea') ? 'selected' : ''}>EXT - Andrea</option>
-            <option ${valorActualNorm === normalizarTexto('EXT - Fausto') ? 'selected' : ''}>EXT - Fausto</option>
-            <option ${valorActualNorm === normalizarTexto('EXT - Moni') ? 'selected' : ''}>EXT - Moni</option>
-            <option ${valorActualNorm === normalizarTexto('EXT - Mandados') ? 'selected' : ''}>EXT - Mandados</option>
-            <option ${valorActualNorm === normalizarTexto('Externo') ? 'selected' : ''}>Externo</option>
+            <optgroup label="Internos">
+              <option ${valorActualNorm === normalizarTexto('Elvis') ? 'selected' : ''}>Elvis</option>
+              <option ${valorActualNorm === normalizarTexto('Oscar') ? 'selected' : ''}>Oscar</option>
+            </optgroup>
+            <optgroup label="Externos">
+              <option ${valorActualNorm === normalizarTexto('EXT - Javier ') ? 'selected' : ''}>EXT - Javier </option>
+              <option ${valorActualNorm === normalizarTexto('EXT - William Osorio') ? 'selected' : ''}>EXT - William Osorio</option>
+              <option ${valorActualNorm === normalizarTexto('EXT - Antonio Orozco') ? 'selected' : ''}>EXT - Antonio Orozco</option>
+              <option ${valorActualNorm === normalizarTexto('EXT - Omar Hernandez') ? 'selected' : ''}>EXT - Omar Hernandez</option>
+              <option ${valorActualNorm === normalizarTexto('EXT - Juan David') ? 'selected' : ''}>EXT - Juan David</option>
+              <option ${valorActualNorm === normalizarTexto('EXT - Andrea') ? 'selected' : ''}>EXT - Andrea</option>
+              <option ${valorActualNorm === normalizarTexto('EXT - Fausto') ? 'selected' : ''}>EXT - Fausto</option>
+              <option ${valorActualNorm === normalizarTexto('EXT - Moni') ? 'selected' : ''}>EXT - Moni</option>
+              <option ${valorActualNorm === normalizarTexto('EXT - Mandados') ? 'selected' : ''}>EXT - Mandados</option>
+              <option ${valorActualNorm === normalizarTexto('Externo') ? 'selected' : ''}>Externo</option>
+              <option value="__registrar_externo__">Registrar Externo</option>
+            </optgroup>
           </select>
           <button class="${btnClass}">${btnTxt}</button>
         `;
         const select = acciones.querySelector('select');
         const boton = acciones.querySelector('button');
         const badge = card.querySelector('.estado');
+        select.dataset.prevValue = valorActual;
 
         if (valorActual !== 'Asignar domiciliario') {
           select.disabled = true;
@@ -504,13 +585,16 @@ function renderizarDomicilios(domicilios, options = {}) {
 
         select.addEventListener('change', async () => {
           if (select.value === 'Asignar domiciliario') return;
-          if (select.value === 'Externo') abrirModalExterno(num, select);
+          if (select.value === '__registrar_externo__') abrirModalExterno(num, select, select.dataset.prevValue || 'Asignar domiciliario');
           else {
             select.disabled = true;
             const ok = await asignarDomiciliario(num, select.value);
             if (!ok) {
               select.disabled = false;
               select.value = 'Asignar domiciliario';
+              select.dataset.prevValue = 'Asignar domiciliario';
+            } else {
+              select.dataset.prevValue = select.value;
             }
           }
         });
@@ -766,6 +850,26 @@ function init() {
   setupBuscador();
   setupFiltros();
   cargarDomicilios();
+}
+
+if (typeof document !== 'undefined') {
+  document.addEventListener('click', function(e) {
+    if (e.target.classList.contains('btn-ver-arreglo')) {
+      const url = e.target.dataset.img;
+
+      const vista = document.getElementById('vistaArreglo');
+      const img = document.getElementById('imagenArregloGrande');
+
+      if (!vista || !img) return;
+      img.src = url || '';
+      vista.style.display = 'flex';
+    }
+
+    if (e.target.id === 'cerrarVistaArreglo') {
+      const vista = document.getElementById('vistaArreglo');
+      if (vista) vista.style.display = 'none';
+    }
+  });
 }
 
 if (typeof document !== 'undefined') {
