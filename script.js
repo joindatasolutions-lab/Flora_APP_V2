@@ -1,4 +1,5 @@
 const ORIGEN_CATALOGO = "normal";
+const CATEGORIA_CAMPANA_PRIMAVERA = "primavera";
 // === CONFIGURACIÓN GENERAL ===
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwdixPJBCFos9aUaUT_NDxQ2ZMW3s2CXoQ0KRNVNe8aYmaXtTSONvKgPRXIFcFpSSmO/exec";
 
@@ -114,6 +115,7 @@ async function init() {
     state.barrios = data.barrios || {};
 
     fillFiltrosCategorias();
+    aplicarFiltroInicialPrimavera();
     renderCatalogoPorCategorias();
     fillBarrios();
   } catch (error) {
@@ -405,6 +407,53 @@ function fillFiltrosCategorias() {
     document.getElementById("searchInput").value = "";
     renderCatalogoPorCategorias();
   });
+
+  // Setup botones de campaña
+  setupBotonesCampana();
+}
+
+function obtenerCategoriaPrimaveraDisponible() {
+  return state.catalogoEnriquecido
+    .map(prod => prod.Categoria || prod.categoria || "")
+    .find(cat => String(cat).trim().toLowerCase() === CATEGORIA_CAMPANA_PRIMAVERA) || null;
+}
+
+function aplicarFiltroInicialPrimavera() {
+  const categoriaPrimavera = obtenerCategoriaPrimaveraDisponible();
+  if (!categoriaPrimavera) return;
+
+  state.categoriaSeleccionada = categoriaPrimavera;
+
+  const filtroSelect = document.getElementById("filtroCategorias");
+  if (filtroSelect) {
+    filtroSelect.value = categoriaPrimavera;
+  }
+}
+
+// === BOTONES DE CAMPAÑA ===
+function setupBotonesCampana() {
+  // Botón: Ver catalogo general
+  const btnGeneral = document.getElementById("btnCatalogoGeneral");
+  if (btnGeneral) {
+    btnGeneral.addEventListener("click", () => {
+      state.categoriaSeleccionada = null;
+      document.getElementById("filtroCategorias").value = "";
+      document.getElementById("searchInput").value = "";
+      renderCatalogoPorCategorias();
+    });
+  }
+
+  // Botón: Catalogo primavera
+  const btnPrimavera = document.getElementById("btnCatalogoPrimavera");
+  if (btnPrimavera) {
+    btnPrimavera.addEventListener("click", () => {
+      const categoriaPrimavera = obtenerCategoriaPrimaveraDisponible() || "Primavera";
+      state.categoriaSeleccionada = categoriaPrimavera;
+      document.getElementById("filtroCategorias").value = categoriaPrimavera;
+      document.getElementById("searchInput").value = "";
+      renderCatalogoPorCategorias();
+    });
+  }
 }
 
 function actualizarDomicilio() {

@@ -8,52 +8,69 @@
   <link rel="stylesheet" href="domicilios-operativo.css" />
 </head>
 <body>
-  <header class="hero">
-    <div class="hero-inner">
-      <h1>Panel Operativo de Domicilios</h1>
-      <p>Vista compacta para despachar rapido, con menos scroll y acciones inmediatas.</p>
+  <header class="topbar">
+    <div class="topbar-summary">
+      <span class="topbar-title">Pedidos hoy</span>
+      <strong id="statsCount" class="topbar-count">0</strong>
     </div>
+    <button id="btnRefresh" type="button" class="btn btn-refresh">Actualizar</button>
   </header>
 
-  <section class="toolbar">
-    <div class="toolbar-filters">
-      <label class="field">
-        <span>Buscar</span>
-        <input id="buscarPedido" type="search" placeholder="Pedido, cliente, barrio, direccion" />
-      </label>
-      <label class="field">
-        <span>Estado</span>
-        <select id="filtroEstado">
-          <option value="Todos">Todos los estados</option>
-        </select>
-      </label>
-      <label class="field">
-        <span>Domiciliario</span>
-        <select id="filtroDomiciliario">
-          <option value="Todos">Todos los domiciliarios</option>
-        </select>
-      </label>
-      <button id="btnOptimizeRoute" type="button" class="btn btn-optimize">Optimize Route</button>
-      <button id="btnRefresh" type="button" class="btn btn-refresh">Actualizar</button>
-    </div>
-
-    <div class="toolbar-views" role="tablist" aria-label="Cambiar vista">
-      <button id="btnViewTable" class="btn btn-view active" data-view="table" type="button">Tabla</button>
-      <button id="btnViewRoute" class="btn btn-view" data-view="route" type="button">Ruta</button>
-      <button id="btnViewMap" class="btn btn-view" data-view="map" type="button">Mapa</button>
-    </div>
-
-    <div class="toolbar-meta">
-      <div class="stat">
-        <strong id="statsCount">0</strong>
-        <span>visibles</span>
-      </div>
-      <small id="statsInfo"></small>
-      <small id="lastUpdate">Actualizado: --</small>
+  <section class="chips-bar" aria-label="Filtros rápidos">
+    <div class="chips-scroll">
+      <button id="chipToday" class="filter-chip active" type="button" data-filter="today">Hoy</button>
+      <button id="chipPending" class="filter-chip" type="button" data-filter="pending">Pendientes</button>
+      <button id="chipEnRuta" class="filter-chip" type="button" data-filter="en-route">En ruta</button>
+      <button id="chipDelivered" class="filter-chip" type="button" data-filter="delivered">Entregados</button>
     </div>
   </section>
 
-  <main id="viewContainer" class="view-container" aria-live="polite"></main>
+  <section class="tabs-bar" role="tablist" aria-label="Cambiar vista">
+    <button
+      id="tab-lista"
+      class="tab-button active"
+      type="button"
+      role="tab"
+      aria-selected="true"
+      aria-controls="panel-lista"
+      data-view="list">Lista</button>
+    <button
+      id="tab-ruta"
+      class="tab-button"
+      type="button"
+      role="tab"
+      aria-selected="false"
+      aria-controls="panel-ruta"
+      data-view="route"
+      tabindex="-1">Ruta</button>
+    <button
+      id="tab-mapa"
+      class="tab-button"
+      type="button"
+      role="tab"
+      aria-selected="false"
+      aria-controls="panel-mapa"
+      data-view="map"
+      tabindex="-1">Mapa</button>
+  </section>
+
+  <main class="content-shell">
+    <section id="panel-lista" class="view-panel is-active" role="tabpanel" aria-labelledby="tab-lista" aria-live="polite"></section>
+    <section id="panel-ruta" class="view-panel" role="tabpanel" aria-labelledby="tab-ruta" hidden></section>
+    <section id="panel-mapa" class="view-panel panel-map" role="tabpanel" aria-labelledby="tab-mapa" hidden></section>
+  </main>
+
+  <div class="floating-bar">
+    <div class="floating-controls">
+      <label class="floating-field" for="routeCourierSelect">
+        <span>Domiciliario</span>
+        <select id="routeCourierSelect" class="route-courier-select">
+          <option value="">Selecciona un domiciliario</option>
+        </select>
+      </label>
+      <button id="btnGenerateRoutes" type="button" class="btn btn-generate-routes">Generar rutas</button>
+    </div>
+  </div>
 
   <output id="toast" class="toast" aria-live="polite"></output>
 

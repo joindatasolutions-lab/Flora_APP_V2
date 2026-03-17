@@ -958,13 +958,22 @@ input[data-auto-filled="true"] {
   padding: 16px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 20px;
   align-items: center;
+}
+
+.catalog-title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  width: 100%;
 }
 
 /* Logo */
 .logo-area {
   text-align: center;
+  flex-shrink: 0;
 }
 
 .logo-area img {
@@ -976,7 +985,7 @@ input[data-auto-filled="true"] {
 
 /* Título */
 .title-area {
-  text-align: center;
+  text-align: left;
 }
 
 .title-area h2 {
@@ -993,7 +1002,16 @@ input[data-auto-filled="true"] {
   flex-direction: column;
   gap: 14px;
   width: 100%;
-  max-width: 400px;
+  max-width: 520px;
+}
+
+@media (min-width: 768px) {
+  .controls-area {
+    flex-direction: column;
+    max-width: 620px;
+    align-items: stretch;
+    gap: 14px;
+  }
 }
 
 /* ===== TABLET: 768px - 1024px ===== */
@@ -1004,29 +1022,21 @@ input[data-auto-filled="true"] {
     gap: 18px;
   }
 
-  /* Fila 1: Logo + Título */
-  .logo-area {
-    text-align: left;
-    width: 100%;
+  .catalog-title {
+    justify-content: center;
   }
 
   .logo-area img {
     max-width: 160px;
   }
 
-  .title-area {
-    text-align: left;
-    width: 100%;
-  }
-
   .title-area h2 {
     font-size: 1.4rem;
   }
 
-  /* Fila 2: Controles en línea */
   .controls-area {
-    flex-direction: row;
-    max-width: 100%;
+    flex-direction: column;
+    max-width: 620px;
     gap: 16px;
   }
 }
@@ -1034,43 +1044,32 @@ input[data-auto-filled="true"] {
 /* ===== DESKTOP: >1024px ===== */
 @media (min-width: 1025px) {
   .catalog-header {
-    flex-direction: row;
+    flex-direction: column;
     align-items: center;
-    justify-content: space-between;
-    gap: 32px;
+    justify-content: flex-start;
+    gap: 20px;
     padding: 24px 28px;
     margin-bottom: 36px;
   }
 
-  /* Logo */
-  .logo-area {
-    flex-shrink: 0;
-    width: auto;
+  .catalog-title {
+    justify-content: center;
   }
 
   .logo-area img {
     max-width: 155px;
   }
 
-  /* Título */
-  .title-area {
-    flex: 1;
-    text-align: left;
-    min-width: 0;
-  }
-
   .title-area h2 {
     font-size: 1.4rem;
-    white-space: nowrap;
     line-height: 1.2;
   }
 
-  /* Controles */
   .controls-area {
-    flex-shrink: 0;
-    flex-direction: row;
+    flex-direction: column;
     gap: 18px;
-    width: auto;
+    width: 620px;
+    max-width: 100%;
   }
 }
 
@@ -1081,19 +1080,6 @@ input[data-auto-filled="true"] {
   position: relative;
   width: 100%;
   min-width: 0;
-}
-
-@media (min-width: 768px) {
-  .search-box {
-    width: 220px;
-    flex-shrink: 0;
-  }
-}
-
-@media (min-width: 1025px) {
-  .search-box {
-    width: 240px;
-  }
 }
 
 #searchInput {
@@ -1307,13 +1293,6 @@ input[data-auto-filled="true"] {
   min-width: 0;
 }
 
-@media (min-width: 768px) {
-  .filtro-categorias-container {
-    width: auto;
-    flex-shrink: 0;
-  }
-}
-
 .filtro-label {
   font-weight: 700;
   font-size: 0.8rem;
@@ -1363,6 +1342,65 @@ input[data-auto-filled="true"] {
 @media (min-width: 1025px) {
   .filtro-select {
     width: 240px;
+  }
+}
+
+/* Botones de catálogo */
+.catalog-actions {
+  display: flex;
+  justify-content: center;
+  gap: 18px;
+  margin-top: 20px;
+  width: 100%;
+  max-width: 620px;
+}
+
+.btn-catalogo-general,
+.btn-coleccion-primavera {
+  border: none;
+  padding: 14px 28px;
+  border-radius: 14px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.btn-catalogo-general {
+  background: #C97A8A;
+  color: #ffffff;
+}
+
+.btn-catalogo-general:hover {
+  background: #B46778;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.btn-coleccion-primavera {
+  background: #F4C430;
+  color: #3A2F00;
+}
+
+.btn-coleccion-primavera:hover {
+  background: #E5B81F;
+  box-shadow: 0 4px 12px rgba(229, 184, 31, 0.35);
+}
+
+.btn-catalogo-general:active,
+.btn-coleccion-primavera:active {
+  transform: scale(0.98);
+}
+
+@media (max-width: 768px) {
+  .catalog-actions {
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+  }
+
+  .catalog-actions button {
+    width: 80%;
   }
 }
 

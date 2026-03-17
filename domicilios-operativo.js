@@ -1,112 +1,117 @@
-﻿const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwdixPJBCFos9aUaUT_NDxQ2ZMW3s2CXoQ0KRNVNe8aYmaXtTSONvKgPRXIFcFpSSmO/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwdixPJBCFos9aUaUT_NDxQ2ZMW3s2CXoQ0KRNVNe8aYmaXtTSONvKgPRXIFcFpSSmO/exec";
 
 const STORE_COORDS = {
   lat: Number(globalThis.STORE_COORDS?.lat ?? 10.998455),
   lng: Number(globalThis.STORE_COORDS?.lng ?? -74.806981)
 };
 
-const GOOGLE_MAPS_API_KEY = (globalThis.GOOGLE_MAPS_API_KEY || '').toString().trim();
+const GOOGLE_MAPS_API_KEY = (globalThis.GOOGLE_MAPS_API_KEY || "").toString().trim();
 
 const getById = id => document.getElementById(id);
 
 const dom = {
-  viewContainer: getById('viewContainer'),
-  toast: getById('toast'),
-  buscar: getById('buscarPedido'),
-  filtroEstado: getById('filtroEstado'),
-  filtroDomiciliario: getById('filtroDomiciliario'),
-  btnRefresh: getById('btnRefresh'),
-  btnOptimizeRoute: getById('btnOptimizeRoute'),
-  btnViewTable: getById('btnViewTable'),
-  btnViewRoute: getById('btnViewRoute'),
-  btnViewMap: getById('btnViewMap'),
-  statsCount: getById('statsCount'),
-  statsInfo: getById('statsInfo'),
-  lastUpdate: getById('lastUpdate')
+  statsCount: getById("statsCount"),
+  btnRefresh: getById("btnRefresh"),
+  btnGenerateRoutes: getById("btnGenerateRoutes"),
+  routeCourierSelect: getById("routeCourierSelect"),
+  toast: getById("toast"),
+  panelList: getById("panel-lista"),
+  panelRoute: getById("panel-ruta"),
+  panelMap: getById("panel-mapa"),
+  chipButtons: Array.from(document.querySelectorAll(".filter-chip")),
+  tabButtons: Array.from(document.querySelectorAll(".tab-button"))
 };
 
 const state = {
   cache: [],
-  timer: null,
-  currentView: 'table',
-  sortKey: 'time',
-  sortDirection: 'asc',
-  optimizedCourier: null,
+  currentView: "list",
+  activeFilter: "today",
+  listSortKey: "time",
+  listSortDirection: "asc",
+  expandedRows: {},
   routeMetrics: {},
   optimizedPath: [],
+  optimizedCourier: "",
   map: null,
   mapMarkers: [],
   mapPolyline: null,
   infoWindow: null,
-  mapsReady: false
+  mapsReady: false,
+  toastTimer: null,
+  lastFiltered: []
 };
 
 function mostrarToast(msg) {
   if (!dom.toast) return;
+  globalThis.clearTimeout(state.toastTimer);
   dom.toast.textContent = msg;
-  dom.toast.classList.add('show');
-  setTimeout(() => dom.toast.classList.remove('show'), 2400);
+  dom.toast.classList.add("show");
+  state.toastTimer = globalThis.setTimeout(() => {
+    dom.toast.classList.remove("show");
+  }, 2400);
 }
 
 function normalizarTexto(value) {
-  return (value ?? '')
+  return (value ?? "")
     .toString()
     .toLowerCase()
-    .normalize('NFD')
-    .replaceAll(/[\u0300-\u036f]/g, '');
+    .normalize("NFD")
+    .replaceAll(/[\u0300-\u036f]/g, "")
+    .trim();
+}
+
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
 }
 
 function limpiarTelefono(telefono) {
-  return (telefono || '').toString().replaceAll(/\D/g, '');
+  return (telefono || "").toString().replaceAll(/\D/g, "");
 }
 
 function telefonoTelHref(telefono) {
-  const raw = (telefono || '').toString().trim();
-  if (!raw) return '';
-  const tel = raw.startsWith('+') ? `+${limpiarTelefono(raw)}` : limpiarTelefono(raw);
-  return tel ? `tel:${tel}` : '';
+  const raw = (telefono || "").toString().trim();
+  if (!raw) return "";
+  const tel = raw.startsWith("+") ? `+${limpiarTelefono(raw)}` : limpiarTelefono(raw);
+  return tel ? `tel:${tel}` : "";
 }
 
 function telefonoWhatsAppHref(telefono) {
   const limpio = limpiarTelefono(telefono);
-  return limpio ? `https://wa.me/${limpio}` : '';
+  return limpio ? `https://wa.me/${limpio}` : "";
 }
 
 function mapsHref(direccion) {
-  const dir = (direccion || '').toString().trim();
-  return dir ? `https://maps.google.com/?q=${encodeURIComponent(dir)}` : '';
+  const dir = (direccion || "").toString().trim();
+  return dir ? `https://maps.google.com/?q=${encodeURIComponent(dir)}` : "";
 }
 
 function toCoord(value) {
-  if (value === null || value === undefined) return null;
-  const parsed = Number(String(value).replaceAll(',', '.').trim());
+  if (value === null || value === undefined || value === "") return null;
+  const parsed = Number(String(value).replaceAll(",", ".").trim());
   return Number.isFinite(parsed) ? parsed : null;
 }
 
 function getOrderId(pedido) {
   return String(
-    pedido.order_id || pedido['N°Pedido'] || pedido.pedido || pedido.id || ''
+    pedido.order_id || pedido["N°Pedido"] || pedido.pedido || pedido.id || ""
   ).trim();
 }
 
-function getCourier(pedido) {
-  return (pedido.courier || pedido.domiciliario || 'Sin asignar').toString().trim();
-}
-
 function getAddress(pedido) {
-  return (pedido.address || pedido.direccion || '').toString().trim();
-}
-
-function getCustomer(pedido) {
-  return (pedido.customer || pedido.destinatario || '').toString().trim();
+  return (pedido.address || pedido.direccion || "").toString().trim();
 }
 
 function getNeighborhood(pedido) {
-  return (pedido.neighborhood || pedido.barrio || '').toString().trim();
+  return (pedido.neighborhood || pedido.barrio || "").toString().trim();
 }
 
 function getPhone(pedido) {
-  return (pedido.telefonoDestino || pedido.telefono || pedido.phone || '').toString().trim();
+  return (pedido.telefonoDestino || pedido.telefono || pedido.phone || "").toString().trim();
 }
 
 function getLatitude(pedido) {
@@ -117,16 +122,20 @@ function getLongitude(pedido) {
   return toCoord(pedido.longitude ?? pedido.longitud ?? pedido.lng);
 }
 
+function getStatus(pedido) {
+  return (pedido.estado || "Pendiente").toString().trim();
+}
+
 function getDeliveryDateRaw(pedido) {
   return (
     pedido.delivery_date ||
     pedido.fechaEntrega ||
     pedido.fecha_entrega ||
     pedido.fecha ||
-    pedido['FechaEntrega'] ||
-    pedido['Fecha Entrega'] ||
-    pedido['Fecha de entrega'] ||
-    ''
+    pedido["FechaEntrega"] ||
+    pedido["Fecha Entrega"] ||
+    pedido["Fecha de entrega"] ||
+    ""
   );
 }
 
@@ -135,449 +144,746 @@ function getDeliveryTimeRaw(pedido) {
     pedido.delivery_time ||
     pedido.horaEntrega ||
     pedido.hora ||
-    pedido['Hora Entrega'] ||
-    ''
+    pedido["Hora Entrega"] ||
+    ""
   );
+}
+
+function getDeliveryType(pedido) {
+  const raw =
+    pedido.tipo_entrega ||
+    pedido.tipoEntrega ||
+    pedido["Tipo entrega"] ||
+    pedido["TipoEntrega"] ||
+    pedido["tipo entrega"] ||
+    "";
+
+  if (raw) return normalizarTexto(raw);
+
+  const zone = normalizarTexto(pedido.zona || "");
+  return zone.includes("recoger") ? "recoger" : "domicilio";
+}
+
+function getAssignedCourier(pedido) {
+  return (
+    pedido._assignedCourier ||
+    pedido.courier ||
+    pedido.domiciliario ||
+    pedido["Domiciliario"] ||
+    "Sin asignar"
+  ).toString().trim();
 }
 
 function esFechaHoy(fecha) {
   if (!fecha) return false;
-  const texto = fecha.toString().trim().replaceAll(' - ', ' ');
-  const f = new Date(texto);
+  const texto = fecha.toString().trim().replaceAll(" - ", " ");
+  const parsed = new Date(texto);
   const hoy = new Date();
-  if (Number.isNaN(f.getTime())) return false;
+  if (Number.isNaN(parsed.getTime())) return false;
   return (
-    f.getFullYear() === hoy.getFullYear() &&
-    f.getMonth() === hoy.getMonth() &&
-    f.getDate() === hoy.getDate()
+    parsed.getFullYear() === hoy.getFullYear() &&
+    parsed.getMonth() === hoy.getMonth() &&
+    parsed.getDate() === hoy.getDate()
   );
-}
-
-function formatearFechaEntrega(pedido) {
-  const rawDate = getDeliveryDateRaw(pedido);
-  const rawTime = getDeliveryTimeRaw(pedido);
-  const compuesto = `${rawDate || ''} ${rawTime || ''}`.trim();
-  const parsed = new Date(compuesto || String(rawDate || '').trim());
-
-  if (!Number.isNaN(parsed.getTime())) {
-    return parsed.toLocaleString('es-CO', {
-      year: 'numeric',
-      month: 'short',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  }
-
-  if (compuesto) return compuesto;
-  return '';
 }
 
 function timestampEntrega(pedido) {
   const rawDate = getDeliveryDateRaw(pedido);
   const rawTime = getDeliveryTimeRaw(pedido);
-  const compuesto = `${rawDate || ''} ${rawTime || ''}`.trim();
-  const parsed = new Date(compuesto.replaceAll(' - ', ' '));
+  const composed = `${rawDate || ""} ${rawTime || ""}`.trim().replaceAll(" - ", " ");
+  const parsed = new Date(composed || String(rawDate || "").trim());
   return Number.isNaN(parsed.getTime()) ? Number.MAX_SAFE_INTEGER : parsed.getTime();
 }
 
-function ordenarUnicos(valores) {
-  return Array.from(new Set(valores)).sort((a, b) => a.localeCompare(b, 'es', { sensitivity: 'base' }));
-}
-
-function fillSelect(select, options, defaultLabel) {
-  if (!select) return;
-  const current = select.value || 'Todos';
-  select.innerHTML = '';
-  const opDefault = document.createElement('option');
-  opDefault.value = 'Todos';
-  opDefault.textContent = defaultLabel;
-  select.appendChild(opDefault);
-  options.forEach(value => {
-    const op = document.createElement('option');
-    op.value = value;
-    op.textContent = value;
-    if (value === current) op.selected = true;
-    select.appendChild(op);
+function formatDeliveryTime(pedido) {
+  const stamp = timestampEntrega(pedido);
+  if (!Number.isFinite(stamp) || stamp === Number.MAX_SAFE_INTEGER) {
+    const raw = getDeliveryTimeRaw(pedido);
+    return raw ? raw.toString().trim() : "Sin hora";
+  }
+  return new Date(stamp).toLocaleTimeString("es-CO", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false
   });
-}
-
-function actualizarFiltros(data) {
-  const estados = ordenarUnicos(data.map(p => (p.estado || 'Pendiente').toString().trim()));
-  const domiciliarios = ordenarUnicos(data.map(p => getCourier(p)));
-  fillSelect(dom.filtroEstado, estados, 'Todos los estados');
-  fillSelect(dom.filtroDomiciliario, domiciliarios, 'Todos los domiciliarios');
-}
-
-function actualizarStats(total, visibles) {
-  if (dom.statsCount) dom.statsCount.textContent = String(visibles);
-  if (dom.statsInfo) dom.statsInfo.textContent = total === visibles ? '' : `Mostrando ${visibles} de ${total}`;
-}
-
-function actualizarUltimaActualizacion() {
-  if (!dom.lastUpdate) return;
-  const now = new Date();
-  dom.lastUpdate.textContent = `Actualizado: ${now.toLocaleString('es-CO', { hour12: false })}`;
-}
-
-function actualizarEnCache(pedidoId, patch) {
-  const id = String(pedidoId ?? '');
-  const item = state.cache.find(p => getOrderId(p) === id);
-  if (item) Object.assign(item, patch);
-}
-
-function filtrarData(data) {
-  let filtrados = [...data];
-
-  filtrados = filtrados.filter(p => !/entregado/i.test((p.estado || '').toString().trim()));
-  filtrados = filtrados.filter(p => !((p.zona || '').toString().toLowerCase()).includes('recoger'));
-
-  const estado = dom.filtroEstado?.value || 'Todos';
-  const domiciliario = dom.filtroDomiciliario?.value || 'Todos';
-
-  if (estado !== 'Todos') {
-    filtrados = filtrados.filter(p => normalizarTexto(p.estado) === normalizarTexto(estado));
-  }
-  if (domiciliario !== 'Todos') {
-    filtrados = filtrados.filter(p => normalizarTexto(getCourier(p)) === normalizarTexto(domiciliario));
-  }
-
-  const q = normalizarTexto(dom.buscar?.value || '').trim();
-  if (q) {
-    filtrados = filtrados.filter(pedido => {
-      const campos = [
-        getOrderId(pedido),
-        getCustomer(pedido),
-        getNeighborhood(pedido),
-        pedido.zona,
-        getAddress(pedido),
-        getPhone(pedido),
-        getCourier(pedido),
-        pedido.estado
-      ];
-      return campos.some(campo => normalizarTexto(campo).includes(q));
-    });
-  }
-
-  return ordenarData(filtrados);
-}
-
-function comparar(a, b) {
-  return state.sortDirection === 'asc' ? a - b : b - a;
-}
-
-function compararTexto(a, b) {
-  return state.sortDirection === 'asc'
-    ? a.localeCompare(b, 'es', { sensitivity: 'base' })
-    : b.localeCompare(a, 'es', { sensitivity: 'base' });
 }
 
 function getRouteMetric(pedido) {
-  const id = getOrderId(pedido);
-  return state.routeMetrics[id] || null;
+  return state.routeMetrics[getOrderId(pedido)] || null;
 }
 
-function ordenarData(data) {
-  const out = [...data];
-  const activeCourier = dom.filtroDomiciliario?.value || 'Todos';
-
-  if (state.optimizedCourier && activeCourier === state.optimizedCourier) {
-    out.sort((a, b) => {
-      const ma = getRouteMetric(a);
-      const mb = getRouteMetric(b);
-      if (ma && mb) return ma.sortIndex - mb.sortIndex;
-      if (ma) return -1;
-      if (mb) return 1;
-      return comparar(timestampEntrega(a), timestampEntrega(b));
-    });
-    return out;
+function getUrgencyInfo(pedido) {
+  const stamp = timestampEntrega(pedido);
+  if (!Number.isFinite(stamp) || stamp === Number.MAX_SAFE_INTEGER) {
+    return {
+      cardClass: "urgency-unknown",
+      pillClass: "unknown",
+      label: "Sin hora"
+    };
   }
 
-  out.sort((a, b) => {
-    if (state.sortKey === 'time') {
-      return comparar(timestampEntrega(a), timestampEntrega(b));
-    }
-    if (state.sortKey === 'neighborhood') {
-      return compararTexto(getNeighborhood(a), getNeighborhood(b));
-    }
-    const pa = Number(getOrderId(a) || 0);
-    const pb = Number(getOrderId(b) || 0);
-    return comparar(pa, pb);
-  });
-  return out;
-}
-
-function badgeClass(estado) {
-  const e = normalizarTexto(estado || 'pendiente');
-  if (e.includes('problema') || e.includes('incidencia') || e.includes('error')) return 'status-pill status-problem';
-  if (e.includes('en ruta')) return 'status-pill status-en-ruta';
-  if (e.includes('entregado')) return 'status-pill status-entregado';
-  return 'status-pill status-pendiente';
-}
-
-function actionLink(label, href) {
-  if (!href) return `<span class="action-link" aria-disabled="true">${label}</span>`;
-  return `<a class="action-link" href="${href}" target="_blank" rel="noopener noreferrer">${label}</a>`;
-}
-
-function metricChip(text) {
-  return `<span class="metric-chip">${text || ''}</span>`;
-}
-
-function renderTableView(data) {
-  if (!data.length) {
-    dom.viewContainer.innerHTML = '<div class="empty">No hay entregas para mostrar.</div>';
-    return;
+  const diffMinutes = Math.round((stamp - Date.now()) / 60000);
+  if (diffMinutes < 0) {
+    return {
+      cardClass: "urgency-late",
+      pillClass: "late",
+      label: `Tarde ${Math.abs(diffMinutes)} min`
+    };
   }
-
-  const cards = data.map(p => {
-    const pedido = getOrderId(p) || '';
-    const address = getAddress(p) || 'Sin direccion';
-    const customer = getCustomer(p) || 'Sin cliente';
-    const neighborhood = getNeighborhood(p) || 'Sin barrio';
-    const status = p.estado || 'Pendiente';
-    const phone = getPhone(p);
-
-    return `
-      <article class="order-card">
-        <header class="order-card-header">
-          <strong class="order-number">Pedido #${pedido}</strong>
-          <span class="${badgeClass(status)}">${status}</span>
-        </header>
-        <div class="order-card-body">
-          <p><strong>Cliente:</strong> ${customer}</p>
-          <p><strong>Barrio:</strong> ${neighborhood}</p>
-          <p><strong>Direccion:</strong> ${address}</p>
-        </div>
-        <div class="actions order-card-actions">
-          ${actionLink('📍 Mapa', mapsHref(address))}
-          ${actionLink('📞 Llamar', telefonoTelHref(phone))}
-          <button class="action-btn deliver" data-action="deliver" data-pedido="${pedido}">✔ Entregado</button>
-        </div>
-      </article>
-    `;
-  }).join('');
-
-  dom.viewContainer.innerHTML = `<section class="orders-cards">${cards}</section>`;
-}
-
-function renderRouteView(data) {
-  if (!data.length) {
-    dom.viewContainer.innerHTML = '<div class="empty">No hay entregas para enrutar.</div>';
-    return;
+  if (diffMinutes <= 30) {
+    return {
+      cardClass: "urgency-soon",
+      pillClass: "soon",
+      label: `En ${diffMinutes} min`
+    };
   }
-
-  const items = data.map((p, idx) => {
-    const pedido = getOrderId(p) || '';
-    const address = getAddress(p) || '';
-    const customer = getCustomer(p) || '';
-    const neighborhood = getNeighborhood(p) || '';
-    const time = formatearFechaEntrega(p);
-    const phone = getPhone(p);
-    const metric = getRouteMetric(p);
-    const routePos = metric?.routePosition || idx + 1;
-
-    return `
-      <article class="route-item">
-        <div class="route-position">${routePos}</div>
-        <div class="route-main">
-          <div class="route-address">${address}</div>
-          <div class="route-meta">Barrio: ${neighborhood} | Cliente: ${customer}</div>
-          <div class="route-meta">Pedido #${pedido} | Entrega: ${time}</div>
-          <div class="route-meta">Distancia: ${metric?.distanceText || ''} | Duracion: ${metric?.durationText || ''}</div>
-        </div>
-        <div class="route-actions">
-          ${actionLink('WhatsApp', telefonoWhatsAppHref(phone))}
-          ${actionLink('Llamar', telefonoTelHref(phone))}
-          ${actionLink('Abrir ruta', mapsHref(address))}
-        </div>
-      </article>
-    `;
-  }).join('');
-
-  dom.viewContainer.innerHTML = `<section class="route-list">${items}</section>`;
+  return {
+    cardClass: "urgency-safe",
+    pillClass: "safe",
+    label: `En ${diffMinutes} min`
+  };
 }
 
-function renderMapView(data) {
-  dom.viewContainer.innerHTML = `
-    <section class="map-layout">
-      <div class="map-banner">
-        <strong>Mapa operativo</strong>
-        <span>Marcadores con acciones y trazo de ruta optimizada.</span>
-      </div>
-      <div id="mapView"></div>
-      <div id="mapMessage" class="empty" style="display:none;"></div>
-    </section>
-  `;
-
-  drawMap(data);
+function actionLink(label, href, tone = "secondary") {
+  if (!href) return `<span class="action-link ${tone}" aria-disabled="true">${label}</span>`;
+  return `<a class="action-link ${tone}" href="${href}" target="_blank" rel="noopener noreferrer">${label}</a>`;
 }
 
-function renderCurrentView(data) {
-  if (state.currentView === 'route') {
-    renderRouteView(data);
-  } else if (state.currentView === 'map') {
-    renderMapView(data);
-  } else {
-    renderTableView(data);
-  }
-}
-
-function marcarActiva(view) {
-  [dom.btnViewTable, dom.btnViewRoute, dom.btnViewMap].forEach(btn => {
-    if (!btn) return;
-    btn.classList.toggle('active', btn.dataset.view === view);
-  });
-}
-
-async function parseResponse(res) {
-  const raw = await res.text();
-  let data = null;
+function parseResponse(res, raw) {
   try {
-    data = raw ? JSON.parse(raw) : null;
-  } catch (err) {
-    console.warn('Respuesta no JSON desde API de domicilios', err);
-    data = null;
+    return raw ? JSON.parse(raw) : null;
+  } catch (error) {
+    console.warn("Respuesta no JSON desde API", error);
+    return null;
   }
-  return { raw, data };
 }
 
 function isOkResponse(res, data, keywords) {
-  const statusValue = (data?.status || data?.result || data?.message || '').toString().toLowerCase();
+  const statusValue = (data?.status || data?.result || data?.message || "").toString().toLowerCase();
   const flag = data?.success === true || data?.ok === true;
   const text = keywords.test(statusValue);
-  return res.ok && (flag || text || data === null || statusValue === '');
+  return res.ok && (flag || text || data === null || statusValue === "");
 }
 
-async function actualizarEstado(pedido, nuevoEstado, btnRef) {
-  const originalText = btnRef?.textContent || 'Entregado';
-  if (btnRef) {
-    btnRef.disabled = true;
-    btnRef.textContent = 'Actualizando...';
+function isDeliveryOrder(pedido) {
+  return getDeliveryType(pedido) === "domicilio";
+}
+
+function getAvailableCouriers(data = state.cache) {
+  return Array.from(new Set(
+    data
+      .map(pedido => getAssignedCourier(pedido))
+      .filter(courier => courier && normalizarTexto(courier) !== "sin asignar")
+  )).sort((a, b) => a.localeCompare(b, "es", { sensitivity: "base" }));
+}
+
+function syncRouteCourierOptions() {
+  if (!dom.routeCourierSelect) return;
+  const available = getAvailableCouriers();
+  const current = dom.routeCourierSelect.value;
+  dom.routeCourierSelect.innerHTML = '<option value="">Selecciona un domiciliario</option>';
+  available.forEach(courier => {
+    const option = document.createElement("option");
+    option.value = courier;
+    option.textContent = courier;
+    dom.routeCourierSelect.appendChild(option);
+  });
+
+  if (current && available.includes(current)) {
+    dom.routeCourierSelect.value = current;
+    state.optimizedCourier = current;
+  } else if (state.optimizedCourier && available.includes(state.optimizedCourier)) {
+    dom.routeCourierSelect.value = state.optimizedCourier;
+  } else {
+    dom.routeCourierSelect.value = "";
+    if (!available.includes(state.optimizedCourier)) state.optimizedCourier = "";
+  }
+}
+
+function actualizarEnCache(pedidoId, patch) {
+  const id = String(pedidoId ?? "");
+  const item = state.cache.find(pedido => getOrderId(pedido) === id);
+  if (item) Object.assign(item, patch);
+}
+
+function matchesStatusFilter(pedido) {
+  const status = normalizarTexto(getStatus(pedido));
+  if (state.activeFilter === "pending") {
+    return status.includes("pendiente") || status.includes("problema") || status.includes("incidencia") || status.includes("error");
+  }
+  if (state.activeFilter === "en-route") {
+    return status.includes("en ruta");
+  }
+  if (state.activeFilter === "delivered") {
+    return status.includes("entregado");
+  }
+  return true;
+}
+
+function ordenarData(data) {
+  const ordered = [...data];
+  ordered.sort((a, b) => {
+    const metricA = getRouteMetric(a);
+    const metricB = getRouteMetric(b);
+    if (metricA && metricB) return metricA.sortIndex - metricB.sortIndex;
+    if (metricA) return -1;
+    if (metricB) return 1;
+    return timestampEntrega(a) - timestampEntrega(b);
+  });
+  return ordered;
+}
+
+function filtrarData(data) {
+  return ordenarData(data.filter(pedido => isDeliveryOrder(pedido) && matchesStatusFilter(pedido)));
+}
+
+function actualizarStats(total) {
+  if (dom.statsCount) dom.statsCount.textContent = String(total);
+}
+
+function resetFilters() {
+  state.activeFilter = "today";
+  syncFilterChips();
+  aplicarFiltros();
+}
+
+function emptyStateMarkup(title, description) {
+  return `
+    <div class="empty">
+      <h2>${escapeHtml(title)}</h2>
+      <p>${escapeHtml(description)}</p>
+      <div class="empty-actions">
+        <a class="empty-link primary" href="index.html">Crear pedido</a>
+        <button class="action-btn" type="button" data-action="clear-filters">Limpiar filtros</button>
+      </div>
+    </div>
+  `;
+}
+
+function renderCourierOptions(pedido) {
+  const current = getAssignedCourier(pedido);
+  const options = ["Sin asignar", ...getAvailableCouriers()];
+  if (current && !options.includes(current)) options.push(current);
+  const uniqueOptions = Array.from(new Set(options));
+
+  return uniqueOptions.map(courier => {
+    const selected = courier === current ? " selected" : "";
+    return `<option value="${escapeHtml(courier)}"${selected}>${escapeHtml(courier)}</option>`;
+  }).join("");
+}
+
+function getStatusClass(status) {
+  const normalized = normalizarTexto(status);
+  if (normalized.includes("entregado")) return "status-delivered";
+  if (normalized.includes("en ruta")) return "status-route";
+  if (normalized.includes("problema") || normalized.includes("incidencia") || normalized.includes("error")) {
+    return "status-late";
+  }
+  return "status-pending";
+}
+
+function parseDistanceToKm(distanceText) {
+  const normalized = normalizarTexto(distanceText);
+  if (!normalized) return Number.POSITIVE_INFINITY;
+
+  if (normalized.includes("km")) {
+    const value = Number(normalized.replaceAll("km", "").replaceAll(",", ".").trim());
+    return Number.isFinite(value) ? value : Number.POSITIVE_INFINITY;
+  }
+  if (normalized.includes("m")) {
+    const value = Number(normalized.replaceAll("m", "").replaceAll(",", ".").trim());
+    return Number.isFinite(value) ? value / 1000 : Number.POSITIVE_INFINITY;
   }
 
-  try {
-    const body = new URLSearchParams({
-      accion: 'actualizarEstado',
-      hoja: 'Domicilios',
-      pedido: String(pedido),
-      estado: nuevoEstado
-    });
+  return Number.POSITIVE_INFINITY;
+}
 
-    const res = await fetch(SCRIPT_URL, { method: 'POST', body });
-    const { data } = await parseResponse(res);
-    const ok = isOkResponse(res, data, /ok|success|actualizado|actualizada/);
-
-    if (ok) {
-      actualizarEnCache(pedido, { estado: nuevoEstado });
-      mostrarToast(nuevoEstado === 'Entregado' ? 'Pedido entregado' : 'Estado actualizado');
-      aplicarFiltros();
-      return true;
-    }
-
-    mostrarToast(data?.message || 'No se pudo actualizar');
-    return false;
-  } catch (err) {
-    console.error(err);
-    mostrarToast('Error de conexion');
-    return false;
-  } finally {
-    if (btnRef) {
-      btnRef.disabled = false;
-      btnRef.textContent = originalText;
-    }
+function getSortableValue(pedido, key) {
+  if (key === "route") {
+    const metric = getRouteMetric(pedido);
+    return metric?.routePosition ?? Number.POSITIVE_INFINITY;
   }
+  if (key === "distance") {
+    const metric = getRouteMetric(pedido);
+    return parseDistanceToKm(metric?.distanceText || "");
+  }
+  return timestampEntrega(pedido);
+}
+
+function sortListData(data) {
+  const sorted = [...data];
+  sorted.sort((a, b) => {
+    const va = getSortableValue(a, state.listSortKey);
+    const vb = getSortableValue(b, state.listSortKey);
+    if (va === vb) return timestampEntrega(a) - timestampEntrega(b);
+    return state.listSortDirection === "asc" ? va - vb : vb - va;
+  });
+  return sorted;
+}
+
+function getSortIndicator(key) {
+  if (state.listSortKey !== key) return "↕";
+  return state.listSortDirection === "asc" ? "↑" : "↓";
+}
+
+function getSafeRowId(orderId, index) {
+  const raw = String(orderId || index || "pedido").replaceAll(/[^a-zA-Z0-9_-]/g, "-");
+  return `order-detail-${raw}-${index}`;
+}
+
+function renderListView(data) {
+  if (!dom.panelList) return;
+
+  if (!data.length) {
+    const title = state.cache.length ? "No hay entregas para este filtro" : "No hay entregas para hoy";
+    const description = state.cache.length
+      ? "Prueba limpiando filtros o asigna un domiciliario para preparar rutas."
+      : "No hay pedidos con entrega a domicilio para hoy. Puedes crear uno nuevo o revisar de nuevo en unos minutos.";
+    dom.panelList.innerHTML = emptyStateMarkup(title, description);
+    return;
+  }
+
+  const rows = sortListData(data).map((pedido, index) => {
+    const orderId = getOrderId(pedido) || "-";
+    const urgency = getUrgencyInfo(pedido);
+    const metric = getRouteMetric(pedido);
+    const phone = getPhone(pedido);
+    const address = getAddress(pedido) || "Sin direccion";
+    const neighborhood = getNeighborhood(pedido) || "Sin barrio";
+    const routePosition = metric?.routePosition ? String(metric.routePosition) : "-";
+    const distanceText = metric?.distanceText || "Sin estimar";
+    const status = getStatus(pedido);
+    const detailId = getSafeRowId(orderId, index);
+    const expanded = Boolean(state.expandedRows[orderId]);
+    let priorityClass = "";
+    if (urgency.pillClass === "late") priorityClass = "priority-late";
+    if (urgency.pillClass === "soon") priorityClass = "priority-soon";
+
+    return `
+      <tr class="ops-row ${priorityClass}" data-order-id="${escapeHtml(orderId)}">
+        <td class="cell-pedido">
+          <button
+            class="row-expand"
+            type="button"
+            data-action="toggle-row"
+            data-order-id="${escapeHtml(orderId)}"
+            aria-expanded="${expanded ? "true" : "false"}"
+            aria-controls="${escapeHtml(detailId)}">${expanded ? "−" : "+"}</button>
+          <strong>#${escapeHtml(orderId)}</strong>
+        </td>
+        <td>${escapeHtml(formatDeliveryTime(pedido))}</td>
+        <td>${escapeHtml(neighborhood)}</td>
+        <td class="cell-address">${escapeHtml(address)}</td>
+        <td>
+          <select class="courier-select table-courier-select" data-order-id="${escapeHtml(orderId)}">
+            ${renderCourierOptions(pedido)}
+          </select>
+        </td>
+        <td>${escapeHtml(routePosition)}</td>
+        <td>${escapeHtml(distanceText)}</td>
+        <td>
+          <span class="table-status ${getStatusClass(status)}">${escapeHtml(status)}</span>
+        </td>
+        <td class="table-actions">
+          ${actionLink("Llamar", telefonoTelHref(phone))}
+          ${actionLink("WhatsApp", telefonoWhatsAppHref(phone))}
+          ${actionLink("Navegar", mapsHref(address), "primary")}
+        </td>
+      </tr>
+      <tr id="${escapeHtml(detailId)}" class="ops-row-details" ${expanded ? "" : "hidden"}>
+        <td colspan="9">
+          <div class="ops-details-grid">
+            <div class="meta-box">
+              <span class="meta-label">Barrio</span>
+              <span class="meta-value">${escapeHtml(neighborhood)}</span>
+            </div>
+            <div class="meta-box">
+              <span class="meta-label">Dirección</span>
+              <span class="meta-value">${escapeHtml(address)}</span>
+            </div>
+            <div class="meta-box">
+              <span class="meta-label">Domiciliario</span>
+              <select class="courier-select" data-order-id="${escapeHtml(orderId)}">
+                ${renderCourierOptions(pedido)}
+              </select>
+            </div>
+            <div class="meta-box">
+              <span class="meta-label">Ruta</span>
+              <span class="meta-value">${escapeHtml(routePosition)}</span>
+            </div>
+            <div class="meta-box">
+              <span class="meta-label">Distancia</span>
+              <span class="meta-value">${escapeHtml(distanceText)}</span>
+            </div>
+            <div class="meta-box">
+              <span class="meta-label">Estado</span>
+              <span class="meta-value">${escapeHtml(status)}</span>
+            </div>
+          </div>
+          <div class="ops-details-actions">
+            ${actionLink("Llamar", telefonoTelHref(phone))}
+            ${actionLink("WhatsApp", telefonoWhatsAppHref(phone))}
+            ${actionLink("Navegar", mapsHref(address), "primary")}
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join("");
+
+  dom.panelList.innerHTML = `
+    <section class="ops-table-wrap">
+      <table class="ops-table">
+        <thead>
+          <tr>
+            <th>Pedido</th>
+            <th>
+              <button class="table-sort" type="button" data-sort="time">
+                Hora entrega ${getSortIndicator("time")}
+              </button>
+            </th>
+            <th>Barrio</th>
+            <th>Dirección</th>
+            <th>Domiciliario</th>
+            <th>
+              <button class="table-sort" type="button" data-sort="route">
+                Ruta ${getSortIndicator("route")}
+              </button>
+            </th>
+            <th>
+              <button class="table-sort" type="button" data-sort="distance">
+                Distancia ${getSortIndicator("distance")}
+              </button>
+            </th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </section>
+  `;
+}
+
+function renderRouteView(data) {
+  if (!dom.panelRoute) return;
+
+  if (!data.length) {
+    dom.panelRoute.innerHTML = emptyStateMarkup(
+      "No hay entregas para hoy",
+      "No hay pedidos de domicilio visibles para construir rutas."
+    );
+    return;
+  }
+
+  const groups = new Map();
+  data.forEach(pedido => {
+    const courier = getAssignedCourier(pedido);
+    if (!groups.has(courier)) groups.set(courier, []);
+    groups.get(courier).push(pedido);
+  });
+
+  const groupMarkup = Array.from(groups.entries()).map(([courier, orders]) => {
+    const items = ordenarData(orders).map((pedido, index) => {
+      const metric = getRouteMetric(pedido);
+      const position = metric?.routePosition || index + 1;
+      const urgency = getUrgencyInfo(pedido);
+      const phone = getPhone(pedido);
+      const address = getAddress(pedido) || "Sin direccion";
+
+      return `
+        <article class="route-item">
+          <div class="route-header">
+            <div class="route-position">${escapeHtml(position)}</div>
+            <span class="urgency-pill ${urgency.pillClass}">${escapeHtml(urgency.label)}</span>
+          </div>
+          <div class="route-address">${escapeHtml(address)}</div>
+          <div class="route-meta-grid">
+            <div class="meta-box">
+              <span class="meta-label">Pedido</span>
+              <span class="meta-value">#${escapeHtml(getOrderId(pedido))}</span>
+            </div>
+            <div class="meta-box">
+              <span class="meta-label">Hora entrega</span>
+              <span class="meta-value">${escapeHtml(formatDeliveryTime(pedido))}</span>
+            </div>
+            <div class="meta-box">
+              <span class="meta-label">Distancia estimada</span>
+              <span class="meta-value ${metric ? "" : "muted"}">${escapeHtml(metric?.distanceText || "Sin estimar")}</span>
+            </div>
+            <div class="meta-box">
+              <span class="meta-label">Duración estimada</span>
+              <span class="meta-value ${metric ? "" : "muted"}">${escapeHtml(metric?.durationText || "Sin estimar")}</span>
+            </div>
+          </div>
+          <div class="route-actions">
+            ${actionLink("Llamar", telefonoTelHref(phone))}
+            ${actionLink("WhatsApp", telefonoWhatsAppHref(phone))}
+            ${actionLink("Navegar", mapsHref(address), "primary")}
+          </div>
+        </article>
+      `;
+    }).join("");
+
+    const heading = courier || "Sin asignar";
+    const isSelected = state.optimizedCourier && normalizarTexto(heading) === normalizarTexto(state.optimizedCourier);
+
+    return `
+      <section class="route-group">
+        <div class="route-group-header">
+          <strong class="route-group-title">Ruta ${escapeHtml(heading)}</strong>
+          <span class="route-group-meta">${escapeHtml(`${orders.length} pedidos${isSelected ? ' · seleccionada' : ''}`)}</span>
+        </div>
+        ${items}
+      </section>
+    `;
+  }).join("");
+
+  dom.panelRoute.innerHTML = `<section class="route-list">${groupMarkup}</section>`;
+}
+
+function getMapSourceData(data) {
+  if (!state.optimizedCourier) return data;
+  const selected = data.filter(pedido => normalizarTexto(getAssignedCourier(pedido)) === normalizarTexto(state.optimizedCourier));
+  return selected.length ? selected : data;
+}
+
+function renderMapView(data) {
+  if (!dom.panelMap) return;
+  const mapData = getMapSourceData(data);
+
+  dom.panelMap.innerHTML = `
+    <section class="map-layout">
+      <div class="map-banner">
+        <strong>Mapa operativo</strong>
+        <span>${escapeHtml(`${mapData.length} pedidos visibles`)}</span>
+      </div>
+      <div id="mapView"></div>
+      <div id="mapMessage" class="map-placeholder" hidden></div>
+    </section>
+  `;
+
+  drawMap(mapData);
+}
+
+function syncFilterChips() {
+  dom.chipButtons.forEach(button => {
+    const active = button.dataset.filter === state.activeFilter;
+    button.classList.toggle("active", active);
+    button.setAttribute("aria-pressed", active ? "true" : "false");
+  });
+}
+
+function syncTabs() {
+  dom.tabButtons.forEach(button => {
+    const active = button.dataset.view === state.currentView;
+    const panelId = button.getAttribute("aria-controls");
+    const panel = panelId ? getById(panelId) : null;
+    button.classList.toggle("active", active);
+    button.setAttribute("aria-selected", active ? "true" : "false");
+    button.tabIndex = active ? 0 : -1;
+    if (panel) {
+      panel.hidden = !active;
+      panel.classList.toggle("is-active", active);
+    }
+  });
+  document.body.classList.toggle("map-mode", state.currentView === "map");
+}
+
+function renderViews(data) {
+  state.lastFiltered = data;
+  renderListView(data);
+  renderRouteView(data);
+  if (state.currentView === "map") renderMapView(data);
+  syncTabs();
 }
 
 function aplicarFiltros() {
-  const filtrados = filtrarData(state.cache);
-  renderCurrentView(filtrados);
-  actualizarStats(state.cache.length, filtrados.length);
+  const filtered = filtrarData(state.cache);
+  renderViews(filtered);
 }
 
 async function cargarDomicilios() {
+  if (dom.panelList) {
+    dom.panelList.innerHTML = emptyStateMarkup(
+      "Cargando entregas",
+      "Estamos consultando los pedidos de domicilio para preparar el despacho."
+    );
+  }
+
   try {
-    dom.viewContainer.innerHTML = '<div class="empty">Cargando pedidos...</div>';
-    const res = await fetch(`${SCRIPT_URL}?hoja=Domicilios`);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const response = await fetch(`${SCRIPT_URL}?hoja=Domicilios`);
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
-    const data = await res.json();
-    state.cache = Array.isArray(data) ? data : [];
-    state.cache = state.cache.filter(p => esFechaHoy(getDeliveryDateRaw(p)));
-
-    actualizarFiltros(state.cache);
+    const data = await response.json();
+    state.cache = Array.isArray(data)
+      ? data.filter(pedido => esFechaHoy(getDeliveryDateRaw(pedido)) && isDeliveryOrder(pedido))
+      : [];
+    actualizarStats(state.cache.length);
+    syncRouteCourierOptions();
     aplicarFiltros();
-    actualizarUltimaActualizacion();
-  } catch (err) {
-    console.error(err);
-    dom.viewContainer.innerHTML = '<div class="empty">No se pudo cargar la informacion.</div>';
-    mostrarToast('Error cargando pedidos');
+  } catch (error) {
+    console.error(error);
+    state.cache = [];
+    actualizarStats(0);
+    syncRouteCourierOptions();
+    aplicarFiltros();
+    mostrarToast("No se pudieron cargar los pedidos");
   }
 }
 
-function getCurrentCourier() {
-  const selected = dom.filtroDomiciliario?.value || 'Todos';
-  return selected === 'Todos' ? '' : selected;
-}
-
-function listCourierOrdersForOptimization() {
-  const courier = getCurrentCourier();
-  if (!courier) {
-    mostrarToast('Selecciona un domiciliario para optimizar ruta');
-    return [];
+async function asignarDomiciliario(orderId, courier) {
+  if (!courier || normalizarTexto(courier) === "sin asignar") {
+    actualizarEnCache(orderId, { _assignedCourier: "Sin asignar" });
+    syncRouteCourierOptions();
+    aplicarFiltros();
+    mostrarToast("Pedido sin domiciliario asignado");
+    return true;
   }
 
-  const current = filtrarData(state.cache)
-    .filter(p => normalizarTexto(getCourier(p)) === normalizarTexto(courier))
-    .sort((a, b) => timestampEntrega(a) - timestampEntrega(b));
+  actualizarEnCache(orderId, { _assignedCourier: courier, domiciliario: courier, courier });
 
-  const withCoords = current
-    .map(p => ({
-      pedido: p,
-      id: getOrderId(p),
-      lat: getLatitude(p),
-      lng: getLongitude(p)
+  try {
+    const body = new URLSearchParams({
+      accion: "asignarDomiciliario",
+      hoja: "Domicilios",
+      pedido: String(orderId),
+      domiciliario: courier
+    });
+
+    const res = await fetch(SCRIPT_URL, { method: "POST", body });
+    const raw = await res.text();
+    const data = parseResponse(res, raw);
+    const ok = isOkResponse(res, data, /ok|success|asignado/);
+
+    syncRouteCourierOptions();
+    aplicarFiltros();
+
+    if (ok) {
+      mostrarToast("Domiciliario asignado");
+      return true;
+    }
+
+    mostrarToast(data?.message || "Asignado solo en este panel");
+    return false;
+  } catch (error) {
+    console.error(error);
+    syncRouteCourierOptions();
+    aplicarFiltros();
+    mostrarToast("Asignado localmente en este panel");
+    return false;
+  }
+}
+
+function distanceKm(a, b) {
+  const toRad = value => (value * Math.PI) / 180;
+  const earthRadius = 6371;
+  const dLat = toRad(b.lat - a.lat);
+  const dLng = toRad(b.lng - a.lng);
+  const lat1 = toRad(a.lat);
+  const lat2 = toRad(b.lat);
+  const haversine =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLng / 2) * Math.sin(dLng / 2);
+  return 2 * earthRadius * Math.atan2(Math.sqrt(haversine), Math.sqrt(1 - haversine));
+}
+
+function formatDistanceText(km) {
+  if (!Number.isFinite(km)) return "";
+  return km < 1 ? `${Math.round(km * 1000)} m` : `${km.toFixed(1)} km`;
+}
+
+function formatDurationText(minutes) {
+  if (!Number.isFinite(minutes)) return "";
+  if (minutes < 60) return `${Math.max(1, Math.round(minutes))} min`;
+  const hours = Math.floor(minutes / 60);
+  const rest = Math.round(minutes % 60);
+  return rest ? `${hours} h ${rest} min` : `${hours} h`;
+}
+
+function decodePolyline(encoded) {
+  if (!encoded) return [];
+  let index = 0;
+  let lat = 0;
+  let lng = 0;
+  const coordinates = [];
+
+  while (index < encoded.length) {
+    let shift = 0;
+    let result = 0;
+    let byte = null;
+
+    do {
+      byte = (encoded.codePointAt(index) || 0) - 63;
+      index += 1;
+      result |= (byte & 0x1f) << shift;
+      shift += 5;
+    } while (byte >= 0x20);
+
+    const deltaLat = (result & 1) ? ~(result >> 1) : result >> 1;
+    lat += deltaLat;
+
+    shift = 0;
+    result = 0;
+
+    do {
+      byte = (encoded.codePointAt(index) || 0) - 63;
+      index += 1;
+      result |= (byte & 0x1f) << shift;
+      shift += 5;
+    } while (byte >= 0x20);
+
+    const deltaLng = (result & 1) ? ~(result >> 1) : result >> 1;
+    lng += deltaLng;
+
+    coordinates.push({ lat: lat / 1e5, lng: lng / 1e5 });
+  }
+
+  return coordinates;
+}
+
+function buildRoutingItems(data) {
+  return data
+    .map((pedido, inputIndex) => ({
+      pedido,
+      id: getOrderId(pedido),
+      lat: getLatitude(pedido),
+      lng: getLongitude(pedido),
+      inputIndex
     }))
     .filter(item => Number.isFinite(item.lat) && Number.isFinite(item.lng));
-
-  if (!withCoords.length) {
-    mostrarToast('No hay coordenadas validas para optimizar');
-  }
-
-  return withCoords;
 }
 
-function buildDirectionsUrl(waypoints) {
-  const origin = `${STORE_COORDS.lat},${STORE_COORDS.lng}`;
-  const destination = origin;
-  const wp = waypoints.map(w => `${w.lat},${w.lng}`).join('|');
-  const waypointsParam = `optimize:true|${wp}`;
-  const params = new URLSearchParams({
-    origin,
-    destination,
-    waypoints: waypointsParam,
-    key: GOOGLE_MAPS_API_KEY
+function buildSequentialMetrics(data) {
+  const metrics = {};
+  data.forEach((pedido, index) => {
+    metrics[getOrderId(pedido)] = {
+      routePosition: index + 1,
+      distanceText: "Sin estimar",
+      durationText: "Sin estimar",
+      sortIndex: index
+    };
   });
-  return `https://maps.googleapis.com/maps/api/directions/json?${params.toString()}`;
+  return metrics;
 }
 
 async function optimizeViaDirectionsRest(waypoints) {
-  if (!GOOGLE_MAPS_API_KEY) {
-    throw new Error('Falta GOOGLE_MAPS_API_KEY');
-  }
-  const url = buildDirectionsUrl(waypoints);
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`Directions API HTTP ${res.status}`);
-  const payload = await res.json();
-  if (payload.status !== 'OK') {
-    throw new Error(payload.status || 'Directions API error');
-  }
-
+  const origin = `${STORE_COORDS.lat},${STORE_COORDS.lng}`;
+  const points = waypoints.map(item => `${item.lat},${item.lng}`).join("|");
+  const params = new URLSearchParams({
+    origin,
+    destination: origin,
+    waypoints: `optimize:true|${points}`,
+    key: GOOGLE_MAPS_API_KEY
+  });
+  const response = await fetch(`https://maps.googleapis.com/maps/api/directions/json?${params.toString()}`);
+  if (!response.ok) throw new Error(`Directions API HTTP ${response.status}`);
+  const payload = await response.json();
+  if (payload.status !== "OK") throw new Error(payload.status || "Directions API error");
   const route = payload.routes?.[0] || {};
   return {
     waypointOrder: route.waypoint_order || [],
     legs: route.legs || [],
-    overviewPolyline: route.overview_polyline?.points || ''
+    overviewPath: decodePolyline(route.overview_polyline?.points || "")
   };
 }
 
@@ -586,24 +892,23 @@ async function ensureGoogleMapsLoaded() {
     state.mapsReady = true;
     return true;
   }
-
   if (!GOOGLE_MAPS_API_KEY) return false;
 
   await new Promise((resolve, reject) => {
-    const existing = document.getElementById('googleMapsScript');
+    const existing = getById("googleMapsScript");
     if (existing) {
-      existing.addEventListener('load', () => resolve(), { once: true });
-      existing.addEventListener('error', () => reject(new Error('No se pudo cargar Google Maps')), { once: true });
+      existing.addEventListener("load", resolve, { once: true });
+      existing.addEventListener("error", () => reject(new Error("No se pudo cargar Google Maps")), { once: true });
       return;
     }
 
-    const script = document.createElement('script');
-    script.id = 'googleMapsScript';
+    const script = document.createElement("script");
+    script.id = "googleMapsScript";
     script.async = true;
     script.defer = true;
     script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(GOOGLE_MAPS_API_KEY)}&libraries=geometry`;
-    script.onload = () => resolve();
-    script.onerror = () => reject(new Error('No se pudo cargar Google Maps'));
+    script.onload = resolve;
+    script.onerror = () => reject(new Error("No se pudo cargar Google Maps"));
     document.head.appendChild(script);
   });
 
@@ -614,7 +919,7 @@ async function ensureGoogleMapsLoaded() {
 function optimizeViaDirectionsJs(waypoints) {
   return new Promise((resolve, reject) => {
     if (!globalThis.google?.maps?.DirectionsService) {
-      reject(new Error('Google Maps JS API no disponible'));
+      reject(new Error("Google Maps JS API no disponible"));
       return;
     }
 
@@ -625,10 +930,13 @@ function optimizeViaDirectionsJs(waypoints) {
         destination: STORE_COORDS,
         travelMode: globalThis.google.maps.TravelMode.DRIVING,
         optimizeWaypoints: true,
-        waypoints: waypoints.map(w => ({ location: { lat: w.lat, lng: w.lng }, stopover: true }))
+        waypoints: waypoints.map(item => ({
+          location: { lat: item.lat, lng: item.lng },
+          stopover: true
+        }))
       },
       (result, status) => {
-        if (status !== 'OK' || !result?.routes?.length) {
+        if (status !== "OK" || !result?.routes?.length) {
           reject(new Error(`Directions JS status: ${status}`));
           return;
         }
@@ -636,79 +944,140 @@ function optimizeViaDirectionsJs(waypoints) {
         resolve({
           waypointOrder: route.waypoint_order || [],
           legs: route.legs || [],
-          overviewPath: (route.overview_path || []).map(p => ({ lat: p.lat(), lng: p.lng() }))
+          overviewPath: (route.overview_path || []).map(point => ({ lat: point.lat(), lng: point.lng() }))
         });
       }
     );
   });
 }
 
-function buildMetricsFromDirections(ordered, waypointOrder, legs) {
+function optimizeByNearestNeighbor(waypoints) {
+  const remaining = [...waypoints];
+  const waypointOrder = [];
+  const legs = [];
+  const overviewPath = [{ lat: STORE_COORDS.lat, lng: STORE_COORDS.lng }];
+  let currentPoint = { lat: STORE_COORDS.lat, lng: STORE_COORDS.lng };
+
+  while (remaining.length) {
+    let nearestIndex = 0;
+    let nearestDistance = Number.POSITIVE_INFINITY;
+
+    remaining.forEach((item, index) => {
+      const distance = distanceKm(currentPoint, item);
+      if (distance < nearestDistance) {
+        nearestDistance = distance;
+        nearestIndex = index;
+      }
+    });
+
+    const next = remaining.splice(nearestIndex, 1)[0];
+    waypointOrder.push(next.inputIndex);
+    legs.push({
+      distance: { text: formatDistanceText(nearestDistance) },
+      duration: { text: formatDurationText((nearestDistance / 22) * 60) }
+    });
+    overviewPath.push({ lat: next.lat, lng: next.lng });
+    currentPoint = { lat: next.lat, lng: next.lng };
+  }
+
+  return { waypointOrder, legs, overviewPath };
+}
+
+function buildMetricsFromDirections(orderedItems, waypointOrder, legs) {
   const metrics = {};
   waypointOrder.forEach((waypointIndex, routeIndex) => {
-    const item = ordered[waypointIndex];
+    const item = orderedItems[waypointIndex];
     if (!item) return;
     const leg = legs?.[routeIndex] || null;
     metrics[item.id] = {
       routePosition: routeIndex + 1,
-      distanceText: leg?.distance?.text || '',
-      durationText: leg?.duration?.text || '',
+      distanceText: leg?.distance?.text || "Sin estimar",
+      durationText: leg?.duration?.text || "Sin estimar",
       sortIndex: routeIndex
     };
   });
   return metrics;
 }
 
-async function optimizeRouteForCourier() {
-  const courier = getCurrentCourier();
-  if (!courier) {
-    mostrarToast('Selecciona un domiciliario para optimizar ruta');
+function clearMetricsForCourier(courier) {
+  const normalized = normalizarTexto(courier);
+  Object.keys(state.routeMetrics).forEach(orderId => {
+    const pedido = state.cache.find(item => getOrderId(item) === orderId);
+    if (!pedido) return;
+    if (normalizarTexto(getAssignedCourier(pedido)) === normalized) {
+      delete state.routeMetrics[orderId];
+    }
+  });
+}
+
+async function generateRoutes() {
+  const selectedCourier = dom.routeCourierSelect?.value || "";
+  if (!selectedCourier) {
+    mostrarToast("Selecciona un domiciliario para generar la ruta");
     return;
   }
 
-  const ordered = listCourierOrdersForOptimization();
-  if (!ordered.length) return;
+  const courierOrders = filtrarData(state.cache).filter(
+    pedido => normalizarTexto(getAssignedCourier(pedido)) === normalizarTexto(selectedCourier)
+  );
 
-  if (dom.btnOptimizeRoute) {
-    dom.btnOptimizeRoute.disabled = true;
-    dom.btnOptimizeRoute.textContent = 'Optimizando...';
+  if (!courierOrders.length) {
+    mostrarToast("No hay pedidos de domicilio para ese domiciliario");
+    return;
+  }
+
+  if (dom.btnGenerateRoutes) {
+    dom.btnGenerateRoutes.disabled = true;
+    dom.btnGenerateRoutes.textContent = "Generando rutas...";
   }
 
   try {
+    const routingItems = buildRoutingItems(courierOrders);
+    clearMetricsForCourier(selectedCourier);
+    state.optimizedCourier = selectedCourier;
+
+    if (routingItems.length < 2) {
+      Object.assign(state.routeMetrics, buildSequentialMetrics(courierOrders));
+      state.optimizedPath = routingItems.length
+        ? [{ lat: STORE_COORDS.lat, lng: STORE_COORDS.lng }, ...routingItems.map(item => ({ lat: item.lat, lng: item.lng }))]
+        : [];
+      aplicarFiltros();
+      mostrarToast(`Ruta ${selectedCourier} actualizada`);
+      return;
+    }
+
     let result = null;
-
-    try {
-      result = await optimizeViaDirectionsRest(ordered);
-    } catch (restErr) {
-      console.warn('REST Directions no disponible, usando JS API', restErr);
-      const mapsOk = await ensureGoogleMapsLoaded();
-      if (!mapsOk) throw new Error('Configura GOOGLE_MAPS_API_KEY para optimizar ruta');
-      result = await optimizeViaDirectionsJs(ordered);
+    if (GOOGLE_MAPS_API_KEY) {
+      try {
+        result = await optimizeViaDirectionsRest(routingItems);
+      } catch (restError) {
+        console.warn("Directions REST no disponible, usando JS API", restError);
+        const mapsReady = await ensureGoogleMapsLoaded();
+        if (mapsReady) {
+          result = await optimizeViaDirectionsJs(routingItems);
+        }
+      }
     }
 
-    const waypointOrder = result.waypointOrder || [];
-    if (!waypointOrder.length) {
-      throw new Error('No se recibio waypoint_order desde Google Directions');
+    if (!result) {
+      result = optimizeByNearestNeighbor(routingItems);
     }
 
-    state.optimizedCourier = courier;
-    state.routeMetrics = buildMetricsFromDirections(ordered, waypointOrder, result.legs || []);
-
-    if (result.overviewPath?.length) {
-      state.optimizedPath = result.overviewPath;
-    } else {
-      state.optimizedPath = [];
-    }
+    Object.assign(
+      state.routeMetrics,
+      buildMetricsFromDirections(routingItems, result.waypointOrder || [], result.legs || [])
+    );
+    state.optimizedPath = result.overviewPath || [];
 
     aplicarFiltros();
-    mostrarToast(`Ruta optimizada para ${courier}`);
-  } catch (err) {
-    console.error(err);
-    mostrarToast(err.message || 'No se pudo optimizar la ruta');
+    mostrarToast(`Ruta ${selectedCourier} generada`);
+  } catch (error) {
+    console.error(error);
+    mostrarToast(error.message || "No se pudieron generar las rutas");
   } finally {
-    if (dom.btnOptimizeRoute) {
-      dom.btnOptimizeRoute.disabled = false;
-      dom.btnOptimizeRoute.textContent = 'Optimize Route';
+    if (dom.btnGenerateRoutes) {
+      dom.btnGenerateRoutes.disabled = false;
+      dom.btnGenerateRoutes.textContent = "Generar rutas";
     }
   }
 }
@@ -723,59 +1092,62 @@ function clearMapObjects() {
 }
 
 function markerInfoHtml(pedido) {
-  const id = getOrderId(pedido) || '';
-  const address = getAddress(pedido) || 'Sin direccion';
-  const time = formatearFechaEntrega(pedido);
+  const address = getAddress(pedido) || "Sin direccion";
   const phone = getPhone(pedido);
-  const tel = telefonoTelHref(phone);
-  const wa = telefonoWhatsAppHref(phone);
-  const nav = mapsHref(address);
-
   return `
     <div style="min-width:220px; font-family: Manrope, sans-serif;">
-      <strong>Pedido #${id}</strong>
-      <div style="margin-top:4px; color:#4b5563;">${address}</div>
-      <div style="margin-top:4px; color:#4b5563;">Entrega: ${time}</div>
-      <div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:8px;">
-        ${actionLink('Llamar', tel)}
-        ${actionLink('WhatsApp', wa)}
-        ${actionLink('Navegar', nav)}
+      <strong>Pedido #${escapeHtml(getOrderId(pedido))}</strong>
+      <div style="margin-top:4px; color:#475467;">${escapeHtml(address)}</div>
+      <div style="margin-top:4px; color:#475467;">Entrega ${escapeHtml(formatDeliveryTime(pedido))}</div>
+      <div style="margin-top:4px; color:#475467;">Domiciliario ${escapeHtml(getAssignedCourier(pedido))}</div>
+      <div style="margin-top:8px; display:flex; gap:6px; flex-wrap:wrap;">
+        ${actionLink("Llamar", telefonoTelHref(phone))}
+        ${actionLink("WhatsApp", telefonoWhatsAppHref(phone))}
+        ${actionLink("Navegar", mapsHref(address), "primary")}
       </div>
     </div>
   `;
 }
 
 function buildMapData(data) {
-  return data
-    .map(p => ({ pedido: p, id: getOrderId(p), lat: getLatitude(p), lng: getLongitude(p) }))
+  return ordenarData(data)
+    .map(pedido => ({
+      pedido,
+      id: getOrderId(pedido),
+      lat: getLatitude(pedido),
+      lng: getLongitude(pedido)
+    }))
     .filter(item => Number.isFinite(item.lat) && Number.isFinite(item.lng));
 }
 
 async function drawMap(data) {
-  const mapDiv = getById('mapView');
-  const mapMessage = getById('mapMessage');
+  const mapDiv = getById("mapView");
+  const mapMessage = getById("mapMessage");
   if (!mapDiv) return;
 
-  const mapsOk = await ensureGoogleMapsLoaded();
-  if (!mapsOk) {
-    mapDiv.className = 'map-placeholder';
-    mapDiv.innerHTML = '<div><strong>Mapa no disponible</strong><p>Define window.GOOGLE_MAPS_API_KEY para habilitar Google Maps.</p></div>';
+  const mapsReady = await ensureGoogleMapsLoaded();
+  if (!mapsReady) {
+    mapDiv.className = "map-placeholder";
+    mapDiv.innerHTML = "<div><strong>Mapa no disponible</strong><p>Configura GOOGLE_MAPS_API_KEY para ver la ruta completa.</p></div>";
     return;
   }
 
-  mapDiv.className = '';
-  mapDiv.innerHTML = '';
+  mapDiv.className = "";
+  mapDiv.innerHTML = "";
   if (mapMessage) {
-    mapMessage.style.display = 'none';
-    mapMessage.textContent = '';
+    mapMessage.hidden = true;
+    mapMessage.textContent = "";
   }
 
-  if (!state.map) {
+  if (state.map) {
+    state.map.setMapTypeId(globalThis.google.maps.MapTypeId.ROADMAP);
+  } else {
     state.map = new globalThis.google.maps.Map(mapDiv, {
       center: STORE_COORDS,
       zoom: 13,
       mapTypeControl: false,
-      streetViewControl: false
+      streetViewControl: false,
+      fullscreenControl: false
     });
     state.infoWindow = new globalThis.google.maps.InfoWindow();
   }
@@ -785,8 +1157,8 @@ async function drawMap(data) {
   const points = buildMapData(data);
   if (!points.length) {
     if (mapMessage) {
-      mapMessage.style.display = 'block';
-      mapMessage.textContent = 'No hay coordenadas para dibujar en el mapa.';
+      mapMessage.hidden = false;
+      mapMessage.textContent = "No hay coordenadas disponibles para los pedidos visibles.";
     }
     return;
   }
@@ -796,111 +1168,138 @@ async function drawMap(data) {
 
   points.forEach(item => {
     const metric = state.routeMetrics[item.id];
-    const label = metric?.routePosition ? String(metric.routePosition) : '';
     const marker = new globalThis.google.maps.Marker({
       map: state.map,
       position: { lat: item.lat, lng: item.lng },
-      label: label || undefined,
+      label: metric?.routePosition ? String(metric.routePosition) : undefined,
       title: `Pedido #${item.id}`
     });
-    marker.addListener('click', () => {
+
+    marker.addListener("click", () => {
       state.infoWindow.setContent(markerInfoHtml(item.pedido));
       state.infoWindow.open({ anchor: marker, map: state.map });
     });
+
     state.mapMarkers.push(marker);
     bounds.extend({ lat: item.lat, lng: item.lng });
   });
 
-  if (state.optimizedPath?.length > 1) {
+  if (state.optimizedPath.length > 1) {
     state.mapPolyline = new globalThis.google.maps.Polyline({
       map: state.map,
       path: state.optimizedPath,
       geodesic: true,
-      strokeColor: '#0f766e',
+      strokeColor: "#0f766e",
       strokeOpacity: 0.9,
       strokeWeight: 4
     });
-    state.optimizedPath.forEach(p => bounds.extend(p));
+    state.optimizedPath.forEach(point => bounds.extend(point));
   }
 
   state.map.fitBounds(bounds);
 }
 
-function setupSortListeners() {
-  dom.viewContainer.addEventListener('click', async event => {
-    const th = event.target.closest('th.sortable');
-    if (th) {
-      const requested = th.dataset.sort;
-      const map = {
-        time: 'time',
-        neighborhood: 'neighborhood',
-        order: 'order'
-      };
-      const key = map[requested] || 'time';
-      if (state.sortKey === key) {
-        state.sortDirection = state.sortDirection === 'asc' ? 'desc' : 'asc';
-      } else {
-        state.sortKey = key;
-        state.sortDirection = 'asc';
-      }
+function setupFilterChips() {
+  dom.chipButtons.forEach(button => {
+    button.addEventListener("click", () => {
+      state.activeFilter = button.dataset.filter || "today";
+      syncFilterChips();
       aplicarFiltros();
-      return;
-    }
-
-    const deliverBtn = event.target.closest('button[data-action="deliver"]');
-    if (deliverBtn) {
-      const pedido = deliverBtn.dataset.pedido;
-      await actualizarEstado(pedido, 'Entregado', deliverBtn);
-    }
+    });
   });
 }
 
-function setupFiltersAndSearch() {
-  if (dom.buscar) {
-    dom.buscar.addEventListener('input', () => {
-      clearTimeout(state.timer);
-      state.timer = setTimeout(() => aplicarFiltros(), 150);
-    });
-  }
-
-  if (dom.filtroEstado) {
-    dom.filtroEstado.addEventListener('change', aplicarFiltros);
-  }
-
-  if (dom.filtroDomiciliario) {
-    dom.filtroDomiciliario.addEventListener('change', () => {
-      const selected = dom.filtroDomiciliario.value || 'Todos';
-      if (selected !== state.optimizedCourier) {
-        state.routeMetrics = {};
-        state.optimizedPath = [];
-      }
-      aplicarFiltros();
-    });
-  }
-
-  if (dom.btnRefresh) dom.btnRefresh.addEventListener('click', () => cargarDomicilios());
-  if (dom.btnOptimizeRoute) dom.btnOptimizeRoute.addEventListener('click', () => optimizeRouteForCourier());
+function focusTabByOffset(currentButton, offset) {
+  const index = dom.tabButtons.indexOf(currentButton);
+  if (index < 0) return;
+  const nextIndex = (index + offset + dom.tabButtons.length) % dom.tabButtons.length;
+  dom.tabButtons[nextIndex]?.focus();
 }
 
-function setupViewSwitcher() {
-  [dom.btnViewTable, dom.btnViewRoute, dom.btnViewMap].forEach(btn => {
-    if (!btn) return;
-    btn.addEventListener('click', () => {
-      state.currentView = btn.dataset.view;
-      marcarActiva(state.currentView);
+function setupTabs() {
+  dom.tabButtons.forEach(button => {
+    button.addEventListener("click", () => {
+      state.currentView = button.dataset.view || "list";
       aplicarFiltros();
     });
+
+    button.addEventListener("keydown", event => {
+      if (event.key === "ArrowRight") {
+        event.preventDefault();
+        focusTabByOffset(button, 1);
+      }
+      if (event.key === "ArrowLeft") {
+        event.preventDefault();
+        focusTabByOffset(button, -1);
+      }
+      if (event.key === "Home") {
+        event.preventDefault();
+        dom.tabButtons[0]?.focus();
+      }
+      if (event.key === "End") {
+        event.preventDefault();
+        dom.tabButtons.at(-1)?.focus();
+      }
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        button.click();
+      }
+    });
+  });
+}
+
+function setupActions() {
+  dom.btnRefresh?.addEventListener("click", () => cargarDomicilios());
+  dom.btnGenerateRoutes?.addEventListener("click", () => generateRoutes());
+  dom.routeCourierSelect?.addEventListener("change", () => {
+    state.optimizedCourier = dom.routeCourierSelect.value || "";
+    if (state.currentView === "map") aplicarFiltros();
+  });
+
+  document.addEventListener("click", event => {
+    const sortButton = event.target.closest(".table-sort");
+    if (sortButton) {
+      const requested = sortButton.dataset.sort || "time";
+      if (state.listSortKey === requested) {
+        state.listSortDirection = state.listSortDirection === "asc" ? "desc" : "asc";
+      } else {
+        state.listSortKey = requested;
+        state.listSortDirection = "asc";
+      }
+      renderListView(state.lastFiltered);
+      return;
+    }
+
+    const toggleButton = event.target.closest('[data-action="toggle-row"]');
+    if (toggleButton) {
+      const orderId = toggleButton.dataset.orderId || "";
+      state.expandedRows[orderId] = !state.expandedRows[orderId];
+      renderListView(state.lastFiltered);
+      return;
+    }
+
+    const clearButton = event.target.closest('[data-action="clear-filters"]');
+    if (clearButton) {
+      resetFilters();
+    }
+  });
+
+  document.addEventListener("change", async event => {
+    const select = event.target.closest(".courier-select");
+    if (!select) return;
+    await asignarDomiciliario(select.dataset.orderId || "", select.value || "Sin asignar");
   });
 }
 
 function init() {
-  setupFiltersAndSearch();
-  setupSortListeners();
-  setupViewSwitcher();
-  marcarActiva(state.currentView);
+  syncFilterChips();
+  syncTabs();
+  setupFilterChips();
+  setupTabs();
+  setupActions();
   cargarDomicilios();
 }
 
-if (typeof document !== 'undefined') {
+if (typeof document !== "undefined") {
   init();
 }
